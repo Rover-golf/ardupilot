@@ -539,5 +539,6 @@ void Rover::golf_end_mission(void)
     golf_work_state = GOLF_BACK;
     work_golf_back = true; // Josh
     isSleep = true;        // Josh
+    start_auto = true;
     rover.set_mode(rover.mode_rtl, MODE_REASON_EVERYDAY_END);
 }
