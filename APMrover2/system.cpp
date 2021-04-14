@@ -51,9 +51,9 @@ void Rover::init_ardupilot()
     hal.scheduler->register_delay_callback(mavlink_delay_cb_static, 5);
 
     BoardConfig.init();
-#if HAL_WITH_UAVCAN
-    BoardConfig_CAN.init();
-#endif
+// #if HAL_WITH_UAVCAN
+//     BoardConfig_CAN.init();
+// #endif
 
     // init gripper
 #if GRIPPER_ENABLED == ENABLED
@@ -166,6 +166,9 @@ void Rover::init_ardupilot()
 #if AP_PARAM_KEY_DUMP
     AP_Param::show_all(hal.console, true);
 #endif
+
+    init_golfpin();
+    sr73f_can.init();
 }
 
 //*********************************************************************************

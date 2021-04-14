@@ -127,7 +127,7 @@ public:
     virtual void initialized(bool val) = 0;
 
     uavcan::ICanDriver* get_driver() { return _driver; }
-private:
+//private:          // sr73
     uavcan::ICanDriver* _driver;
 };
 

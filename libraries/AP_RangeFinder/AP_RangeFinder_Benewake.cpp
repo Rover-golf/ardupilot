@@ -173,6 +173,7 @@ bool AP_RangeFinder_Benewake::get_reading(uint16_t &reading_cm)
     }
 
     // no readings so return false
+    reading_cm = 0;    // Josh 
     return false;
 }
 

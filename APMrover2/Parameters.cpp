@@ -371,7 +371,21 @@ const AP_Param::Info Rover::var_info[] = {
     GOBJECT(osd, "OSD", AP_OSD),
 #endif
 
+    GSCALAR(press_up, "GOLF_PUP", 0),
+    GSCALAR(press_low, "GOLF_PLOW", 0),
+
+    GSCALAR(batt_nd_rtl, "GOLF_BATT_ND_RTL", 0),
+    GSCALAR(batt_charge_to, "GOLF_BATT_CHARGE", 12),
+    GSCALAR(unload_sec, "GOLF_UNLOAD_SEC", 30),
+    GSCALAR(test_full_sec, "GOLF_RTL_SEC", 1800),
+    GSCALAR(pwm_unload, "GOLF_PWM_UNLOAD", 1000),
+    GSCALAR(pwm_normal, "GOLF_PWM_NORMAL", 2000),
+    GSCALAR(steer_rate_use, "GOLF_STEER_RATE", 2000),
+    GSCALAR(steer_yaw_to, "GOLF_STEER_DEG", 0),
+    GSCALAR(steer_error, "GOLF_STEER_ERR", 3),
+
     AP_VAREND
+
 };
 
 /*
@@ -628,7 +642,21 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("FS_OPTIONS", 48, ParametersG2, fs_options, 0),
 
+    AP_GROUPINFO("GOLF1_START_HOUR", 49, ParametersG2, start_1_hour, 0),
+    AP_GROUPINFO("GOLF1_START_MIN", 50, ParametersG2, start_1_min, 0),
+    AP_GROUPINFO("GOLF2_START_HOUR", 51, ParametersG2, start_2_hour, 0),
+    AP_GROUPINFO("GOLF2_START_MIN", 52, ParametersG2, start_2_min, 0),
+    AP_GROUPINFO("GOLF3_START_HOUR", 53, ParametersG2, start_3_hour, 0),
+    AP_GROUPINFO("GOLF3_START_MIN", 54, ParametersG2, start_3_min, 0),
+    AP_GROUPINFO("GOLF1_END_HOUR", 55, ParametersG2, end_1_hour, 0),
+    AP_GROUPINFO("GOLF1_END_MIN", 56, ParametersG2, end_1_min, 0),
+    AP_GROUPINFO("GOLF2_END_HOUR", 57, ParametersG2, end_2_hour, 0),
+    AP_GROUPINFO("GOLF2_END_MIN", 58, ParametersG2, end_2_min, 0),
+    AP_GROUPINFO("GOLF3_END_HOUR", 59, ParametersG2, end_3_hour, 0),
+    AP_GROUPINFO("GOLF3_END_MIN", 60, ParametersG2, end_3_min, 0),
+
     AP_GROUPEND
+
 };
 
 // These auxiliary channel param descriptions are here so that users of beta Mission Planner (which uses the master branch as its source of descriptions)

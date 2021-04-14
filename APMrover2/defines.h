@@ -100,6 +100,8 @@ enum mode_reason_t {
     MODE_REASON_MISSION_COMMAND,
     MODE_REASON_FENCE_BREACH,
     MODE_REASON_EKF_FAILSAFE,
+    MODE_REASON_EVERYDAY_START, //golf
+    MODE_REASON_EVERYDAY_END,   //golf
 };
 
 enum pilot_steer_type_t {
@@ -119,3 +121,25 @@ enum frame_class {
 
 #define AUX_SWITCH_PWM_TRIGGER_HIGH 1800   // pwm value above which the ch7 or ch8 option will be invoked
 #define AUX_SWITCH_PWM_TRIGGER_LOW  1200   // pwm value below which the ch7 or ch8 option will be disabled
+
+enum golf_work_state_t
+{
+    GOLF_HOLD = 0,
+    GOLF_WORK,
+    GOLF_BACK,
+    GOLF_UNLOAD,
+    GOLF_PREP_PI,
+    GOLF_PI_CTL,
+    GOLF_LOW_BATT,
+    GOLF_PI_AVOID,
+    GOLF_NOWORK,   // Josh
+    GOLF_COLLISION, // Josh
+
+};
+
+#define AUX_ENA_PIN 50      // AUX1
+#define AUX_IN1_PIN 51      // AUX2
+#define AUX_IN2_PIN 52      // AUX3
+
+#define AUX_AVOID_PIN 53    // AUX4
+#define AUX_GOLF_PIN 54     // AUX5

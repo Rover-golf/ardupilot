@@ -77,6 +77,7 @@ public:
         RangeFinder_TYPE_BenewakeTFminiPlus = 25,
         RangeFinder_TYPE_Lanbao = 26,
         RangeFinder_TYPE_BenewakeTF03 = 27,
+        RangeFinder_TYPE_SR73F = 28,    // sr73
     };
 
     enum RangeFinder_Function {
@@ -100,7 +101,8 @@ public:
         enum RangeFinder_Status status; // sensor status
         uint8_t  range_valid_count;     // number of consecutive valid readings (maxes out at 10)
         uint32_t last_reading_ms;       // system time of last successful update from sensor
-
+        
+        float target_deg;               // detected target degree from central sr73
         const struct AP_Param::GroupInfo *var_info;
     };
 

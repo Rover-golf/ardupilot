@@ -57,6 +57,19 @@ public:
         k_param_serial1_baud,   // deprecated, can be deleted
         k_param_serial2_baud,   // deprecated, can be deleted
 
+        //golf
+        k_param_press_up = 50,
+        k_param_press_low,
+        k_param_batt_nd_rtl,
+        k_param_batt_charge_to,
+        k_param_unload_sec,
+        k_param_test_full_sec,
+        k_param_pwm_unload,
+        k_param_pwm_normal,
+        k_param_steer_rate_use,
+        k_param_steer_yaw_to,
+        k_param_steer_error,
+
         // 97: RSSI
         k_param_rssi = 97,
         k_param_rpm_sensor,     // rpm sensor 98
@@ -262,6 +275,19 @@ public:
     AP_Int8     mode5;
     AP_Int8     mode6;
 
+    AP_Int16 press_up;
+    AP_Int16 press_low;
+
+    AP_Float batt_nd_rtl;
+    AP_Float batt_charge_to;
+    AP_Int16 unload_sec;
+    AP_Int16 test_full_sec;
+    AP_Int16 pwm_unload;
+    AP_Int16 pwm_normal;
+    AP_Float steer_rate_use;
+    AP_Float steer_yaw_to;
+    AP_Float steer_error;
+
     Parameters() {}
 };
 
@@ -398,6 +424,22 @@ public:
 
     // FS options
     AP_Int32 fs_options;
+
+    AP_Int8 start_1_hour;
+    AP_Int8 start_1_min;
+    AP_Int8 end_1_hour;
+    AP_Int8 end_1_min;
+
+    AP_Int8 start_2_hour;
+    AP_Int8 start_2_min;
+    AP_Int8 end_2_hour;
+    AP_Int8 end_2_min;
+
+    AP_Int8 start_3_hour;
+    AP_Int8 start_3_min;
+    AP_Int8 end_3_hour;
+    AP_Int8 end_3_min;
+
 };
 
 extern const AP_Param::Info var_info[];

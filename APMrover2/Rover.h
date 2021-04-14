@@ -19,7 +19,7 @@
 
 #include <cmath>
 #include <stdarg.h>
-
+#include <stdio.h>
 // Libraries
 #include <AP_Common/AP_Common.h>
 #include <AP_HAL/AP_HAL.h>
@@ -69,6 +69,7 @@
 #include <AP_Follow/AP_Follow.h>
 #include <AP_OSD/AP_OSD.h>
 #include <AP_WindVane/AP_WindVane.h>
+#include <AP_SR73F_CAN/AP_SR73F_CAN.h>
 
 #ifdef ENABLE_SCRIPTING
 #include <AP_Scripting/AP_Scripting.h>
@@ -118,6 +119,7 @@ public:
     friend class ModeSmartRTL;
     friend class ModeFollow;
     friend class ModeSimple;
+    friend class ModeGoBatt;
 
     friend class RC_Channel_Rover;
     friend class RC_Channels_Rover;
@@ -244,6 +246,7 @@ private:
     AP_BattMonitor battery{MASK_LOG_CURRENT,
                            FUNCTOR_BIND_MEMBER(&Rover::handle_battery_failsafe, void, const char*, const int8_t),
                            _failsafe_priorities};
+    // AP_BattMonitor &rover_battery(){return battery};
 
     // true if the compass's initial location has been set
     bool compass_init_location;
@@ -289,6 +292,7 @@ private:
     ModeSmartRTL mode_smartrtl;
     ModeFollow mode_follow;
     ModeSimple mode_simple;
+    ModeGoBatt mode_gobatt;
 
     // cruise throttle and speed learning
     typedef struct {
@@ -454,6 +458,47 @@ public:
 
     // Simple mode
     float simple_sin_yaw;
+
+    // golf
+    AP_SR73F_CAN sr73f_can;
+    void one_hz_loop(void);
+    void hundred_hz_loop(void);
+    void sim_pi_ctl(void);
+
+    void init_golfpin(void);
+    void motor_pull(void);
+    void motor_push(void);
+    void motor_stop(void);
+
+    golf_work_state_t golf_work_state = GOLF_NOWORK; // Josh changed from GOLF_HOLD
+    bool work_enable = false;
+    bool isSleep = true; // Josh
+    bool work_golf_back = false;    // Josh
+
+    bool start_auto = true;
+    uint32_t rover_golf_start = 0;
+    bool batt_nd_charge = false;
+
+    void golf_start_mission();
+    void golf_end_mission();
+
+    bool yaw_enable = false;
+    float yaw_desire = 0.0f;
+    bool yaw_complete = false;
+    
+    bool pi_ctl = false;
+    uint16_t pi_ctl_id = 0;
+    uint8_t pi_ctl_step = 0;
+    uint32_t pi_ctl_start = 0;
+
+
+
+    float target_deg = 0.0f;
+
+    float constrain_deg(float deg);
+    void send_golf_to_buff();
+    void golf_send_cmd(uint16_t cmd_id, float &param1, float &param2);  // Josh added param1,2
+
 };
 
 extern Rover rover;

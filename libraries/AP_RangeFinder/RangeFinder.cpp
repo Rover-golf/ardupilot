@@ -40,6 +40,7 @@
 #include "AP_RangeFinder_BLPing.h"
 #include "AP_RangeFinder_UAVCAN.h"
 #include "AP_RangeFinder_Lanbao.h"
+#include "AP_RangeFinder_SR73F.h"    
 
 #include <AP_BoardConfig/AP_BoardConfig.h>
 #include <AP_Logger/AP_Logger.h>
@@ -524,6 +525,16 @@ void RangeFinder::detect_instance(uint8_t instance, uint8_t& serial_instance)
             drivers[instance] = new AP_RangeFinder_Lanbao(state[instance], params[instance], serial_instance++);
         }
         break;
+#if HAL_WITH_UAVCAN
+    case RangeFinder_TYPE_SR73F:   // sr73
+        hal.console->printf("SR73F Init\r\n");
+        if(AP_RangeFinder_SR73F::detect(state[instance], params[instance]))
+        {
+            drivers[instance] = new AP_RangeFinder_SR73F(state[instance], params[instance]);
+            hal.console->printf("SR73F finish\r\n");
+        }
+        break;
+#endif //HAL_WITH_UAVCAN
     default:
         break;
     }
