@@ -60,6 +60,7 @@ void Rover::one_hz_loop(void)
         gcs().send_text(MAV_SEVERITY_DEBUG, "UTC get time faild!");
     // else
     //     gcs().send_text(MAV_SEVERITY_CRITICAL, "H:M:S %d:%d:%d", hour, min, sec);
+    batt_nd_charge = false;
 
     float batt_volt = battery.voltage();
 
@@ -276,6 +277,7 @@ void Rover::one_hz_loop(void)
         if (g2.wp_nav.reached_destination())
         {
             gcs().send_text(MAV_SEVERITY_CRITICAL, "Golf near home");
+ //           rover.set_mode(rover.mode_rtl, MODE_REASON_EVERYDAY_END);
             golf_work_state = GOLF_PREP_PI;
         }
         break;
