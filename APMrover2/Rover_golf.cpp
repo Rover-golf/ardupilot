@@ -44,8 +44,10 @@ void Rover::one_hz_loop(void)
     {
         rover.golf_end_mission();
     }
-    
 
+    float dis = 0.0f, angel = 0.0f;
+    g2.beacon.get_data(dis, angel);
+    gcs().send_text(MAV_SEVERITY_NOTICE, "AOA %.2f %.2f", dis, angel);
 
     sr73f_can.update();
     //golf: regular start&return
@@ -55,6 +57,8 @@ void Rover::one_hz_loop(void)
     // static uint16_t unload_s = 0;
     static uint16_t test_work_s = 0;
 
+    // gcs().send_text(MAV_SEVERITY_BS_DEBUG, "UTC get time faild!");
+    
     //获取现在的UTC时间 时 分 秒
     if (!AP::rtc().get_local_time(hour, min, sec, ms))
         gcs().send_text(MAV_SEVERITY_DEBUG, "UTC get time faild!");
