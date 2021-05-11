@@ -25,3 +25,15 @@ To use this Driver BrightSoul developed, you need follow settings below:
 > Note: you can change Serial num to baud what you exact using
 
 When message send like `AOA 0.86 4.85`, the AOA connect and work successful.
+
+### Rover Guide to Stick
+
+When switch to `case 9000` it will turn to yaw 0 (North). Then it will guide to stick follow the formula 
+
+
+```
+vel = \text{GOLF_GUIDE_FORWARD} \quad from -100 \to 100
+steer_rate = GOLF_GUIDE_YAWRATE_K * angel_from_AOA
+```
+
+it recommed set `GOLF_GUIDE_YAWRATE_K` from around `100~300`

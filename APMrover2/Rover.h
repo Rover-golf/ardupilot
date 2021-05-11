@@ -464,6 +464,7 @@ public:
     void one_hz_loop(void);
     void hundred_hz_loop(void);
     void sim_pi_ctl(void);
+    void sim_pi_guide(void);
 
     void init_golfpin(void);
     void motor_pull(void);
@@ -487,11 +488,13 @@ public:
     bool yaw_complete = false;
     
     bool pi_ctl = false;
+    bool rover_reached_stick = false;
     uint16_t pi_ctl_id = 0;
     uint8_t pi_ctl_step = 0;
     uint32_t pi_ctl_start = 0;
 
-
+    uint8_t golf_is_full = 0xff;
+    uint8_t nd_collision = 0xff;
 
     float target_deg = 0.0f;
 

@@ -384,6 +384,9 @@ const AP_Param::Info Rover::var_info[] = {
     GSCALAR(steer_yaw_to, "GOLF_STEER_DEG", 0),
     GSCALAR(steer_error, "GOLF_STEER_ERR", 3),
 
+    GSCALAR(golf_yawrate_k, "GOLF_GUIDE_YAWRATE_K", 100),
+    GSCALAR(golf_forward, "GOLF_GUIDE_FORWARD", 30),
+
     AP_VAREND
 
 };

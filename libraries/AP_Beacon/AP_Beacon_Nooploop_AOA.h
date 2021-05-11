@@ -26,7 +26,7 @@ public:
     void get_data(float &dis, float &angel) override;
 
     float _dis = 0.0f, _angel = 0.0f;
-    uint32_t _last_update_ms;
+    // float L_dis[10] = {0.0f}, L_angel[10] = {0.0f};
 
 private:
     // // 解析AOA_Node_Frame0
@@ -61,6 +61,7 @@ private:
     uint16_t _msg_len;                     // number of bytes received from the current message (may be larger than size of _msgbuf)
     uint16_t _frame_len;                   // message supplied frame length
     uint8_t _crc_expected;                 // calculated crc which is compared against actual received crc
-    // uint32_t _last_update_ms;              // last time we receive data from tag
+    uint32_t _last_update_ms;              // last time we receive data from tag
+
 };
 

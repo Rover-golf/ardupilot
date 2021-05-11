@@ -69,6 +69,8 @@ public:
         k_param_steer_rate_use,
         k_param_steer_yaw_to,
         k_param_steer_error,
+        k_param_golf_yawrate_k,
+        k_param_golf_forward,
 
         // 97: RSSI
         k_param_rssi = 97,
@@ -287,6 +289,9 @@ public:
     AP_Float steer_rate_use;
     AP_Float steer_yaw_to;
     AP_Float steer_error;
+
+    AP_Float golf_yawrate_k;
+    AP_Float golf_forward;
 
     Parameters() {}
 };

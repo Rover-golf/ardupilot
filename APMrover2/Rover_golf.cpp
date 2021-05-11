@@ -50,14 +50,11 @@ void Rover::one_hz_loop(void)
     gcs().send_text(MAV_SEVERITY_NOTICE, "AOA %.2f %.2f", dis, angel);
 
     sr73f_can.update();
+    
     //golf: regular start&return
-    //golf
     uint8_t hour, min, sec;
     uint16_t ms;
-    // static uint16_t unload_s = 0;
     static uint16_t test_work_s = 0;
-
-    // gcs().send_text(MAV_SEVERITY_BS_DEBUG, "UTC get time faild!");
     
     //获取现在的UTC时间 时 分 秒
     if (!AP::rtc().get_local_time(hour, min, sec, ms))
@@ -73,8 +70,8 @@ void Rover::one_hz_loop(void)
     
 
     static bool door_nd_close = false;
-    uint8_t golf_is_full = !(rover.check_digital_pin(AUX_GOLF_PIN));
-    uint8_t nd_collision = !(rover.check_digital_pin(AUX_AVOID_PIN));
+    golf_is_full = !(rover.check_digital_pin(AUX_GOLF_PIN));
+    nd_collision = !(rover.check_digital_pin(AUX_AVOID_PIN));
     uint8_t nd_avd = 0;
 
     // Begin Josh
@@ -93,9 +90,9 @@ void Rover::one_hz_loop(void)
 
     //float last_time;
     //bool hasDate;
-    if (nd_collision) // Josh  collision
-    {
-        golf_work_state = GOLF_COLLISION;
+     if (golf_work_state != GOLF_PI_CTL && nd_collision) // Josh  collision
+     {
+         golf_work_state = GOLF_COLLISION;
     }
 //#if HAL_WITH_UAVCAN
     else
@@ -136,10 +133,7 @@ void Rover::one_hz_loop(void)
 
     // End Josh
 
-    if (batt_is_low)
-    {
-        batt_nd_charge = true;
-    }
+    if (batt_is_low) { batt_nd_charge = true; }
 
     //定时启动
     // bool time1_avaiable = !((g2.start_1_hour == 0) && (g2.start_1_min == 0) && (g2.end_1_hour == 0) && (g2.end_1_min == 0));
@@ -457,37 +451,44 @@ void Rover::sim_pi_ctl(void)
                 {
                     pi_ctl_step++;
                 }
+                break;
             case 1:
-                pi_ctl_start = AP_HAL::millis();
-                pi_ctl_step++;
+                // run guided
+                sim_pi_guide();
+                if (rover_reached_stick)
+                {
+                    rover_reached_stick = false;
+                    pi_ctl_start = AP_HAL::millis();
+                    pi_ctl_step++;
+                }
                 break;
             case 2:
-                if (AP_HAL::millis() - pi_ctl_start > 3000)
+                // open door and wait 10s
+                motor_push();     
+                if (AP_HAL::millis() - pi_ctl_start > 10000)
+                {
+                    pi_ctl_start = AP_HAL::millis();
                     pi_ctl_step++;
+                }
                 break;
             case 3:
                 rover.mode_gobatt.set_para(-50);
-                pi_ctl_start = AP_HAL::millis();
-                pi_ctl_step++;
+                if (AP_HAL::millis() - pi_ctl_start > 5000)
+                {
+                    pi_ctl_start = AP_HAL::millis();
+                    pi_ctl_step++;
+                }
                 break;
             case 4:
-                motor_push();     // open door
-                if (AP_HAL::millis() - pi_ctl_start > 10000)
-                    pi_ctl_step++;
-                break;
-            case 5:
-                rover.mode_gobatt.set_para(50);
-                pi_ctl_start = AP_HAL::millis();
-                pi_ctl_step++;
-                break;
-            case 6:
-                motor_pull();    // close door
+                // close door and wait 3s
+                motor_pull();    
                 if (AP_HAL::millis() - pi_ctl_start > 3000)
                 {
                     pi_ctl_step = 0;
                     pi_ctl = false;
                     pi_ctl_start = 0;
                 }
+                break;
             }
             break;
         }
@@ -496,6 +497,49 @@ void Rover::sim_pi_ctl(void)
         }
     }
 }
+
+void Rover::sim_pi_guide(void)
+{
+    // if (pi_ctl != true && pi_ctl_id != 9000 && pi_ctl_step != 1)
+    //     return;
+    
+    static uint8_t sim_pi_guide_state = 0;
+    float dis = 0.0f, angel = 0.0f;
+    g2.beacon.get_data(dis, angel);
+
+    if(!nd_collision)
+    {
+        switch (sim_pi_guide_state)
+        {
+        // wait AOA data 
+        case 0:
+            pi_ctl_start = AP_HAL::millis();
+            sim_pi_guide_state++;
+            break;
+        // data OK
+        case 1:
+            if (AP_HAL::millis() - pi_ctl_start > 500)
+            {
+                pi_ctl_start = AP_HAL::millis();
+                sim_pi_guide_state++;
+            }
+            break;
+        case 2:
+            rover.mode_gobatt.set_para(g.golf_forward,g.golf_yawrate_k*angel);
+            break;
+        default:
+            break;
+        }
+
+    }
+    else
+    {
+        rover_reached_stick = true;
+    }
+    
+    
+}
+
 
 void Rover::init_golfpin(void)
 {
