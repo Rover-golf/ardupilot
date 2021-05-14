@@ -135,13 +135,31 @@ void AP_Beacon_Nooploop_AOA::parse_aoa_node_frame0()
         const int16_t angel = ((int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_ANGEL + 1] << 8 | (int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_ANGEL]);
         _dis = dis/1000.0f;
         _angel = angel/100.0f;
+        L_angel[angel_index] = _angel;
+        angel_index++;
+        if(angel_index >= AVERAGE_ANGEL_MAX)
+                angel_index=0;
         // gcs().send_text(MAV_SEVERITY_DEBUG, "%.2f %.2f", _dis, _angel);
     }
 
 }
 
-void AP_Beacon_Nooploop_AOA::get_data(float &dis, float &angel)
+void AP_Beacon_Nooploop_AOA::get_data_raw(float &dis, float &angel)
 {
     dis = _dis;
     angel = _angel;
+}
+
+void AP_Beacon_Nooploop_AOA::get_data(float &dis, float &angel)
+{
+    float temp = 0;
+    for (uint8_t i = 0; i < AVERAGE_ANGEL_MAX; i++)
+    {
+        temp += L_angel[i];
+    }
+    
+    dis = _dis;
+    angel = temp/AVERAGE_ANGEL_MAX;
+
+
 }

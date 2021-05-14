@@ -10,6 +10,9 @@
 #define NOOPLOOP_NODE_FRAME2_DIS    23               // 20+3
 #define NOOPLOOP_NODE_FRAME2_ANGEL  26
 
+
+#define AVERAGE_ANGEL_MAX   100
+
 class AP_Beacon_Nooploop_AOA : public AP_Beacon_Backend
 {
 
@@ -24,9 +27,12 @@ public:
     void update() override;
 
     void get_data(float &dis, float &angel) override;
+    void get_data_raw(float &dis, float &angel) override;
 
     float _dis = 0.0f, _angel = 0.0f;
-    // float L_dis[10] = {0.0f}, L_angel[10] = {0.0f};
+    
+    float L_angel[AVERAGE_ANGEL_MAX] = {0.0f};
+    uint8_t angel_index = 0;
 
 private:
     // // 解析AOA_Node_Frame0

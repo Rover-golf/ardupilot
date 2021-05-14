@@ -69,6 +69,7 @@ public:
     void update(void);
 
     void get_data(float &dis, float &angel);
+    void get_data_raw(float &dis, float &angel);
 
     // return origin of position estimate system in lat/lon
     bool get_origin(Location &origin_loc) const;

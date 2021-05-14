@@ -46,8 +46,10 @@ void Rover::one_hz_loop(void)
     }
 
     float dis = 0.0f, angel = 0.0f;
+    g2.beacon.get_data_raw(dis, angel);
+    gcs().send_text(MAV_SEVERITY_NOTICE, "AOA data raw \t %.4f %.4f", dis, angel);
     g2.beacon.get_data(dis, angel);
-    gcs().send_text(MAV_SEVERITY_NOTICE, "AOA %.2f %.2f", dis, angel);
+    gcs().send_text(MAV_SEVERITY_NOTICE, "AOA data filter \t  %.4f %.4f", dis, angel);
 
     sr73f_can.update();
     
@@ -511,14 +513,14 @@ void Rover::sim_pi_guide(void)
     {
         switch (sim_pi_guide_state)
         {
-        // wait AOA data 
+        // wait AOA data stable
         case 0:
             pi_ctl_start = AP_HAL::millis();
             sim_pi_guide_state++;
             break;
         // data OK
         case 1:
-            if (AP_HAL::millis() - pi_ctl_start > 500)
+            if (AP_HAL::millis() - pi_ctl_start > 1000)
             {
                 pi_ctl_start = AP_HAL::millis();
                 sim_pi_guide_state++;

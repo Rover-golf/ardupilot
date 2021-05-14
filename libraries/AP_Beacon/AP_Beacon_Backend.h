@@ -32,6 +32,7 @@ public:
     virtual void update() = 0;
 
     virtual void get_data(float &dis, float &angel){};
+    virtual void get_data_raw(float &dis, float &angel){};
 
     // set vehicle position, pos should be in the beacon's local frame
     void set_vehicle_position(const Vector3f& pos, float accuracy_estimate);

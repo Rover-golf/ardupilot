@@ -120,6 +120,14 @@ void AP_Beacon::get_data(float &dis, float &angel)
         _driver->get_data(dis, angel);
     }
 }
+void AP_Beacon::get_data_raw(float &dis, float &angel)
+{
+    if (_type == AP_BeaconType_Nooploop_AOA)
+    {
+        // AP_Beacon_BackendÖĞµÄgetdata
+        _driver->get_data_raw(dis, angel);
+    }
+}
 
 // return true if beacon feature is enabled
 bool AP_Beacon::enabled(void)
