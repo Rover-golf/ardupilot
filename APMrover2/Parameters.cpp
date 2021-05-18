@@ -386,6 +386,8 @@ const AP_Param::Info Rover::var_info[] = {
 
     GSCALAR(golf_yawrate_k, "GOLF_GD_YAWRATE", 100),
     GSCALAR(golf_forward, "GOLF_GD_AHEAD", 30),
+    GSCALAR(golf_max_degerr, "GOLF_GD_DEGERR", 5),
+    GSCALAR(golf_max_turn, "GOLF_GD_MAXTURN", 1500),
 
     AP_VAREND
 

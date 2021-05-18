@@ -72,6 +72,8 @@ public:
 
         k_param_golf_yawrate_k,
         k_param_golf_forward,
+        k_param_golf_max_degerr,
+        k_param_golf_max_turn,
 
         // 97: RSSI
         k_param_rssi = 97,
@@ -292,7 +294,9 @@ public:
     AP_Float steer_error;
 
     AP_Float golf_yawrate_k;
+    AP_Float golf_max_degerr;
     AP_Float golf_forward;
+    AP_Float golf_max_turn;
 
     Parameters() {}
 };

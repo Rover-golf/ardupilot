@@ -45,11 +45,11 @@ void Rover::one_hz_loop(void)
         rover.golf_end_mission();
     }
 
-    float dis = 0.0f, angel = 0.0f;
-    g2.beacon.get_data_raw(dis, angel);
-    gcs().send_text(MAV_SEVERITY_NOTICE, "AOA data raw \t %.4f %.4f", dis, angel);
-    g2.beacon.get_data(dis, angel);
-    gcs().send_text(MAV_SEVERITY_NOTICE, "AOA data filter \t  %.4f %.4f", dis, angel);
+    // float dis = 0.0f, angel = 0.0f;
+    // g2.beacon.get_data_raw(dis, angel);
+    // gcs().send_text(MAV_SEVERITY_NOTICE, "AOA data raw \t %.4f %.4f", dis, angel);
+    // g2.beacon.get_data(dis, angel);
+    // gcs().send_text(MAV_SEVERITY_NOTICE, "AOA data filter \t  %.4f %.4f", dis, angel);
 
     sr73f_can.update();
     
@@ -452,6 +452,7 @@ void Rover::sim_pi_ctl(void)
                 if (yaw_complete)
                 {
                     pi_ctl_step++;
+                    pi_ctl_start = AP_HAL::millis();
                 }
                 break;
             case 1:
@@ -508,6 +509,13 @@ void Rover::sim_pi_guide(void)
     static uint8_t sim_pi_guide_state = 0;
     float dis = 0.0f, angel = 0.0f;
     g2.beacon.get_data(dis, angel);
+    if (fabs(angel)<g.golf_max_degerr)
+        angel = 0.0;
+    float trun = g.golf_yawrate_k*angel > g.golf_max_turn? g.golf_max_turn:g.golf_yawrate_k*angel;
+    
+    gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angel=%.2f trun=%.2f", 
+        sim_pi_guide_state,dis, angel,trun
+    );
 
     if(!nd_collision)
     {
@@ -515,19 +523,29 @@ void Rover::sim_pi_guide(void)
         {
         // wait AOA data stable
         case 0:
-            pi_ctl_start = AP_HAL::millis();
-            sim_pi_guide_state++;
-            break;
-        // data OK
-        case 1:
             if (AP_HAL::millis() - pi_ctl_start > 1000)
             {
                 pi_ctl_start = AP_HAL::millis();
                 sim_pi_guide_state++;
             }
             break;
+        // try to turn till angle in error file
+        case 1:
+            rover.mode_gobatt.set_para(0,trun);
+            if (fabs(angel)<g.golf_max_degerr)
+            {
+                pi_ctl_start = AP_HAL::millis();
+                sim_pi_guide_state++;
+            }
+            break;
         case 2:
-            rover.mode_gobatt.set_para(g.golf_forward,g.golf_yawrate_k*angel);
+            rover.mode_gobatt.set_para(g.golf_forward,trun);
+            if (AP_HAL::millis() - pi_ctl_start > 2000)
+            {
+                rover.mode_gobatt.set_para(0,0);
+                pi_ctl_start = AP_HAL::millis();
+                sim_pi_guide_state = 0;
+            }
             break;
         default:
             break;
