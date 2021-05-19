@@ -139,7 +139,7 @@ void AP_Beacon_Nooploop_AOA::parse_aoa_node_frame0()
         angel_index++;
         if(angel_index >= AVERAGE_ANGEL_MAX)
                 angel_index=0;
-        // gcs().send_text(MAV_SEVERITY_DEBUG, "%.2f %.2f", _dis, _angel);
+        //gcs().send_text(MAV_SEVERITY_DEBUG, "%.2f %.2f", _dis, _angel);
     }
 
 }

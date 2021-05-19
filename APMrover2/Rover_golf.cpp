@@ -501,12 +501,16 @@ void Rover::sim_pi_guide(void)
     // if (pi_ctl != true && pi_ctl_id != 9000 && pi_ctl_step != 1)
     //     return;
     
-    float dis = 0.0f, angel = 0.0f;
+    float dis = 0.0f, angel = 0.0f, trun = 0.0f;
     g2.beacon.get_data(dis, angel);
     if (fabs(angel)<g.golf_max_degerr)
         angel = 0.0;
-    float trun = g.golf_yawrate_k*angel > g.golf_max_turn? g.golf_max_turn:g.golf_yawrate_k*angel;
     
+    if(angel < 0)    
+        trun = g.golf_yawrate_k*fabs(angel) > g.golf_max_turn? g.golf_max_turn:g.golf_yawrate_k*angel;
+    else
+        trun = g.golf_yawrate_k*fabs(angel) > g.golf_max_turn? -g.golf_max_turn:-g.golf_yawrate_k*angel;
+
     gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angel=%.2f trun=%.2f", 
         sim_pi_guide_state,dis, angel, trun
     );
@@ -517,7 +521,7 @@ void Rover::sim_pi_guide(void)
         {
         // wait AOA data stable
         case 0:
-            if (AP_HAL::millis() - pi_ctl_start > 1000)
+            if (AP_HAL::millis() - pi_ctl_start > 3000)
             {
                 pi_ctl_start = AP_HAL::millis();
                 sim_pi_guide_state++;
@@ -534,7 +538,7 @@ void Rover::sim_pi_guide(void)
             break;
         case 2:
             rover.mode_gobatt.set_para(g.golf_forward,trun);
-            if (AP_HAL::millis() - pi_ctl_start > 2000)
+            if (AP_HAL::millis() - pi_ctl_start > 3000)
             {
                 rover.mode_gobatt.set_para(0,0);
                 pi_ctl_start = AP_HAL::millis();
