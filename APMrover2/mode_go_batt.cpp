@@ -10,6 +10,7 @@ void ModeGoBatt::_exit()
 bool ModeGoBatt::_enter()
 {
     gcs().send_text(MAV_SEVERITY_DEBUG, "start mode gobatt");
+    rover.start_debug();
     return true;
 }
 

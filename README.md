@@ -4,6 +4,10 @@ This branch is based on `f431c0b256067daae7c154b7f62fd1e91004f891`
 
 ## Change Log
 
+- 2021-05-19
+
+change parameter `GOLF` to `GF`, add some function to debug
+
 - 2021-05-14
 
 fix bug that can not save parameter
@@ -38,9 +42,9 @@ When switch to `case 9000` it will turn to yaw 0 (North). Then it will guide to 
 
 
 ```
-vel 		=   GOLF_GD_AHEAD
-steer_rate 	= 	GOLF_GD_YAWRATE * angel_from_AOA
+vel 		=   GF_GD_AHEAD
+steer_rate 	= 	GF_GD_YAWRATE * angel_from_AOA
 ```
 
-it recommed set `GOLF_GD_YAWRATE` from around `50~300`
+it recommed set `GF_GD_YAWRATE` from around `50~300`
 

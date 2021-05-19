@@ -58,7 +58,7 @@ public:
         k_param_serial2_baud,   // deprecated, can be deleted
 
         //golf
-        k_param_press_up = 50,
+        k_param_press_up = 60,
         k_param_press_low,
         k_param_batt_nd_rtl,
         k_param_batt_charge_to,

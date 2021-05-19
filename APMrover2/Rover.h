@@ -487,6 +487,7 @@ public:
     float yaw_desire = 0.0f;
     bool yaw_complete = false;
     
+    uint8_t sim_pi_guide_state = 0;
     bool pi_ctl = false;
     bool rover_reached_stick = false;
     uint16_t pi_ctl_id = 0;
@@ -497,6 +498,8 @@ public:
     uint8_t nd_collision = 0xff;
 
     float target_deg = 0.0f;
+
+    void start_debug();
 
     float constrain_deg(float deg);
     void send_golf_to_buff();

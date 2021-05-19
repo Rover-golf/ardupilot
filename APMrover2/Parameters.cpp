@@ -371,23 +371,23 @@ const AP_Param::Info Rover::var_info[] = {
     GOBJECT(osd, "OSD", AP_OSD),
 #endif
 
-    GSCALAR(press_up, "GOLF_PUP", 0),
-    GSCALAR(press_low, "GOLF_PLOW", 0),
+    GSCALAR(press_up, "GF_PUP", 0),
+    GSCALAR(press_low, "GF_PLOW", 0),
 
-    GSCALAR(batt_nd_rtl, "GOLF_BATT_ND_RTL", 0),
-    GSCALAR(batt_charge_to, "GOLF_BATT_CHARGE", 12),
-    GSCALAR(unload_sec, "GOLF_UNLOAD_SEC", 30),
-    GSCALAR(test_full_sec, "GOLF_RTL_SEC", 1800),
-    GSCALAR(pwm_unload, "GOLF_PWM_UNLOAD", 1000),
-    GSCALAR(pwm_normal, "GOLF_PWM_NORMAL", 2000),
-    GSCALAR(steer_rate_use, "GOLF_STEER_RATE", 2000),
-    GSCALAR(steer_yaw_to, "GOLF_STEER_DEG", 0),
-    GSCALAR(steer_error, "GOLF_STEER_ERR", 3),
+    GSCALAR(batt_nd_rtl, "GF_BAT_ND_RTL", 0),
+    GSCALAR(batt_charge_to, "GF_BAT_CHARGE", 12),
+    GSCALAR(unload_sec, "GF_UNLOAD_SEC", 30),
+    GSCALAR(test_full_sec, "GF_RTL_SEC", 1800),
+    GSCALAR(pwm_unload, "GF_PWM_UNLOAD", 1000),
+    GSCALAR(pwm_normal, "GF_PWM_NORMAL", 2000),
+    GSCALAR(steer_rate_use, "GF_STEER_RATE", 2000),
+    GSCALAR(steer_yaw_to, "GF_STEER_DEG", 0),
+    GSCALAR(steer_error, "GF_STEER_ERR", 3),
 
-    GSCALAR(golf_yawrate_k, "GOLF_GD_YAWRATE", 100),
-    GSCALAR(golf_forward, "GOLF_GD_AHEAD", 30),
-    GSCALAR(golf_max_degerr, "GOLF_GD_DEGERR", 5),
-    GSCALAR(golf_max_turn, "GOLF_GD_MAXTURN", 1500),
+    GSCALAR(golf_yawrate_k, "GF_GD_YAWRATE", 100),
+    GSCALAR(golf_forward, "GF_GD_AHEAD", 30),
+    GSCALAR(golf_max_degerr, "GF_GD_DEGERR", 5),
+    GSCALAR(golf_max_turn, "GF_GD_MAXTURN", 1500),
 
     AP_VAREND
 

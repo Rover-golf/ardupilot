@@ -45,22 +45,17 @@ void Rover::one_hz_loop(void)
         rover.golf_end_mission();
     }
 
-    // float dis = 0.0f, angel = 0.0f;
-    // g2.beacon.get_data_raw(dis, angel);
-    // gcs().send_text(MAV_SEVERITY_NOTICE, "AOA data raw \t %.4f %.4f", dis, angel);
-    // g2.beacon.get_data(dis, angel);
-    // gcs().send_text(MAV_SEVERITY_NOTICE, "AOA data filter \t  %.4f %.4f", dis, angel);
+    gcs().send_text(MAV_SEVERITY_DEBUG, "golf_work_state = %d;", golf_work_state);
 
     sr73f_can.update();
     
     //golf: regular start&return
-    uint8_t hour, min, sec;
-    uint16_t ms;
     static uint16_t test_work_s = 0;
-    
+    // uint8_t hour, min, sec;
+    // uint16_t ms;
     //获取现在的UTC时间 时 分 秒
-    if (!AP::rtc().get_local_time(hour, min, sec, ms))
-        gcs().send_text(MAV_SEVERITY_DEBUG, "UTC get time faild!");
+    // if (!AP::rtc().get_local_time(hour, min, sec, ms))
+    //     gcs().send_text(MAV_SEVERITY_DEBUG, "UTC get time faild!");
     // else
     //     gcs().send_text(MAV_SEVERITY_CRITICAL, "H:M:S %d:%d:%d", hour, min, sec);
     batt_nd_charge = false;
@@ -70,7 +65,7 @@ void Rover::one_hz_loop(void)
     bool batt_is_low = (batt_volt < g.batt_nd_rtl) ? true : false;
     bool batt_is_full = (batt_volt > g.batt_charge_to) ? true : false;
     
-
+    // 
     static bool door_nd_close = false;
     golf_is_full = !(rover.check_digital_pin(AUX_GOLF_PIN));
     nd_collision = !(rover.check_digital_pin(AUX_AVOID_PIN));
@@ -289,8 +284,8 @@ void Rover::one_hz_loop(void)
         yaw_enable = true;
         yaw_complete = false;
         yaw_desire = 0;
-        golf_send_cmd(pi_ctl_id, rover.ahrs.yaw, target_deg); // Josh added parameters
         pi_ctl = true;
+        golf_send_cmd(pi_ctl_id, rover.ahrs.yaw, target_deg); // Josh added parameters
         break;
     case GOLF_PI_CTL:
         // 等树莓派控制完成后pi_ctl会设置成false
@@ -506,7 +501,6 @@ void Rover::sim_pi_guide(void)
     // if (pi_ctl != true && pi_ctl_id != 9000 && pi_ctl_step != 1)
     //     return;
     
-    static uint8_t sim_pi_guide_state = 0;
     float dis = 0.0f, angel = 0.0f;
     g2.beacon.get_data(dis, angel);
     if (fabs(angel)<g.golf_max_degerr)
@@ -514,7 +508,7 @@ void Rover::sim_pi_guide(void)
     float trun = g.golf_yawrate_k*angel > g.golf_max_turn? g.golf_max_turn:g.golf_yawrate_k*angel;
     
     gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angel=%.2f trun=%.2f", 
-        sim_pi_guide_state,dis, angel,trun
+        sim_pi_guide_state,dis, angel, trun
     );
 
     if(!nd_collision)
@@ -611,4 +605,16 @@ void Rover::golf_end_mission(void)
     isSleep = true;        // Josh
     start_auto = true;
     rover.set_mode(rover.mode_rtl, MODE_REASON_EVERYDAY_END);
+}
+
+void Rover::start_debug(void)
+{    
+    gcs().send_text(MAV_SEVERITY_DEBUG, "start gobatt debug");
+    golf_work_state = GOLF_PI_CTL;
+    pi_ctl_id = 9000;
+    pi_ctl = true;
+    sim_pi_guide_state = 0;
+    yaw_complete = true;
+    pi_ctl_start = AP_HAL::millis();
+
 }
