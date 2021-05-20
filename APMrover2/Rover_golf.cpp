@@ -511,9 +511,6 @@ void Rover::sim_pi_guide(void)
     else
         trun = g.golf_yawrate_k*fabs(angel) > g.golf_max_turn? -g.golf_max_turn:-g.golf_yawrate_k*angel;
 
-    gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angel=%.2f trun=%.2f", 
-        sim_pi_guide_state,dis, angel, trun
-    );
 
     if(!nd_collision)
     {
@@ -529,6 +526,8 @@ void Rover::sim_pi_guide(void)
             break;
         // try to turn till angle in error file
         case 1:
+            gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angel=%.2f trun=%.2f", 
+                                                    sim_pi_guide_state,dis, angel, trun);
             rover.mode_gobatt.set_para(0,trun);
             if (fabs(angel)<g.golf_max_degerr)
             {
@@ -537,13 +536,15 @@ void Rover::sim_pi_guide(void)
             }
             break;
         case 2:
-            rover.mode_gobatt.set_para(g.golf_forward,trun);
-            if (AP_HAL::millis() - pi_ctl_start > 3000)
-            {
-                rover.mode_gobatt.set_para(0,0);
-                pi_ctl_start = AP_HAL::millis();
+            gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angel=%.2f trun=%.2f", 
+                                                    sim_pi_guide_state,dis, angel, trun);
+            rover.mode_gobatt.set_para(g.golf_forward,0);
+//            if (AP_HAL::millis() - pi_ctl_start > 3000)
+//            {
+//                rover.mode_gobatt.set_para(0,0);
+//                pi_ctl_start = AP_HAL::millis();
                 sim_pi_guide_state = 0;
-            }
+//            }
             break;
         default:
             break;
