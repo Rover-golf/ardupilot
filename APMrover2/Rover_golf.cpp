@@ -45,7 +45,6 @@ void Rover::one_hz_loop(void)
         rover.golf_end_mission();
     }
 
-    gcs().send_text(MAV_SEVERITY_DEBUG, "golf_work_state = %d;", golf_work_state);
 
     sr73f_can.update();
     
@@ -69,6 +68,8 @@ void Rover::one_hz_loop(void)
     static bool door_nd_close = false;
     golf_is_full = !(rover.check_digital_pin(AUX_GOLF_PIN));
     nd_collision = !(rover.check_digital_pin(AUX_AVOID_PIN));
+    gcs().send_text(MAV_SEVERITY_INFO, "golf full %i", batt_is_low); 
+    gcs().send_text(MAV_SEVERITY_INFO, "collision %i", nd_collision); 
     uint8_t nd_avd = 0;
 
     // Begin Josh
@@ -187,6 +188,8 @@ void Rover::one_hz_loop(void)
     }
 */
     // 状态机
+//    gcs().send_text(MAV_SEVERITY_DEBUG, "golf_work_state = %d ", golf_work_state);
+
     switch (golf_work_state)
     {
     case GOLF_COLLISION:
@@ -281,11 +284,11 @@ void Rover::one_hz_loop(void)
         rover.set_mode(rover.mode_gobatt, MODE_REASON_EVERYDAY_END);
         golf_work_state = GOLF_PI_CTL;
         pi_ctl_id = 9000;
-        yaw_enable = true;
-        yaw_complete = false;
-        yaw_desire = 0;
+//        yaw_enable = true;
+//        yaw_complete = false;
+//        yaw_desire = 0;
         pi_ctl = true;
-        golf_send_cmd(pi_ctl_id, rover.ahrs.yaw, target_deg); // Josh added parameters
+//        golf_send_cmd(pi_ctl_id, rover.ahrs.yaw, target_deg); // Josh added parameters
         break;
     case GOLF_PI_CTL:
         // 等树莓派控制完成后pi_ctl会设置成false
@@ -329,6 +332,7 @@ void Rover::one_hz_loop(void)
 
 void Rover::sim_pi_ctl(void)
 {
+//    gcs().send_text(MAV_SEVERITY_DEBUG, "pi_ctl_step = %d",  pi_ctl_step);
     if (pi_ctl)
     {
         switch (pi_ctl_id)
@@ -439,16 +443,16 @@ void Rover::sim_pi_ctl(void)
             }
             break;
         }  
-        case 9000:  // reached home then uoload ball
+        case 9000:  // reached home then unload ball
         {
             switch (pi_ctl_step)
             {
             case 0:
-                if (yaw_complete)
-                {
+//                if (yaw_complete)
+//                {
                     pi_ctl_step++;
                     pi_ctl_start = AP_HAL::millis();
-                }
+//                }
                 break;
             case 1:
                 // run guided
@@ -526,8 +530,8 @@ void Rover::sim_pi_guide(void)
             break;
         // try to turn till angle in error file
         case 1:
-            gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angel=%.2f trun=%.2f", 
-                                                    sim_pi_guide_state,dis, angel, trun);
+ //           gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angel=%.2f trun=%.2f", 
+ //                                                   sim_pi_guide_state,dis, angel, trun);
             rover.mode_gobatt.set_para(0,trun);
             if (fabs(angel)<g.golf_max_degerr)
             {
@@ -536,8 +540,8 @@ void Rover::sim_pi_guide(void)
             }
             break;
         case 2:
-            gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angel=%.2f trun=%.2f", 
-                                                    sim_pi_guide_state,dis, angel, trun);
+//            gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angel=%.2f trun=%.2f", 
+//                                                    sim_pi_guide_state,dis, angel, trun);
             rover.mode_gobatt.set_para(g.golf_forward,0);
 //            if (AP_HAL::millis() - pi_ctl_start > 3000)
 //            {
