@@ -141,5 +141,5 @@ enum golf_work_state_t
 #define AUX_IN1_PIN 51      // AUX2
 #define AUX_IN2_PIN 52      // AUX3
 
-#define AUX_AVOID_PIN 53    // AUX4
-#define AUX_GOLF_PIN 54     // AUX5
+#define AUX_AVOID_PIN 54    // AUX4
+#define AUX_GOLF_PIN 53     // AUX5

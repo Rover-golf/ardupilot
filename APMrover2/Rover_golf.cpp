@@ -67,9 +67,9 @@ void Rover::one_hz_loop(void)
     // 
     static bool door_nd_close = false;
     golf_is_full = !(rover.check_digital_pin(AUX_GOLF_PIN));
+//    gcs().send_text(MAV_SEVERITY_INFO, "golf full %i", golf_is_full); 
     nd_collision = !(rover.check_digital_pin(AUX_AVOID_PIN));
-    gcs().send_text(MAV_SEVERITY_INFO, "golf full %i", batt_is_low); 
-    gcs().send_text(MAV_SEVERITY_INFO, "collision %i", nd_collision); 
+//    gcs().send_text(MAV_SEVERITY_INFO, "collision %i", nd_collision); 
     uint8_t nd_avd = 0;
 
     // Begin Josh
