@@ -168,7 +168,7 @@ void Rover::init_ardupilot()
 #endif
 
     init_golfpin();
-    sr73f_can.init();
+    sr73f_can.init(g.golf_can_1,g.golf_can_1_buad);
 }
 
 //*********************************************************************************

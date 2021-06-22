@@ -11,7 +11,7 @@
 #include <uavcan/time.hpp>
 #include <AP_HAL_ChibiOS/CAN.h>
 extern const AP_HAL::HAL& hal;
-
+uavcan::ICanDriver* sr73_can_driver;
 
 
 AP_SR73F_CAN::AP_SR73F_CAN()
@@ -30,14 +30,14 @@ AP_SR73F_CAN::~AP_SR73F_CAN()
 *修改作者：zuav
 *备注信息：
 ****************************************************************************************************************/
-void AP_SR73F_CAN::init()
+void AP_SR73F_CAN::init(uint8_t inum,uint32_t buad)
 {
 	//定义设备对象
-    uint8_t inum = 0;
     //初始化can_mgr对象
     const_cast <AP_HAL::HAL&> (hal).can_mgr[inum] = new ChibiOS::CANManager();
 	//初始化can的波特率
-	hal.can_mgr[0]->begin(500000,0);
+	hal.can_mgr[inum]->begin(buad,0);
+	sr73_can_driver = hal.can_mgr[inum]->get_driver();
 }
 
 /**************************************************************************************************************
@@ -54,7 +54,8 @@ void AP_SR73F_CAN::update()
 	//定义can接收
 	uavcan::CanRxFrame can_rx;
 	uavcan::CanIOFlags out_flags=0;
-	hal.can_mgr[0]->_driver[0].getIface(0)->receive(can_rx,can_rx.ts_mono,can_rx.ts_utc,out_flags);
+	sr73_can_driver->getIface(0)->receive(can_rx,can_rx.ts_mono,can_rx.ts_utc,out_flags);
+	// hal.can_mgr[0]->_driver[0].getIface(0)->receive(can_rx,can_rx.ts_mono,can_rx.ts_utc,out_flags);
 	if(can_rx.id<=0)
 	{
 		return;
