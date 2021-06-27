@@ -26,7 +26,7 @@ class AP_SR73F_CAN
 	   AP_SR73F_CAN &operator=(const AP_SR73F_CAN&) = delete;
 
        //初始化
-       void init() ;
+       void init(uint8_t inum,uint32_t buad) ;
        //更新
        void update();
        enum{

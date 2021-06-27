@@ -5,7 +5,7 @@
 #include <AP_Proximity/AP_Proximity_Backend.h>  // Josh
 #include <AP_Proximity/AP_Proximity_RangeFinder.h> // Josh
 #include <AP_RangeFinder/RangeFinder.h>  // Josh
-#include <AP_RangeFinder/AP_RangeFinder_SR73F.h>  // Josh
+// #include <AP_RangeFinder/AP_RangeFinder_SR73F.h>  // Josh
 // static RangeFinder lidar;
 #endif
 
