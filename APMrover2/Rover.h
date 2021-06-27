@@ -69,7 +69,7 @@
 #include <AP_Follow/AP_Follow.h>
 #include <AP_OSD/AP_OSD.h>
 #include <AP_WindVane/AP_WindVane.h>
-#include <AP_SR73F_CAN/AP_SR73F_CAN.h>
+//#include <AP_SR73F_CAN/AP_SR73F_CAN.h>
 
 #ifdef ENABLE_SCRIPTING
 #include <AP_Scripting/AP_Scripting.h>

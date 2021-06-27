@@ -27,7 +27,7 @@ def build(bld):
             'AP_Follow',
             'AP_OSD',
             'AP_WindVane',
-            'AP_SR73F_CAN',
+          #  'AP_SR73F_CAN',
         ],
     )
 
