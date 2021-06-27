@@ -4,7 +4,7 @@
  *  Created on: Aug 1, 2020
  *      Author: coco
  */
-
+/*
 #ifndef DZUAV_FC_FIRMWARE_LIBRARIES_AP_SR73FCAN_H_
 #define DZUAV_FC_FIRMWARE_LIBRARIES_AP_SR73FCAN_H_
 
@@ -21,7 +21,7 @@ class AP_SR73F_CAN
 	  AP_SR73F_CAN();
 	  ~AP_SR73F_CAN();
 
-       /* Do not allow copies */
+       // Do not allow copies 
 	   AP_SR73F_CAN(const AP_SR73F_CAN &other) = delete;
 	   AP_SR73F_CAN &operator=(const AP_SR73F_CAN&) = delete;
 
@@ -44,18 +44,18 @@ class AP_SR73F_CAN
        ObjectsStatusBits objectstatus_data;
 
       typedef struct{
-    	  uint8_t Id:8; /*0:7雷达ID*/
-    	  uint8_t DistLongH:8; /*8:15 纵向距离高8位*/
-    	  uint8_t DistLatH:3; /*16:18    横向距离高3位*/
-    	  uint8_t DistLongL:5; /*19:23    纵向距离低5位*/
-    	  uint8_t DistLatL:8;    /*24:31    横向距离低8位*/
-    	  uint8_t VrelLongH:8;  /*32:39    纵向速度高8位*/
-    	  uint8_t VrelLatH:6;  /*40:45    横向速度高6位*/
-    	  uint8_t VrelLongL:2;  /*46:47    纵向速度低2位*/
-    	  uint8_t DynProp:3;  /*48:50    目标的运动属性，默认是0*/
-    	  uint8_t undefined:2;  /*51:52    目标的运动属性，默认是0*/
-    	  uint8_t VrelLatL:3;  /*53:55    横向速度低3位*/
-    	  uint8_t RCS:8;  /*56:63    目标的运动属性，默认是0*/
+    	  uint8_t Id:8; //0:7雷达ID
+    	  uint8_t DistLongH:8; //8:15 纵向距离高8位
+    	  uint8_t DistLatH:3; //16:18    横向距离高3位/
+    	  uint8_t DistLongL:5; //19:23    纵向距离低5位/
+    	  uint8_t DistLatL:8;    //24:31    横向距离低8位/
+    	  uint8_t VrelLongH:8;  //32:39    纵向速度高8位/
+    	  uint8_t VrelLatH:6;  //40:45    横向速度高6位/
+    	  uint8_t VrelLongL:2;  //46:47    纵向速度低2位/
+    	  uint8_t DynProp:3;  //48:50    目标的运动属性，默认是0/
+    	  uint8_t undefined:2;  //51:52    目标的运动属性，默认是0/
+    	  uint8_t VrelLatL:3;  //53:55    横向速度低3位/
+    	  uint8_t RCS:8;  //56:63    目标的运动属性，默认是0/
       }ObjectsInforBits;
       //定义目标信息位
       ObjectsInforBits objectsinformation;
@@ -84,3 +84,4 @@ class AP_SR73F_CAN
 
 
 #endif
+*/

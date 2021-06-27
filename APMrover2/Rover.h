@@ -460,7 +460,7 @@ public:
     float simple_sin_yaw;
 
     // golf
-    AP_SR73F_CAN sr73f_can;
+    //AP_SR73F_CAN sr73f_can;
     void one_hz_loop(void);
     void hundred_hz_loop(void);
     void sim_pi_ctl(void);

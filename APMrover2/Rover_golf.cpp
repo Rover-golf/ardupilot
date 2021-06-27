@@ -46,16 +46,15 @@ void Rover::one_hz_loop(void)
     }
 
 
-    sr73f_can.update();
-    
+    //sr73f_can.update();
     //golf: regular start&return
     static uint16_t test_work_s = 0;
-    // uint8_t hour, min, sec;
-    // uint16_t ms;
+    //uint8_t hour, min, sec;
+    //uint16_t ms;
     //获取现在的UTC时间 时 分 秒
-    // if (!AP::rtc().get_local_time(hour, min, sec, ms))
+    //if (!AP::rtc().get_local_time(hour, min, sec, ms))
     //     gcs().send_text(MAV_SEVERITY_DEBUG, "UTC get time faild!");
-    // else
+    //else
     //     gcs().send_text(MAV_SEVERITY_CRITICAL, "H:M:S %d:%d:%d", hour, min, sec);
     batt_nd_charge = false;
 
@@ -67,9 +66,9 @@ void Rover::one_hz_loop(void)
     // 
     static bool door_nd_close = false;
     golf_is_full = !(rover.check_digital_pin(AUX_GOLF_PIN));
-//    gcs().send_text(MAV_SEVERITY_INFO, "golf full %i", golf_is_full); 
+    if(golf_is_full) gcs().send_text(MAV_SEVERITY_INFO, "golf full %i", golf_is_full); 
     nd_collision = !(rover.check_digital_pin(AUX_AVOID_PIN));
-//    gcs().send_text(MAV_SEVERITY_INFO, "collision %i", nd_collision); 
+    if(nd_collision) gcs().send_text(MAV_SEVERITY_INFO, "collision %i", nd_collision); 
     uint8_t nd_avd = 0;
 
     // Begin Josh
