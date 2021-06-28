@@ -123,6 +123,22 @@ const AP_Param::GroupInfo AP_RangeFinder_Params::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("ORIENT", 53, AP_RangeFinder_Params, orientation, ROTATION_PITCH_270),
 
+    // @Param: PORT
+    // @DisplayName: can_driver
+    // @Description: 驱动端口:0 表示CAN0 1:表示CAN1
+    // @Values: 0:
+    // @User: Advanced
+    AP_GROUPINFO("DEVICE", 54, AP_RangeFinder_Params, can_driver, RANGEFINDER_CAN_DRIVER_DEFAULT),
+
+
+    // @Param: PORT
+    // @DisplayName: can_driver
+    // @Description: 驱动波特率设置：默认500k
+    // @Values: 0:
+    // @User: Advanced
+    AP_GROUPINFO("RATE", 55, AP_RangeFinder_Params, rate, RANGEFINDER_CAN_RATE_DEFAULT),
+
+
     AP_GROUPEND
 };
 

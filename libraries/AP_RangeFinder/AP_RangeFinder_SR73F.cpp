@@ -13,9 +13,14 @@
 #include <uavcan/time.hpp>
 #include <AP_HAL_ChibiOS/CAN.h>
 #include <GCS_MAVLink/GCS.h>   
+#include <uavcan/time.hpp>
+#include <AP_BoardConfig/AP_BoardConfig_CAN.h>
 extern const AP_HAL::HAL& hal;
 
 
+uavcan::ICanDriver* sr73_can_driver;
+uint8_t sr73_driver_index; //驱动号
+uint32_t sr73_driver_rate; //波特率
 /****************************************************************************************
 *函数原型：void AP_RangeFinder_SR73F::init()
 *函数功能：can设备外设初始化
@@ -37,7 +42,8 @@ AP_RangeFinder_SR73F::AP_RangeFinder_SR73F(RangeFinder::RangeFinder_State &_stat
 bool AP_RangeFinder_SR73F::detect(RangeFinder::RangeFinder_State &_state,AP_RangeFinder_Params &_params)
 {
 	AP_RangeFinder_SR73F *sensor= new AP_RangeFinder_SR73F(_state,_params);
-    sensor->init();
+	//进行设备初始化
+    sensor->init(_params.can_driver,_params.rate);
     return sensor;
 }
 
@@ -48,15 +54,49 @@ bool AP_RangeFinder_SR73F::detect(RangeFinder::RangeFinder_State &_state,AP_Rang
 *修改作者：zuav
 *备注信息：
 ***************************************************************************************/
-bool AP_RangeFinder_SR73F::init(void)
+bool AP_RangeFinder_SR73F::init(uint8_t driver_index,uint32_t rate)
 {
-	//定义设备对象
-    uint8_t inum = 0;
-    //初始化can_mgr对象
-    const_cast <AP_HAL::HAL&> (hal).can_mgr[inum] = new ChibiOS::CANManager();
-	//初始化can的波特率
-	hal.can_mgr[0]->begin(500000,0);
-	return true;
+	//获取驱动号
+	sr73_driver_index = driver_index;
+	//获取波特率
+	sr73_driver_rate=rate;
+    hal.console->printf("sr73_driver_index=%d\r\n",sr73_driver_index);
+	hal.console->printf("sr73_driver_rate=%d\r\n",sr73_driver_rate);
+    hal.console->printf("SR73F: starting init\n\r");
+    if (_initialized)
+    {
+    	hal.console->printf("SR73F： already initialized\r");
+        return false;
+    }
+    const_cast <AP_HAL::HAL&> (hal).can_mgr[sr73_driver_index ] = new ChibiOS::CANManager;
+    //初始化对应的端口号和波特率
+    hal.can_mgr[sr73_driver_index]->begin(sr73_driver_index,sr73_driver_rate);
+    hal.console->printf("can_mgr=%d\r\n",hal.can_mgr[sr73_driver_index]);
+    if (hal.can_mgr[sr73_driver_index ]  == nullptr)
+    {
+    	hal.console->printf("SR73F: no mgr for this driver\n\r");
+        return false;
+    }
+    hal.can_mgr[sr73_driver_index]->initialized(true);
+    if (!hal.can_mgr[sr73_driver_index ]->is_initialized())
+    {
+    	hal.console->printf("SR73F: mgr not initialized\n\r");
+        return false;
+    }
+    //存储设备
+    sr73_can_driver = hal.can_mgr[sr73_driver_index ]->get_driver();
+    hal.console->printf("_can_driver2=%d\r\n",sr73_can_driver);
+    if (sr73_can_driver == nullptr)
+    {
+    	hal.console->printf("SR73F: no CAN driver\n\r");
+        return false;
+    }
+
+
+    _initialized = true;
+
+	hal.console->printf("SR73F Init FINISH \r\n");
+    return true;
 }
 
 /*********************************************************************************

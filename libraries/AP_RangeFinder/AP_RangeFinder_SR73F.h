@@ -8,6 +8,7 @@
 #ifndef DZUAV_FC_FIRMWARE_LIBRARIES_AP_RANGEFINDER_H_
 #define DZUAV_FC_FIRMWARE_LIBRARIES_AP_RANGEFINDER_H_
 
+#include <AP_UAVCAN/AP_UAVCAN.h>
 #include <AP_HAL/AP_HAL.h>
 #include <AP_BoardConfig/AP_BoardConfig.h>
 #include <AP_Common/AP_Common.h>
@@ -22,7 +23,7 @@ class AP_RangeFinder_SR73F: public AP_RangeFinder_Backend
 	//构造函数
 	AP_RangeFinder_SR73F(RangeFinder::RangeFinder_State &_state,AP_RangeFinder_Params &_params);
 	static bool detect(RangeFinder::RangeFinder_State &_state,AP_RangeFinder_Params &_params);
-    bool init(void);
+	bool init(uint8_t driver_index,uint32_t rate);
     bool get_reading(uint16_t &reading_cm, float &target_deg);
     void update(void)override;;
     enum{
@@ -76,7 +77,8 @@ class AP_RangeFinder_SR73F: public AP_RangeFinder_Backend
       }
 
 
-
+  private:
+      bool _initialized;
 
 
 };

@@ -27,4 +27,7 @@ public:
     AP_Int8  address;
     AP_Vector3f pos_offset; // position offset in body frame
     AP_Int8  orientation;
+    AP_Int8  can_driver; //选择哪个驱动端口
+    AP_Int8  rate;      //选择多大波特率
+
 };
