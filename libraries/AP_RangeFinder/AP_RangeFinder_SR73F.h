@@ -8,24 +8,31 @@
 #ifndef DZUAV_FC_FIRMWARE_LIBRARIES_AP_RANGEFINDER_H_
 #define DZUAV_FC_FIRMWARE_LIBRARIES_AP_RANGEFINDER_H_
 
+
 #include <AP_UAVCAN/AP_UAVCAN.h>
-#include <AP_HAL/AP_HAL.h>
-#include <AP_BoardConfig/AP_BoardConfig.h>
-#include <AP_Common/AP_Common.h>
-#include <AP_Param/AP_Param.h>
+#include <AP_Math/AP_Math.h>
+#include <AP_HAL/CAN.h>
+#include <AP_HAL/Semaphores.h>
 #include "RangeFinder.h"
 #include "RangeFinder_Backend.h"
 #include "AP_RangeFinder_Params.h"
 
-class AP_RangeFinder_SR73F: public AP_RangeFinder_Backend
+
+
+//定义恩曌TR24DA100类继承AP_RangeFinder_Backend和CANProtocol类
+class AP_RangeFinder_SR73F  : public AP_RangeFinder_Backend
 {
-  public:
-	//构造函数
-	AP_RangeFinder_SR73F(RangeFinder::RangeFinder_State &_state,AP_RangeFinder_Params &_params);
-	static bool detect(RangeFinder::RangeFinder_State &_state,AP_RangeFinder_Params &_params);
-	bool init(uint8_t driver_index,uint32_t rate);
-    bool get_reading(uint16_t &reading_cm, float &target_deg);
-    void update(void)override;;
+public:
+	//定义构造函数
+	AP_RangeFinder_SR73F(RangeFinder::RangeFinder_State &_state,
+                              AP_RangeFinder_Params &_params);
+	//识别传感器
+   static bool detect(RangeFinder::RangeFinder_State &_state,
+           AP_RangeFinder_Params &_params);
+   bool get_reading(uint16_t &reading_cm, float &target_deg);
+   bool init(uint32_t rate,uint8_t driver_index);
+	//对数据进行更新
+	void update(void)override;
     enum{
   	  OBJECT_STATUS=1546,
   	  OBJECT_INFORMATION=1547
@@ -37,8 +44,7 @@ class AP_RangeFinder_SR73F: public AP_RangeFinder_Backend
  	   uint8_t Objects_InterfaceVersion:4 ; //只要高4位,接口版本
  	   uint16_t Objects_MeasCount:16 ; //循环计数数据=循环计数高8位|循环计数低8位
     }ObjectsStatusBits;
-    //定义结构体,获取目标状态数据
-    ObjectsStatusBits objectstatus_data;
+
 
    typedef struct{
  	  uint8_t Id:8; /*0:7雷达ID*/
@@ -54,8 +60,9 @@ class AP_RangeFinder_SR73F: public AP_RangeFinder_Backend
  	  uint8_t VrelLatL:3;  /*53:55    横向速度低3位*/
  	  uint8_t RCS:8;  /*56:63    目标的运动属性，默认是0*/
    }ObjectsInforBits;
-   //定义目标信息位
-   ObjectsInforBits objectsinformation;
+
+
+
 
    typedef struct { // byte description
    		float Objects_ID; //目标ID
@@ -69,19 +76,21 @@ class AP_RangeFinder_SR73F: public AP_RangeFinder_Backend
    		float target_deg;           //目标角度
    		float target_speed;         //目标速度
    }Object_dataBytes;
-
-   Object_dataBytes get_object_data;
-  protected:
-      MAV_DISTANCE_SENSOR _get_mav_distance_sensor_type() const override {
-          return MAV_DISTANCE_SENSOR_UNKNOWN;
-      }
-
-
-  private:
+protected:
+	//定义保护类型的函数，获取无人机距离传感器类型---所有通用格式这里可以先不用
+	virtual MAV_DISTANCE_SENSOR _get_mav_distance_sensor_type() const override
+	{
+		return MAV_DISTANCE_SENSOR_UNKNOWN;
+	}
+private:
+      uint32_t last_reading_ms=0;
       bool _initialized;
 
-
 };
+
+
+
+
 
 
 
