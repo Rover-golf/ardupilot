@@ -41,6 +41,7 @@
 #include "AP_RangeFinder_UAVCAN.h"
 #include "AP_RangeFinder_Lanbao.h"
 #include "AP_RangeFinder_SR73F.h"    
+#include "AP_RangeFinder_NoopLoop_TOF.h"
 
 #include <AP_BoardConfig/AP_BoardConfig.h>
 #include <AP_Logger/AP_Logger.h>
@@ -545,6 +546,17 @@ void RangeFinder::detect_instance(uint8_t instance, uint8_t& serial_instance)
 //        }
 //        break;
 //#endif //HAL_WITH_UAVCAN
+    case RangeFinder_TYPE_NoopLoop_TOF: 
+        gcs().send_text(MAV_SEVERITY_DEBUG, "NoopLoop Init");
+        if(AP_RangeFinder_NoopLoop_TOF::detect(serial_instance))
+        {
+        	drivers[instance] = new AP_RangeFinder_NoopLoop_TOF(state[instance], params[instance],serial_instance,params[instance].num.get());
+            serial_instance++;
+            // hal.console->printf("NoopLoop finish\r\n");
+            gcs().send_text(MAV_SEVERITY_DEBUG, "NoopLoop finish");
+
+        }
+        break;
     default:
         break;
     }
@@ -555,6 +567,20 @@ void RangeFinder::detect_instance(uint8_t instance, uint8_t& serial_instance)
         AP_Param::load_object_from_eeprom(drivers[instance], backend_var_info[instance]);
     }
 }
+
+float RangeFinder::get_data(uint8_t id)
+{
+    for (uint8_t i=0; i<num_instances; i++) 
+    {
+        if ((drivers[i] != nullptr) && (params[i].type == RangeFinder_TYPE_NoopLoop_TOF)) 
+        {
+          return drivers[i]->get_data(id);
+        }
+    }
+    return 0.0f;
+}
+
+
 
 AP_RangeFinder_Backend *RangeFinder::get_backend(uint8_t id) const {
     if (id >= num_instances) {

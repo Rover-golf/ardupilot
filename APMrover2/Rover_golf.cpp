@@ -45,6 +45,13 @@ void Rover::one_hz_loop(void)
         rover.golf_end_mission();
     }
 
+    float test_distance_cm;
+    test_distance_cm = rangefinder.get_data((uint8_t)0);
+    gcs().send_text(MAV_SEVERITY_INFO, "0 %f", test_distance_cm); 
+    test_distance_cm = rangefinder.get_data((uint8_t)1);
+    gcs().send_text(MAV_SEVERITY_INFO, "1 %f", test_distance_cm); 
+
+
 
     //sr73f_can.update();
     //golf: regular start&return
@@ -66,9 +73,9 @@ void Rover::one_hz_loop(void)
     // 
     static bool door_nd_close = false;
     golf_is_full = !(rover.check_digital_pin(AUX_GOLF_PIN));
-    if(golf_is_full) gcs().send_text(MAV_SEVERITY_INFO, "golf full %i", golf_is_full); 
     nd_collision = !(rover.check_digital_pin(AUX_AVOID_PIN));
-    if(nd_collision) gcs().send_text(MAV_SEVERITY_INFO, "collision %i", nd_collision); 
+    // if(golf_is_full) gcs().send_text(MAV_SEVERITY_INFO, "golf full %i", golf_is_full); 
+    // if(nd_collision) gcs().send_text(MAV_SEVERITY_INFO, "collision %i", nd_collision); 
     uint8_t nd_avd = 0;
 
     // Begin Josh

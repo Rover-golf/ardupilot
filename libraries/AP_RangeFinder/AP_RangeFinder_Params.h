@@ -30,4 +30,5 @@ public:
     AP_Int8  can_driver; //选择哪个驱动端口
     AP_Int32  rate;      //选择多大波特率
 
+    AP_Int8  num; 
 };
