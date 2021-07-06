@@ -32,6 +32,7 @@ public:
     virtual void update() = 0;
 
     virtual void handle_msg(const mavlink_message_t &msg) { return; }
+    virtual float get_data(uint8_t id) { return 0.0f;}
 
     enum Rotation orientation() const { return (Rotation)params.orientation.get(); }
     uint16_t distance_cm() const { return state.distance_cm; }

@@ -18,11 +18,36 @@ add filter to AOA data
 
 Add NoopLoop AOA Drivers
 
+- 2021-07-03
+
+Add NoopLoop TOF Drivers
+
 
 
 
 
 ## Function Descriptions
+
+### NoopLoop TOF
+
+To use NoopLoop TOF Driver BrightSoul developed, you need follow settings below:
+
+- set Rngfnd2_type to 40 (Which set in `libraries\AP_RangeFinder\RangeFinder.h`)
+- set Rngfnd2_NUM to how many NoopLoop TOF in use
+- set SERIAL4_BAUD to 921 to set SERIAL baud rate to 921600
+- set SERIAL4_PROTOCOL to 9 to enable the Range Finder protocol
+
+With NoopLoop TOF In series using, get data in Class rover like example below:
+
+```
+float test_distance_cm;
+test_distance_cm = rangefinder.get_data((uint8_t)0);
+gcs().send_text(MAV_SEVERITY_INFO, "0 %f", test_distance_cm); 
+test_distance_cm = rangefinder.get_data((uint8_t)1);
+gcs().send_text(MAV_SEVERITY_INFO, "1 %f", test_distance_cm); 
+```
+
+`rangefinder.get_data((uint8_t)0);`  means get data form NoopLoop TOF ID=0.
 
 ### NoopLoop AOA
 

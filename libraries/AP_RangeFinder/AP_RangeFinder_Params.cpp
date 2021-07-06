@@ -138,6 +138,8 @@ const AP_Param::GroupInfo AP_RangeFinder_Params::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("RATE", 55, AP_RangeFinder_Params, rate, RANGEFINDER_CAN_RATE_DEFAULT),
 
+    AP_GROUPINFO("NUM", 56, AP_RangeFinder_Params, num, 2),
+
 
     AP_GROUPEND
 };

@@ -52,6 +52,8 @@ public:
     RangeFinder(const RangeFinder &other) = delete;
     RangeFinder &operator=(const RangeFinder&) = delete;
 
+    float get_data(uint8_t id);
+
     // RangeFinder driver types
     enum RangeFinder_Type {
         RangeFinder_TYPE_NONE   = 0,
@@ -82,7 +84,8 @@ public:
         RangeFinder_TYPE_BenewakeTFminiPlus = 25,
         RangeFinder_TYPE_Lanbao = 26,
         RangeFinder_TYPE_BenewakeTF03 = 27,
-        RangeFinder_TYPE_SR73F = 28   // sr73
+        RangeFinder_TYPE_SR73F = 28,   // sr73
+        RangeFinder_TYPE_NoopLoop_TOF = 40
     };
 
     enum RangeFinder_Function {
