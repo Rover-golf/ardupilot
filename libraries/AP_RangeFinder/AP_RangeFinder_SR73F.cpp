@@ -105,21 +105,19 @@ bool AP_RangeFinder_SR73F::init(uint32_t rate,uint8_t driver_index)
  *修改作者：cihang_uav
  *备注信息：return rangefinder altitude in centimeters
  ******************************************************************************************************/
-bool AP_RangeFinder_SR73F::detect(RangeFinder::RangeFinder_State &_state,
+AP_RangeFinder_Backend * AP_RangeFinder_SR73F::detect(RangeFinder::RangeFinder_State &_state,
         AP_RangeFinder_Params &_params)
 {
 	AP_RangeFinder_SR73F *sensor= new AP_RangeFinder_SR73F(_state,_params);
 
-    if(sensor->init(_params.rate,_params.can_driver)) //初始化对应的串口
+    if((!sensor) ||(!sensor->init(_params.rate,_params.can_driver))) //初始化对应的串口
     {
-    	 hal.console->printf("RNGFND SR73F Init Finish\r\n");
-    	 return true;
+   	    hal.console->printf("RNGFND SR73F Init Fail \r\n");
+        delete sensor;
+        return nullptr;
     }
-    else
-    {
-    	 hal.console->printf("RNGFND SR73F Init Fail \r\n");
-    	return false;
-    }
+    hal.console->printf("RNGFND SR73F Init Success \r\n");
+    return sensor;
 }
 
 

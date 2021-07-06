@@ -27,7 +27,7 @@ public:
 	AP_RangeFinder_SR73F(RangeFinder::RangeFinder_State &_state,
                               AP_RangeFinder_Params &_params);
 	//识别传感器
-   static bool detect(RangeFinder::RangeFinder_State &_state,
+	static AP_RangeFinder_Backend * detect(RangeFinder::RangeFinder_State &_state,
            AP_RangeFinder_Params &_params);
    bool get_reading(uint16_t &reading_cm, float &target_deg);
    bool init(uint32_t rate,uint8_t driver_index);

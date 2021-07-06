@@ -145,11 +145,14 @@ void AP_BoardConfig_CAN::init()
             _num_drivers = i + 1;
             hal.can_mgr[i]->initialized(true);
             printf("can_mgr %d initialized well\n\r", i + 1);
-
-            if (prot_type == Protocol_Type_UAVCAN) {
+            hal.console->printf("prot_type=%d\r\n",prot_type);
+            if (prot_type == Protocol_Type_UAVCAN)
+            {
                 _drivers[i]._driver = _drivers[i]._uavcan =  new AP_UAVCAN;
 
-                if (_drivers[i]._driver == nullptr) {
+                if (_drivers[i]._driver == nullptr)
+                {
+                	hal.console->printf("KKKK\r\n");
                     AP_HAL::panic("Failed to allocate uavcan %d\n\r", i + 1);
                     continue;
                 }
@@ -184,7 +187,9 @@ void AP_BoardConfig_CAN::init()
                 _drivers[i]._driver->init(i, false);
             }
 #else
+            hal.console->printf("KKKK2\r\n");
             _drivers[i]._driver->init(i, true);
+            hal.console->printf("KKKK3\r\n");
 #endif
         }
     }

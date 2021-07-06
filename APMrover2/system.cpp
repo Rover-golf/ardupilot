@@ -52,7 +52,9 @@ void Rover::init_ardupilot()
 
     BoardConfig.init();
  #if HAL_WITH_UAVCAN
+	 hal.console->printf("UAVCAN\r\n");
      BoardConfig_CAN.init();
+     hal.console->printf("UAVCAN END\r\n");
  #endif
 
     // init gripper

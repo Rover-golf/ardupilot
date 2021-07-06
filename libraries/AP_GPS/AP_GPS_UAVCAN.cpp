@@ -51,16 +51,23 @@ AP_GPS_UAVCAN::~AP_GPS_UAVCAN()
 
 void AP_GPS_UAVCAN::subscribe_msgs(AP_UAVCAN* ap_uavcan)
 {
-    if (ap_uavcan == nullptr) {
+	 hal.console->printf("MMMM5\r\n");
+
+    if (ap_uavcan == nullptr)
+    {
+    	 hal.console->printf("MMMM6\r\n");
         return;
     }
 
     auto* node = ap_uavcan->get_node();
-
+    hal.console->printf("MMMM7=%d\r\n",node);
     uavcan::Subscriber<uavcan::equipment::gnss::Fix, FixCb> *gnss_fix;
     gnss_fix = new uavcan::Subscriber<uavcan::equipment::gnss::Fix, FixCb>(*node);
+    hal.console->printf("gnss_fix=%d\r\n",gnss_fix);
     const int gnss_fix_start_res = gnss_fix->start(FixCb(ap_uavcan, &handle_fix_msg_trampoline));
-    if (gnss_fix_start_res < 0) {
+    hal.console->printf("gnss_fix_start_res=%d\r\n",gnss_fix_start_res);
+    if (gnss_fix_start_res < 0)
+    {
         AP_HAL::panic("UAVCAN GNSS subscriber start problem\n\r");
         return;
     }
@@ -143,13 +150,17 @@ void AP_GPS_UAVCAN::handle_fix_msg(const FixCb &cb)
     bool process = false;
 
     WITH_SEMAPHORE(sem);
-
-    if (cb.msg->status == uavcan::equipment::gnss::Fix::STATUS_NO_FIX) {
+    hal.console->printf("status=%d\r\n",cb.msg->status);
+    if (cb.msg->status == uavcan::equipment::gnss::Fix::STATUS_NO_FIX)
+    {
         interim_state.status = AP_GPS::GPS_Status::NO_FIX;
-    } else {
-        if (cb.msg->status == uavcan::equipment::gnss::Fix::STATUS_TIME_ONLY) {
+    } else
+    {
+        if (cb.msg->status == uavcan::equipment::gnss::Fix::STATUS_TIME_ONLY)
+        {
             interim_state.status = AP_GPS::GPS_Status::NO_FIX;
-        } else if (cb.msg->status == uavcan::equipment::gnss::Fix::STATUS_2D_FIX) {
+        } else if (cb.msg->status == uavcan::equipment::gnss::Fix::STATUS_2D_FIX)
+        {
             interim_state.status = AP_GPS::GPS_Status::GPS_OK_FIX_2D;
             process = true;
         } else if (cb.msg->status == uavcan::equipment::gnss::Fix::STATUS_3D_FIX) {
@@ -258,7 +269,9 @@ void AP_GPS_UAVCAN::handle_fix_msg_trampoline(AP_UAVCAN* ap_uavcan, uint8_t node
     WITH_SEMAPHORE(_sem_registry);
 
     AP_GPS_UAVCAN* driver = get_uavcan_backend(ap_uavcan, node_id);
-    if (driver != nullptr) {
+    hal.console->printf("driver=%d\r\n",driver);
+    if (driver != nullptr)
+    {
         driver->handle_fix_msg(cb);
     }
 }

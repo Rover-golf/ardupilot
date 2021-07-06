@@ -146,11 +146,13 @@ AP_UAVCAN *AP_UAVCAN::get_uavcan(uint8_t driver_index)
 
 void AP_UAVCAN::init(uint8_t driver_index, bool enable_filters)
 {
-    if (_initialized) {
+	hal.console->printf("KKKK5\r\n");
+    if (_initialized)
+    {
         debug_uavcan(2, "UAVCAN: init called more than once\n\r");
         return;
     }
-
+    hal.console->printf("driver_index=%d\r\n",driver_index);
     _driver_index = driver_index;
 
     AP_HAL::CANManager* can_mgr = hal.can_mgr[driver_index];
@@ -226,24 +228,25 @@ void AP_UAVCAN::init(uint8_t driver_index, bool enable_filters)
         debug_uavcan(1, "UAVCAN: Failed to start DNA Server\n\r");
         return;
     }
-
+    hal.console->printf("MMMM\r\n");
     // Roundup all subscribers from supported drivers
     AP_UAVCAN_Server::subscribe_msgs(this);
     AP_GPS_UAVCAN::subscribe_msgs(this);
-    AP_Compass_UAVCAN::subscribe_msgs(this);
-    AP_Baro_UAVCAN::subscribe_msgs(this);
-    AP_BattMonitor_UAVCAN::subscribe_msgs(this);
-    AP_Airspeed_UAVCAN::subscribe_msgs(this);
-    AP_OpticalFlow_HereFlow::subscribe_msgs(this);
-    AP_RangeFinder_UAVCAN::subscribe_msgs(this);
-
-    act_out_array[driver_index] = new uavcan::Publisher<uavcan::equipment::actuator::ArrayCommand>(*_node);
-    act_out_array[driver_index]->setTxTimeout(uavcan::MonotonicDuration::fromMSec(2));
-    act_out_array[driver_index]->setPriority(uavcan::TransferPriority::OneLowerThanHighest);
-
-    esc_raw[driver_index] = new uavcan::Publisher<uavcan::equipment::esc::RawCommand>(*_node);
-    esc_raw[driver_index]->setTxTimeout(uavcan::MonotonicDuration::fromMSec(2));
-    esc_raw[driver_index]->setPriority(uavcan::TransferPriority::OneLowerThanHighest);
+    hal.console->printf("MMMM2\r\n");
+//    AP_Compass_UAVCAN::subscribe_msgs(this);
+//    AP_Baro_UAVCAN::subscribe_msgs(this);
+//    AP_BattMonitor_UAVCAN::subscribe_msgs(this);
+//    AP_Airspeed_UAVCAN::subscribe_msgs(this);
+//    AP_OpticalFlow_HereFlow::subscribe_msgs(this);
+//    AP_RangeFinder_UAVCAN::subscribe_msgs(this);
+//
+//    act_out_array[driver_index] = new uavcan::Publisher<uavcan::equipment::actuator::ArrayCommand>(*_node);
+//    act_out_array[driver_index]->setTxTimeout(uavcan::MonotonicDuration::fromMSec(2));
+//    act_out_array[driver_index]->setPriority(uavcan::TransferPriority::OneLowerThanHighest);
+//
+//    esc_raw[driver_index] = new uavcan::Publisher<uavcan::equipment::esc::RawCommand>(*_node);
+//    esc_raw[driver_index]->setTxTimeout(uavcan::MonotonicDuration::fromMSec(2));
+//    esc_raw[driver_index]->setPriority(uavcan::TransferPriority::OneLowerThanHighest);
 
     rgb_led[driver_index] = new uavcan::Publisher<uavcan::equipment::indication::LightsCommand>(*_node);
     rgb_led[driver_index]->setTxTimeout(uavcan::MonotonicDuration::fromMSec(20));
@@ -295,15 +298,20 @@ void AP_UAVCAN::init(uint8_t driver_index, bool enable_filters)
 
 void AP_UAVCAN::loop(void)
 {
-    while (true) {
-        if (!_initialized) {
+    while (true)
+    {
+
+        if (!_initialized)
+        {
             hal.scheduler->delay_microseconds(1000);
             continue;
         }
 
         const int error = _node->spin(uavcan::MonotonicDuration::fromMSec(1));
-
-        if (error < 0) {
+        hal.console->printf("error=%d\r\n",error);
+        hal.console->printf("LOOP RUN \r\n");
+        if (error < 0)
+        {
             hal.scheduler->delay_microseconds(100);
             continue;
         }

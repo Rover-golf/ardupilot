@@ -528,11 +528,14 @@ void RangeFinder::detect_instance(uint8_t instance, uint8_t& serial_instance)
 //#if HAL_WITH_UAVCAN
     case RangeFinder_TYPE_SR73F:   // sr73
         hal.console->printf("SR73F Init\r\n");
-        if(AP_RangeFinder_SR73F::detect(state[instance], params[instance]))
+        if(_add_backend(AP_RangeFinder_SR73F::detect(state[instance], params[instance])))
         {
         	drivers[instance] = new AP_RangeFinder_SR73F(state[instance], params[instance]);
-
             hal.console->printf("SR73F finish\r\n");
+        }
+        else
+        {
+        	 hal.console->printf("SR73F fail\r\n");
         }
         break;
 //    case RangeFinder_TYPE_SR73F:   // sr73
