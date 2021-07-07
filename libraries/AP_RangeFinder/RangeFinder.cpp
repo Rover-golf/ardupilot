@@ -49,7 +49,8 @@
 #include <AP_Vehicle/AP_Vehicle_Type.h>
 
 extern const AP_HAL::HAL &hal;
-
+//定义使能参数
+extern bool sr73f_senseor_driver_enable;
 // table of user settable parameters
 const AP_Param::GroupInfo RangeFinder::var_info[] = {
 
@@ -526,29 +527,27 @@ void RangeFinder::detect_instance(uint8_t instance, uint8_t& serial_instance)
             drivers[instance] = new AP_RangeFinder_Lanbao(state[instance], params[instance], serial_instance++);
         }
         break;
-//#if HAL_WITH_UAVCAN
+
     case RangeFinder_TYPE_SR73F:   // sr73
         hal.console->printf("SR73F Init\r\n");
-        if(_add_backend(AP_RangeFinder_SR73F::detect(state[instance], params[instance])))
+        if(sr73f_senseor_driver_enable==1)
         {
-        	drivers[instance] = new AP_RangeFinder_SR73F(state[instance], params[instance]);
-            hal.console->printf("SR73F finish\r\n");
+            if(_add_backend(AP_RangeFinder_SR73F::detect(state[instance], params[instance])))
+            {
+
+                hal.console->printf("SR73F finish\r\n");
+            }
+            else
+            {
+            	 hal.console->printf("SR73F fail\r\n");
+            }
+
         }
         else
         {
-        	 hal.console->printf("SR73F fail\r\n");
+        	 hal.console->printf("please init SR73F can protocol\r\n");
         }
         break;
-//    case RangeFinder_TYPE_SR73F:   // sr73
-//        hal.console->printf("SR73F Init\r\n");
-//        if(AP_RangeFinder_SR73F::detect(state[instance], params[instance],serial_instance))
-//        {
-//        	drivers[instance] = new AP_RangeFinder_SR73F(state[instance], params[instance],serial_instance++);
-//
-//            hal.console->printf("SR73F finish\r\n");
-//        }
-//        break;
-//#endif //HAL_WITH_UAVCAN
     case RangeFinder_TYPE_NoopLoop_TOF: 
         gcs().send_text(MAV_SEVERITY_DEBUG, "NoopLoop Init");
         if(AP_RangeFinder_NoopLoop_TOF::detect(serial_instance))

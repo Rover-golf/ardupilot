@@ -36,6 +36,7 @@
 #include <AP_KDECAN/AP_KDECAN.h>
 #include <AP_ToshibaCAN/AP_ToshibaCAN.h>
 #include <AP_SerialManager/AP_SerialManager.h>
+#include <AP_SR73F_CAN/AP_SR73F_CAN.h>
 extern const AP_HAL::HAL& hal;
 
 // table of user settable parameters
@@ -170,14 +171,29 @@ void AP_BoardConfig_CAN::init()
 
                 AP_Param::load_object_from_eeprom(_drivers[i]._kdecan, AP_KDECAN::var_info);
 #endif
-            } else if (prot_type == Protocol_Type_ToshibaCAN) {
+            } else if (prot_type == Protocol_Type_ToshibaCAN)
+            {
                 _drivers[i]._driver = _drivers[i]._tcan = new AP_ToshibaCAN;
 
                 if (_drivers[i]._driver == nullptr) {
                     AP_BoardConfig::sensor_config_error("ToshibaCAN init failed");
                     continue;
                 }
-            } else {
+            }
+            else if (prot_type == Protocol_Type_SR73CAN)
+            {
+            	 _drivers[i]._driver = _drivers[i]._sr73can = new AP_SR73F_CAN;
+
+
+                if (_drivers[i]._driver == nullptr)
+                {
+                    AP_BoardConfig::sensor_config_error("SR73CAN init failed");
+                    continue;
+                }
+                AP_Param::load_object_from_eeprom(_drivers[i]._sr73can, AP_UAVCAN::var_info);
+            }
+            else
+            {
                 continue;
             }
 #if AP_UAVCAN_SLCAN_ENABLED

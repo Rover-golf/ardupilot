@@ -162,7 +162,7 @@ void AP_GPS_Backend::broadcast_gps_type() const
 #ifndef HAL_NO_GCS
     char buffer[MAVLINK_MSG_STATUSTEXT_FIELD_TEXT_LEN+1];
     _detection_message(buffer, sizeof(buffer));
-    gcs().send_text(MAV_SEVERITY_INFO, "%s", buffer);
+   // gcs().send_text(MAV_SEVERITY_INFO, "%s", buffer);
 #endif
 }
 

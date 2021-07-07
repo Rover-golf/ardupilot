@@ -51,21 +51,21 @@ AP_GPS_UAVCAN::~AP_GPS_UAVCAN()
 
 void AP_GPS_UAVCAN::subscribe_msgs(AP_UAVCAN* ap_uavcan)
 {
-	 hal.console->printf("MMMM5\r\n");
+	 //hal.console->printf("MMMM5\r\n");
 
     if (ap_uavcan == nullptr)
     {
-    	 hal.console->printf("MMMM6\r\n");
+    	// hal.console->printf("MMMM6\r\n");
         return;
     }
 
     auto* node = ap_uavcan->get_node();
-    hal.console->printf("MMMM7=%d\r\n",node);
+   // hal.console->printf("MMMM7=%d\r\n",node);
     uavcan::Subscriber<uavcan::equipment::gnss::Fix, FixCb> *gnss_fix;
     gnss_fix = new uavcan::Subscriber<uavcan::equipment::gnss::Fix, FixCb>(*node);
-    hal.console->printf("gnss_fix=%d\r\n",gnss_fix);
+   // hal.console->printf("gnss_fix=%d\r\n",gnss_fix);
     const int gnss_fix_start_res = gnss_fix->start(FixCb(ap_uavcan, &handle_fix_msg_trampoline));
-    hal.console->printf("gnss_fix_start_res=%d\r\n",gnss_fix_start_res);
+   // hal.console->printf("gnss_fix_start_res=%d\r\n",gnss_fix_start_res);
     if (gnss_fix_start_res < 0)
     {
         AP_HAL::panic("UAVCAN GNSS subscriber start problem\n\r");

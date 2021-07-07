@@ -52,7 +52,7 @@
 #include "AP_UAVCAN_Server.h"
 
 #define LED_DELAY_US 50000
-
+#include <AP_HAL/AP_HAL.h>
 extern const AP_HAL::HAL& hal;
 
 #define debug_uavcan(level_debug, fmt, args...) do { if ((level_debug) <= AP::can().get_debug_level_driver(_driver_index)) { printf(fmt, ##args); }} while (0)
@@ -146,13 +146,13 @@ AP_UAVCAN *AP_UAVCAN::get_uavcan(uint8_t driver_index)
 
 void AP_UAVCAN::init(uint8_t driver_index, bool enable_filters)
 {
-	hal.console->printf("KKKK5\r\n");
+	//hal.console->printf("KKKK5\r\n");
     if (_initialized)
     {
         debug_uavcan(2, "UAVCAN: init called more than once\n\r");
         return;
     }
-    hal.console->printf("driver_index=%d\r\n",driver_index);
+   // hal.console->printf("driver_index=%d\r\n",driver_index);
     _driver_index = driver_index;
 
     AP_HAL::CANManager* can_mgr = hal.can_mgr[driver_index];
@@ -308,8 +308,8 @@ void AP_UAVCAN::loop(void)
         }
 
         const int error = _node->spin(uavcan::MonotonicDuration::fromMSec(1));
-        hal.console->printf("error=%d\r\n",error);
-        hal.console->printf("LOOP RUN \r\n");
+       // hal.console->printf("error=%d\r\n",error);
+        //hal.console->printf("LOOP RUN \r\n");
         if (error < 0)
         {
             hal.scheduler->delay_microseconds(100);
