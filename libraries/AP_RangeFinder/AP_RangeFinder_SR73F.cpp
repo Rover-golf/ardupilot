@@ -76,6 +76,7 @@ AP_RangeFinder_Backend * AP_RangeFinder_SR73F::detect(RangeFinder::RangeFinder_S
         return nullptr;
     }
     hal.console->printf("RNGFND SR73F Init Success \r\n");
+    hal.console->printf("sensor=%d \r\n",sensor);
     return sensor;
 }
 
@@ -91,6 +92,8 @@ bool AP_RangeFinder_SR73F::get_reading(uint16_t &reading_cm, float &target_deg)
 {
 	reading_cm=sr73f_reading_cm;
 	target_deg=sr73f_target_deg;
+	hal.console->printf("reading_cm=%d\r\n",reading_cm);
+	hal.console->printf("target_deg=%d\r\n",target_deg);
     if(reading_cm>0) //必须输出数据
     {
       return true;

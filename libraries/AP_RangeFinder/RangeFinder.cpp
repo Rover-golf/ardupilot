@@ -530,6 +530,7 @@ void RangeFinder::detect_instance(uint8_t instance, uint8_t& serial_instance)
 
     case RangeFinder_TYPE_SR73F:   // sr73
         hal.console->printf("SR73F Init\r\n");
+        hal.console->printf("SR73F=%d\r\n",sr73f_senseor_driver_enable);
         if(sr73f_senseor_driver_enable==1)
         {
             if(_add_backend(AP_RangeFinder_SR73F::detect(state[instance], params[instance])))

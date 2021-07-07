@@ -155,7 +155,7 @@ void AP_SR73F_CAN::loop()
 	//定义CAN接收数据
 	uavcan::CanRxFrame can_rx;
 
-
+	hal.console->printf( "KKKKK\r\n");
     while (true)
     {
         if (!_initialized)
@@ -165,8 +165,11 @@ void AP_SR73F_CAN::loop()
             continue;
         }
         valid_data= _can_driver->getIface(CAN_IFACE_INDEX)->receive(can_rx,can_rx.ts_mono,can_rx.ts_utc,out_flags);
-        if(valid_data)
+        hal.console->printf( "valid_data ID=%d \r\n", valid_data);
+        hal.console->printf( "can_rx ID=%ld \r\n", can_rx.id);
+        if(valid_data!=0)
         {
+
        	   hal.console->printf( "can_rx ID=%d \r\n", can_rx.id);
 
        	 	switch(can_rx.id)
@@ -261,8 +264,8 @@ void AP_SR73F_CAN::loop()
        	 	  sr73f_reading_cm=0;
 
        	 	}
-       	      sr73f_reading_cm = get_object_data.target_distance * 100;
-       	      sr73f_reading_cm = get_object_data.target_deg*57.29;
+       	    sr73f_reading_cm = get_object_data.target_distance * 100;
+       	    sr73f_reading_cm = get_object_data.target_deg*57.29;
 
         }
         else
