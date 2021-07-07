@@ -256,16 +256,18 @@ void AP_SR73F_CAN::loop()
        	 	        hal.scheduler->delay_microseconds(500);
        	 	    	break;
        	 	}
-       	 	if(get_object_data.target_distance * 100 < 20 || get_object_data.target_distance * 100 > 600
-       	 	   || can_rx.id != OBJECT_INFORMATION)
+       	 	if(
+			//		get_object_data.target_distance * 100 < 20 || get_object_data.target_distance * 100 > 600
+       	 	//   || 
+				   can_rx.id != OBJECT_INFORMATION)
        	 	{
 
        	 	  sr73f_reading_cm=0;
-       	 	  sr73f_reading_cm=0;
+       	 	  sr73f_target_deg=0;
 
        	 	}
        	    sr73f_reading_cm = get_object_data.target_distance * 100;
-       	    sr73f_reading_cm = get_object_data.target_deg*57.29;
+       	    sr73f_target_deg = get_object_data.target_deg*57.29;
 
         }
         else
