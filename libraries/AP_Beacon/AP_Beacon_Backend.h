@@ -31,6 +31,9 @@ public:
     // update
     virtual void update() = 0;
 
+    virtual void get_data(float &dis, float &angel){};
+    virtual void get_data_raw(float &dis, float &angel){};
+
     // set vehicle position
     // pos should be in meters in NED frame from the beacon's local origin
     // accuracy_estimate is also in meters

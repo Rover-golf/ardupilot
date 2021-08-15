@@ -434,26 +434,26 @@ public:
 
     // golf
     //AP_SR73F_CAN sr73f_can;
-    // void one_hz_loop(void);
-    // void hundred_hz_loop(void);
-    // void sim_pi_ctl(void);
-    // void sim_pi_guide(void);
+    void one_hz_loop(void);
+    void hundred_hz_loop(void);
+    void sim_pi_ctl(void);
+    void sim_pi_guide(void);
 
-    // void init_golfpin(void);
-    // void motor_pull(void);
-    // void motor_push(void);
-    // void motor_stop(void);
+    void init_golfpin(void);
+    void motor_pull(void);
+    void motor_push(void);
+    void motor_stop(void);
 
 
-    // void golf_start_mission();
-    // void golf_end_mission();
+    void golf_start_mission();
+    void golf_end_mission();
 
     
-    // void start_debug();
+    void start_debug();
 
-    // float constrain_deg(float deg);
-    // void send_golf_to_buff();
-    // void golf_send_cmd(uint16_t cmd_id, float &param1, float &param2);  // Josh added param1,2
+    float constrain_deg(float deg);
+    void send_golf_to_buff();
+    void golf_send_cmd(uint16_t cmd_id, const float &param1, const float &param2);  // Josh added param1,2
 
 
 

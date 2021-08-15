@@ -62,6 +62,6 @@ enum class ModeReason : uint8_t {
   FRSKY_COMMAND,
   FENCE_RETURN_PREVIOUS_MODE,
   QRTL_INSTEAD_OF_RTL,
-  MODE_REASON_EVERYDAY_START, //golf
-  MODE_REASON_EVERYDAY_END    //golf
+  EVERYDAY_START, //golf
+  EVERYDAY_END    //golf
 };

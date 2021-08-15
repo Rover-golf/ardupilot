@@ -749,7 +749,7 @@ MAV_RESULT GCS_MAVLINK_Rover::handle_command_long_packet(const mavlink_command_l
 
     //     rover.yaw_enable = true;
     //     rover.yaw_complete = false;
-    //     rover.yaw_desire = rover.constrain_deg(rover.constrain_deg(degrees(rover.ahrs.yaw)) + packet.param1);
+    //     rover.yaw_desire = rover.constrain_deg(rover.constrain_deg(degrees(rover.ahrs.yaw_sensor)) + packet.param1);
 
     //     return MAV_RESULT_ACCEPTED;
 
@@ -1158,4 +1158,36 @@ uint64_t GCS_MAVLINK_Rover::capabilities() const
             MAV_PROTOCOL_CAPABILITY_SET_POSITION_TARGET_GLOBAL_INT |
             MAV_PROTOCOL_CAPABILITY_SET_ATTITUDE_TARGET |
             GCS_MAVLINK::capabilities());
+}
+
+
+float Rover::constrain_deg(float deg)
+{
+    if (deg < 0) 
+        deg += 360.0f;
+    if (deg > 360) 
+        deg -= 360.0f;
+    return deg;
+}
+
+
+void Rover::golf_send_cmd(uint16_t cmd_id, const float &param1, const float &param2)
+{
+    uint8_t buf[sizeof(mavlink_message_t)] = {0};
+    mavlink_message_t _send_msg;
+    uint16_t len;
+    mavlink_msg_command_long_pack(1, 0, &_send_msg, 0, 0,
+                                  cmd_id, 0,
+                                  param1, param2, 0, 0, 0, 0, 0);
+    len = mavlink_msg_to_send_buffer(buf, &_send_msg);
+    
+    for (uint8_t i = 0; i < SERIALMANAGER_NUM_PORTS; i++) 
+    {
+        auto *uart = hal.serial(i);
+        if (uart) 
+        {
+            uart->write(buf, len);
+        }
+    }
+
 }

@@ -43,7 +43,8 @@ public:
         AP_BeaconType_Pozyx  = 1,
         AP_BeaconType_Marvelmind = 2,
         AP_BeaconType_Nooploop  = 3,
-        AP_BeaconType_SITL   = 10
+        AP_BeaconType_SITL   = 10,
+        AP_BeaconType_Nooploop_AOA  = 15
     };
 
     // The AP_BeaconState structure is filled in by the backend driver
@@ -66,6 +67,9 @@ public:
 
     // update state of all beacons
     void update(void);
+
+    void get_data(float &dis, float &angel);
+    void get_data_raw(float &dis, float &angel);
 
     // return origin of position estimate system in lat/lon
     bool get_origin(Location &origin_loc) const;
