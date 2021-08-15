@@ -1,140 +1,107 @@
 # ArduPilot Project
 
-<a href="https://ardupilot.org/discord"><img src="https://img.shields.io/discord/674039678562861068.svg" alt="Discord">
+This branch is based on `f431c0b256067daae7c154b7f62fd1e91004f891`
 
-![Test Copter](https://github.com/ArduPilot/ardupilot/workflows/test%20copter/badge.svg?branch=master) ![Test Plane](https://github.com/ArduPilot/ardupilot/workflows/test%20plane/badge.svg?branch=master) ![Test Rover](https://github.com/ArduPilot/ardupilot/workflows/test%20rover/badge.svg?branch=master) ![Test Sub](https://github.com/ArduPilot/ardupilot/workflows/test%20sub/badge.svg?branch=master) ![Test Tracker](https://github.com/ArduPilot/ardupilot/workflows/test%20tracker/badge.svg?branch=master)
+## Change Log
 
-![Test AP_Periph](https://github.com/ArduPilot/ardupilot/workflows/test%20ap_periph/badge.svg?branch=master) ![Test Chibios](https://github.com/ArduPilot/ardupilot/workflows/test%20chibios/badge.svg?branch=master) ![Test Linux SBC](https://github.com/ArduPilot/ardupilot/workflows/test%20Linux%20SBC/badge.svg?branch=master) ![Test Replay](https://github.com/ArduPilot/ardupilot/workflows/test%20replay/badge.svg?branch=master)
+- 2021-05-19
 
-![Test Unit Tests](https://github.com/ArduPilot/ardupilot/workflows/test%20unit%20tests/badge.svg?branch=master)
+change parameter `GOLF` to `GF`, add some function to debug
 
-[![Build SemaphoreCI](https://semaphoreci.com/api/v1/ardupilot/ardupilot/branches/master/badge.svg)](https://semaphoreci.com/ardupilot/ardupilot) [![Build Status](https://dev.azure.com/ardupilot-org/ardupilot/_apis/build/status/ArduPilot.ardupilot?branchName=master)](https://dev.azure.com/ardupilot-org/ardupilot/_build/latest?definitionId=1&branchName=master)
+- 2021-05-14
 
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/5331/badge.svg)](https://scan.coverity.com/projects/ardupilot-ardupilot)
+fix bug that can not save parameter
 
-[![Autotest Status](https://autotest.ardupilot.org/autotest-badge.svg)](https://autotest.ardupilot.org/)
+add filter to AOA data
 
-ArduPilot is the most advanced, full-featured and reliable open source autopilot software available.
-It has been under development since 2010 by a diverse team of professional engineers, computer scientists and community contributors.
-Our autopilot software is capable of controlling almost any vehicle system imaginable, from conventional airplanes, quad planes, multi-rotors, and helicopters to rovers, boats, balance bots and even submarines.
-It is continually being expanded to provide support for new emerging vehicle types.
+- 2021-05-11
 
-## The ArduPilot project is made up of: ##
+Add NoopLoop AOA Drivers
 
-- ArduCopter: [code](https://github.com/ArduPilot/ardupilot/tree/master/ArduCopter), [wiki](https://ardupilot.org/copter/index.html)
+- 2021-07-03
 
-- ArduPlane: [code](https://github.com/ArduPilot/ardupilot/tree/master/ArduPlane), [wiki](https://ardupilot.org/plane/index.html)
+Add NoopLoop TOF Drivers
 
-- Rover: [code](https://github.com/ArduPilot/ardupilot/tree/master/Rover), [wiki](https://ardupilot.org/rover/index.html)
+2021-08-15
 
-- ArduSub : [code](https://github.com/ArduPilot/ardupilot/tree/master/ArduSub), [wiki](http://ardusub.com/)
+merge in Rover 4.1
 
-- Antenna Tracker : [code](https://github.com/ArduPilot/ardupilot/tree/master/AntennaTracker), [wiki](https://ardupilot.org/antennatracker/index.html)
+## Change Files
 
-## User Support & Discussion Forums ##
+In `APMrover2` folder the following files has been changed from `f431c0b256067daae7c154b7f62fd1e91004f891`
 
-- Support Forum: <https://discuss.ardupilot.org/>
+```
+# macro or head define and some function declaration
+defines.h
+system.cpp
+Rover.cpp
+Rover.h 
 
-- Community Site: <https://ardupilot.org>
 
-## Developer Information ##
+# add some mavlink msg to ctl
+GCS_Mavlink.cpp
 
-- Github repository: <https://github.com/ArduPilot/ardupilot>
+# modify somthing to add mode
+mode.cpp
+mode.h
+mode_auto.cpp
+mode_go_batt.cpp
+mode_manual.cpp
 
-- Main developer wiki: <https://ardupilot.org/dev/>
+# add some parameters
+Parameters.cpp
+Parameters.h
 
-- Developer discussion: <https://discuss.ardupilot.org>
 
-- Developer chat: <https://discord.com/channels/ardupilot>
 
-## Top Contributors ##
+# function to implement task
+Rover_golf.cpp
+```
 
-- [Flight code contributors](https://github.com/ArduPilot/ardupilot/graphs/contributors)
-- [Wiki contributors](https://github.com/ArduPilot/ardupilot_wiki/graphs/contributors)
-- [Most active support forum users](https://discuss.ardupilot.org/u?order=post_count&period=quarterly)
-- [Partners who contribute financially](https://ardupilot.org/about/Partners)
+## Function Descriptions
 
-## How To Get Involved ##
+### NoopLoop TOF
 
-- The ArduPilot project is open source and we encourage participation and code contributions: [guidelines for contributors to the ardupilot codebase](https://ardupilot.org/dev/docs/contributing.html)
+To use NoopLoop TOF Driver BrightSoul developed, you need follow settings below:
 
-- We have an active group of Beta Testers to help us improve our code: [release procedures](https://ardupilot.org/dev/docs/release-procedures.html)
+- set Rngfnd2_type to 40 (Which set in `libraries\AP_RangeFinder\RangeFinder.h`)
+- set Rngfnd2_NUM to how many NoopLoop TOF in use
+- set SERIAL4_BAUD to 921 to set SERIAL baud rate to 921600
+- set SERIAL4_PROTOCOL to 9 to enable the Range Finder protocol
 
-- Desired Enhancements and Bugs can be posted to the [issues list](https://github.com/ArduPilot/ardupilot/issues).
+With NoopLoop TOF In series using, get data in Class rover like example below:
 
-- Help other users with log analysis in the [support forums](https://discuss.ardupilot.org/)
+```
+float test_distance_cm;
+test_distance_cm = rangefinder.get_data((uint8_t)0);
+gcs().send_text(MAV_SEVERITY_INFO, "0 %f", test_distance_cm); 
+test_distance_cm = rangefinder.get_data((uint8_t)1);
+gcs().send_text(MAV_SEVERITY_INFO, "1 %f", test_distance_cm); 
+```
 
-- Improve the wiki and chat with other [wiki editors on Discord #documentation](https://discord.com/channels/ardupilot)
+`rangefinder.get_data((uint8_t)0);`  means get data form NoopLoop TOF ID=0.
 
-- Contact the developers on one of the [communication channels](https://ardupilot.org/copter/docs/common-contact-us.html)
+### NoopLoop AOA
 
-## License ##
+To use this Driver BrightSoul developed, you need follow settings below:
 
-The ArduPilot project is licensed under the GNU General Public
-License, version 3.
+- set BCN_TYPE to 15 (means using Nooploop AOA Driver BrightSoul dev version)
+- set SERIAL4_BAUD to 921 to set SERIAL1’s baud rate to 921600
+- set SERIAL4_PROTOCOL to 13 to enable the Beacon  protocol
 
-- [Overview of license](https://dev.ardupilot.com/wiki/license-gplv3)
+> Note: you can also set Serialx to what you exact using
 
-- [Full Text](https://github.com/ArduPilot/ardupilot/blob/master/COPYING.txt)
+When message send like `AOA 0.86 4.85`, the AOA connect and work successful.
 
-## Maintainers ##
+### Rover Guide to Stick
 
-ArduPilot is comprised of several parts, vehicles and boards. The list below
-contains the people that regularly contribute to the project and are responsible
-for reviewing patches on their specific area.
+When switch to `case 9000` it will turn to yaw 0 (North). Then it will guide to stick follow the formula 
 
-- [Andrew Tridgell](https://github.com/tridge):
-  - ***Vehicle***: Plane, AntennaTracker
-  - ***Board***: Pixhawk, Pixhawk2, PixRacer
-- [Francisco Ferreira](https://github.com/oxinarf):
-  - ***Bug Master***
-- [Grant Morphett](https://github.com/gmorph):
-  - ***Vehicle***: Rover
-- [Jacob Walser](https://github.com/jaxxzer):
-  - ***Vehicle***: Sub
-- [Lucas De Marchi](https://github.com/lucasdemarchi):
-  - ***Subsystem***: Linux
-- [Michael du Breuil](https://github.com/WickedShell):
-  - ***Subsystem***: Batteries
-  - ***Subsystem***: GPS
-  - ***Subsystem***: Scripting
-- [Peter Barker](https://github.com/peterbarker):
-  - ***Subsystem***: DataFlash, Tools
-- [Randy Mackay](https://github.com/rmackay9):
-  - ***Vehicle***: Copter, Rover, AntennaTracker
-- [Siddharth Purohit](https://github.com/bugobliterator):
-  - ***Subsystem***: CAN, Compass
-  - ***Board***: Cube*
-- [Tom Pittenger](https://github.com/magicrub):
-  - ***Vehicle***: Plane
-- [Bill Geyer](https://github.com/bnsgeyer):
-  - ***Vehicle***: TradHeli
-- [Chris Olson](https://github.com/ChristopherOlson):
-  - ***Vehicle***: TradHeli
-- [Emile Castelnuovo](https://github.com/emilecastelnuovo):
-  - ***Board***: VRBrain
-- [Georgii Staroselskii](https://github.com/staroselskii):
-  - ***Board***: NavIO
-- [Gustavo José de Sousa](https://github.com/guludo):
-  - ***Subsystem***: Build system
-- [Julien Beraud](https://github.com/jberaud):
-  - ***Board***: Bebop & Bebop 2
-- [Leonard Hall](https://github.com/lthall):
-  - ***Subsystem***: Copter attitude control and navigation
-- [Matt Lawrence](https://github.com/Pedals2Paddles):
-  - ***Vehicle***: 3DR Solo & Solo based vehicles
-- [Matthias Badaire](https://github.com/badzz):
-  - ***Subsystem***: FRSky
-- [Mirko Denecke](https://github.com/mirkix):
-  - ***Board***: BBBmini, BeagleBone Blue, PocketPilot
-- [Paul Riseborough](https://github.com/priseborough):
-  - ***Subsystem***: AP_NavEKF2
-  - ***Subsystem***: AP_NavEKF3
-- [Pierre Kancir](https://github.com/khancyr):
-  - ***Subsystem***: Copter SITL, Rover SITL
-- [Víctor Mayoral Vilches](https://github.com/vmayoral):
-  - ***Board***: PXF, Erle-Brain 2, PXFmini
-- [Amilcar Lucas](https://github.com/amilcarlucas):
-  - ***Subsystem***: Marvelmind
-- [Samuel Tabor](https://github.com/samuelctabor):
-  - ***Subsystem***: Soaring/Gliding
+
+```
+vel 		=   GF_GD_AHEAD
+steer_rate 	= 	GF_GD_YAWRATE * angel_from_AOA
+```
+
+it recommed set `GF_GD_YAWRATE` from around `50~300`
+

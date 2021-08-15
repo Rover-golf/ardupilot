@@ -1,6 +1,19 @@
 #include "mode.h"
 #include "Rover.h"
 
+bool ModeManual::_enter()
+{
+    // rover.golf_end_mission();
+
+    // gcs().send_text(MAV_SEVERITY_DEBUG, "AUX4:%d", rover.check_digital_pin(AUX_AVOID_PIN));
+    // gcs().send_text(MAV_SEVERITY_DEBUG, "AUX5:%d", rover.check_digital_pin(AUX_GOLF_PIN));
+    // gcs().send_text(MAV_SEVERITY_DEBUG, "start mode mannul");
+
+    // rover.work_enable = false;
+    // rover.yaw_enable = false;
+    return true;
+}
+
 void ModeManual::_exit()
 {
     // clear lateral when exiting manual mode
