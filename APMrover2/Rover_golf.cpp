@@ -4,8 +4,9 @@
 #include <AP_RangeFinder/RangeFinder_Backend.h>  // Josh
 #include <AP_Proximity/AP_Proximity_Backend.h>  // Josh
 #include <AP_Proximity/AP_Proximity_RangeFinder.h> // Josh
+#include <AP_Proximity/AP_Proximity.h> // Josh
 #include <AP_RangeFinder/RangeFinder.h>  // Josh
-// #include <AP_RangeFinder/AP_RangeFinder_SR73F.h>  // Josh
+//#include <AP_RangeFinder/AP_RangeFinder_SR73F.h>  // Josh
 // static RangeFinder lidar;
 #endif
 
@@ -72,8 +73,10 @@ void Rover::one_hz_loop(void)
     uint8_t nd_avd = 0;
 
     // Begin Josh
+ 
+
 //#if HAL_WITH_UAVCAN
-     float distance_cm;
+     float distance_cm=0.0;
 //#endif
     // char            c = 0;
 //	static char   buf[16];
@@ -87,13 +90,39 @@ void Rover::one_hz_loop(void)
 
     //float last_time;
     //bool hasDate;
-     if (golf_work_state != GOLF_PI_CTL && nd_collision) // Josh  collision
-     {
+    if (golf_work_state != GOLF_PI_CTL && nd_collision) // Josh  collision
+    {
          golf_work_state = GOLF_COLLISION;
     }
 //#if HAL_WITH_UAVCAN
     else
     {
+        // Josh  2021August12
+           float distance0=0.0, distance45=0.0, distance315=0.0;
+           if(g2.proximity.get_status() == AP_Proximity::Proximity_Good)
+           {
+            g2.proximity.get_horizontal_distance(0, distance0);
+            g2.proximity.get_horizontal_distance(45, distance45);
+            g2.proximity.get_horizontal_distance(315, distance315);
+           }
+           
+            if (distance0 > 0.50 && distance0 < 5.00)
+                gcs().send_text(MAV_SEVERITY_INFO, "0=%lf ", distance0);
+            if (distance45 > 0.50 && distance45 < 5.00)
+                gcs().send_text(MAV_SEVERITY_INFO, "45=%lf ", distance45);
+            if (distance315 > 0.50 && distance315 < 5.00)
+                gcs().send_text(MAV_SEVERITY_INFO, "315=%lf ", distance315);
+           
+  
+            if (((distance0 > 1.00 && distance0 < 5.00) || (distance45 > 1.00 && distance45 < 5.00) || (distance315 > 1.00 && distance315 < 5.00))
+                        && pi_ctl == false && rover.control_mode->is_autopilot_mode())
+            {
+                 nd_avd = 1;
+                 golf_work_state = GOLF_WORK;
+            }
+//            gcs().send_text(MAV_SEVERITY_INFO, "0=%lf 45=%lf 315=%lf v=%i", distance0,distance45,distance315, nd_avd);
+        // end of 2021August12
+ 
         for (uint8_t i = 0; i < rover.rangefinder.num_sensors(); i++)
         {
 
@@ -108,11 +137,10 @@ void Rover::one_hz_loop(void)
             //last_time = s->last_reading_ms();
             //hasDate = s->has_data;
 //            gcs().send_text(MAV_SEVERITY_INFO, "lidar #%i  status = %i  count = %i", i,  s->status(), s->range_valid_count());
-            //        gcs().send_text(MAV_SEVERITY_INFO, "#i=%i dist=%lf deg=%f status = %i", i,distance_cm,target_deg, s->status());
-            if (distance_cm > 100.0 && distance_cm < 500.0 && pi_ctl == false && rover.control_mode->is_autopilot_mode() && s->status() == 4)
+                          //   gcs().send_text(MAV_SEVERITY_INFO, "dist #%i =  %lf", i, distance_cm);
+            if (distance_cm > 50.0 && distance_cm < 500.0 && pi_ctl == false && rover.control_mode->is_autopilot_mode() && s->status() == 4)
             //           &&  s->has_data() )
             {
-                //             gcs().send_text(MAV_SEVERITY_INFO, "lidar dist #%i =  %lf", i, distance_cm);
                  nd_avd = 1;
                  golf_work_state = GOLF_WORK;
             }
@@ -120,8 +148,10 @@ void Rover::one_hz_loop(void)
             {
 //                nd_avd = 0;
             }
+    //        gcs().send_text(MAV_SEVERITY_INFO, "#i=%i dist=%lf deg=%f status=%i  avd=%i", i,distance_cm,target_deg, s->status(), nd_avd);
             
         }
+
     }
 
 //    gcs().send_text(MAV_SEVERITY_INFO, "mode=%i work_enable=%i state=%i colli=%i", rover.control_mode->mode_number(),
@@ -513,7 +543,10 @@ void Rover::sim_pi_guide(void)
         trun = g.golf_yawrate_k*fabs(angel) > g.golf_max_turn? g.golf_max_turn:g.golf_yawrate_k*angel;
     else
         trun = g.golf_yawrate_k*fabs(angel) > g.golf_max_turn? -g.golf_max_turn:-g.golf_yawrate_k*angel;
-
+ 
+           gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angel=%.2f trun=%.2f", 
+                                                    sim_pi_guide_state,dis, angel, trun);
+ 
 
     if(!nd_collision)
     {
@@ -529,8 +562,6 @@ void Rover::sim_pi_guide(void)
             break;
         // try to turn till angle in error file
         case 1:
- //           gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angel=%.2f trun=%.2f", 
- //                                                   sim_pi_guide_state,dis, angel, trun);
             rover.mode_gobatt.set_para(0,trun);
             if (fabs(angel)<g.golf_max_degerr)
             {

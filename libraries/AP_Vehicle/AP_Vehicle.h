@@ -119,6 +119,7 @@ protected:
     AP_InertialSensor ins;
     AP_Button button;
     RangeFinder rangefinder;
+   // AP_Proximity  proximity;   // Josh 2021August12
 
     AP_RSSI rssi;
 
