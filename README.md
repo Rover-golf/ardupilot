@@ -22,7 +22,41 @@ Add NoopLoop AOA Drivers
 
 Add NoopLoop TOF Drivers
 
+2021-08-15
 
+merge in Rover 4.1
+
+## Change Files
+
+In `APMrover2` folder the following files has been changed from `f431c0b256067daae7c154b7f62fd1e91004f891`
+
+```
+# macro or head define and some function declaration
+defines.h
+system.cpp
+Rover.cpp
+Rover.h 
+
+
+# add some mavlink msg to ctl
+GCS_Mavlink.cpp
+
+# modify somthing to add mode
+mode.cpp
+mode.h
+mode_auto.cpp
+mode_go_batt.cpp
+mode_manual.cpp
+
+# add some parameters
+Parameters.cpp
+Parameters.h
+
+
+
+# function to implement task
+Rover_golf.cpp
+```
 
 
 
