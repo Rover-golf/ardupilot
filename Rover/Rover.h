@@ -456,6 +456,7 @@ public:
     void send_golf_to_buff();
     void golf_send_cmd(uint16_t cmd_id, const float &param1, const float &param2);  // Josh added param1,2
 
+    void get_proximity_dis(float &distance0, float &distance45,float &distance315);
 
 
     golf_work_state_t golf_work_state = GOLF_NOWORK; // Josh changed from GOLF_HOLD

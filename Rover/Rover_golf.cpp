@@ -107,15 +107,19 @@ void Rover::one_hz_loop(void)
         // Josh  2021August12
 
 
-           float distance0=0.0, distance45=0.0, distance315=0.0;
-//           	hal.console->printf("prx_status=%d\r\n",g2.proximity.get_status() );
-          AP_Proximity::Proximity_Distance_Array dist_array;
-        if (g2.proximity.get_horizontal_distances(dist_array)) {
-            distance0 =dist_array.distance[0];
-            distance45 =dist_array.distance[1];
-            distance315 =dist_array.distance[7];
+        float distance0=0.0, distance45=0.0, distance315=0.0;
+        get_proximity_dis(distance0,distance45,distance315);
 
-        }
+
+//           	hal.console->printf("prx_status=%d\r\n",g2.proximity.get_status() );
+        // AP_Proximity::Proximity_Distance_Array dist_array;
+        // if (g2.proximity.get_horizontal_distances(dist_array)) 
+        // {
+        //     distance0 =dist_array.distance[0];
+        //     distance45 =dist_array.distance[1];
+        //     distance315 =dist_array.distance[7];
+
+        // }
 
 /*           if(g2.proximity.get_status() == AP_Proximity::Proximity_Good)
            {
@@ -676,4 +680,22 @@ void Rover::start_debug(void)
     yaw_complete = true;
     pi_ctl_start = AP_HAL::millis();
 
+}
+
+void Rover::get_proximity_dis(float &distance0, float &distance45,float &distance315)
+{
+    AP_Proximity *proximity = AP_Proximity::get_singleton();
+    if (proximity == nullptr) { return; }
+
+    if (proximity->get_status() == AP_Proximity::Status::Good) 
+    {
+        AP_Proximity::Proximity_Distance_Array dist_array;
+        if (proximity->get_horizontal_distances(dist_array)) 
+        {
+            distance0   = dist_array.distance[0];
+            distance45  = dist_array.distance[1];
+            distance315 = dist_array.distance[7];
+ 
+        }
+    }
 }
