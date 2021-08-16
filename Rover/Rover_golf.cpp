@@ -73,11 +73,9 @@ void Rover::one_hz_loop(void)
     // 
     static bool door_nd_close = false;
     golf_is_full = !(rover.check_digital_pin(AUX_GOLF_PIN));
-
-    // if(golf_is_full);
-    	//gcs().send_text(MAV_SEVERITY_INFO, "golf full %i", golf_is_full);
-
+    if(golf_is_full) gcs().send_text(MAV_SEVERITY_INFO, "golf full %i", golf_is_full); 
     nd_collision = !(rover.check_digital_pin(AUX_AVOID_PIN));
+    if(nd_collision) gcs().send_text(MAV_SEVERITY_INFO, "collision %i", nd_collision); 
     // if(golf_is_full) gcs().send_text(MAV_SEVERITY_INFO, "golf full %i", golf_is_full); 
     // if(nd_collision) gcs().send_text(MAV_SEVERITY_INFO, "collision %i", nd_collision); 
     uint8_t nd_avd = 0;
@@ -105,6 +103,46 @@ void Rover::one_hz_loop(void)
 //#if HAL_ENABLE_LIBUAVCAN_DRIVERS
     else
     {
+
+        // Josh  2021August12
+
+
+           float distance0=0.0, distance45=0.0, distance315=0.0;
+//           	hal.console->printf("prx_status=%d\r\n",g2.proximity.get_status() );
+          AP_Proximity::Proximity_Distance_Array dist_array;
+        if (g2.proximity.get_horizontal_distances(dist_array)) {
+            distance0 =dist_array.distance[0];
+            distance45 =dist_array.distance[1];
+            distance315 =dist_array.distance[7];
+
+        }
+
+/*           if(g2.proximity.get_status() == AP_Proximity::Proximity_Good)
+           {
+              g2.proximity.get_horizontal_distances(0.0, distance0);
+        //    g2.proximity.get_horizontal_distance(45.0, distance45);
+            //g2.proximity.get_horizontal_distance(315.0, distance315);
+           }
+ */          
+            if (distance0 > 0.50 && distance0 < 5.00)
+                gcs().send_text(MAV_SEVERITY_INFO, "0=%lf ", distance0);
+            if (distance45 > 0.50 && distance45 < 5.00)
+                gcs().send_text(MAV_SEVERITY_INFO, "45=%lf ", distance45);
+            if (distance315 > 0.50 && distance315 < 5.00)
+                gcs().send_text(MAV_SEVERITY_INFO, "315=%lf ", distance315);
+           
+  
+            if (((distance0 > 1.00 && distance0 < 5.00) || (distance45 > 1.00 && distance45 < 5.00) || (distance315 > 1.00 && distance315 < 5.00))
+                        && pi_ctl == false && rover.control_mode->is_autopilot_mode())
+            {
+                 nd_avd = 1;
+                 golf_work_state = GOLF_WORK;
+            }
+//            gcs().send_text(MAV_SEVERITY_INFO, "0=%lf 45=%lf 315=%lf v=%i", distance0,distance45,distance315, nd_avd);
+        // end of 2021August12
+
+
+
         for (uint8_t i = 0; i < rover.rangefinder.num_sensors(); i++)
         {
 
