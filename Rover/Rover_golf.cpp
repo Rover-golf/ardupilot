@@ -141,8 +141,9 @@ void Rover::one_hz_loop(void)
             {
                  nd_avd = 1;
                  golf_work_state = GOLF_WORK;
+                 gcs().send_text(MAV_SEVERITY_INFO, "set avoid");
             }
-//            gcs().send_text(MAV_SEVERITY_INFO, "0=%lf 45=%lf 315=%lf v=%i", distance0,distance45,distance315, nd_avd);
+            gcs().send_text(MAV_SEVERITY_INFO, "0=%lf 45=%lf 315=%lf v=%i", distance0,distance45,distance315, nd_avd);
         // end of 2021August12
 
 
@@ -257,7 +258,7 @@ void Rover::one_hz_loop(void)
             }
             rover.set_mode(rover.mode_gobatt, ModeReason::EVERYDAY_END);
             pi_ctl_id = 9010;
-            golf_send_cmd(pi_ctl_id, rover.ahrs.yaw_sensor, target_deg); // Josh added parameters
+//            golf_send_cmd(pi_ctl_id, rover.ahrs.yaw_sensor, target_deg); // Josh added parameters
 //            target_deg = target_deg > 0 ? fabsf(target_deg) - 45.0 : 45.0 - fabsf(target_deg);
             yaw_desire = constrain_deg(constrain_deg(degrees(rover.ahrs.yaw_sensor)) + 0);
             yaw_enable = true;
@@ -304,13 +305,14 @@ void Rover::one_hz_loop(void)
         if (nd_avd)
         {
             gcs().send_text(MAV_SEVERITY_CRITICAL, "Golf avd now");
-            rover.set_mode(rover.mode_gobatt, ModeReason::EVERYDAY_END);
+//            rover.set_mode(rover.mode_gobatt, ModeReason::EVERYDAY_END);
             golf_work_state = GOLF_PI_AVOID;
             pi_ctl_id = 9020;
             yaw_complete = true;
             pi_ctl_start = AP_HAL::millis();
             target_deg = target_deg > 0 ? fabsf(target_deg) - 45.0 : 45.0 - fabsf(target_deg);
-            golf_send_cmd(pi_ctl_id, rover.ahrs.yaw_sensor, target_deg); // Josh added parameters
+            rover.mode_gobatt.set_para(1.0,target_deg);
+//            golf_send_cmd(pi_ctl_id, rover.ahrs.yaw_sensor, target_deg); // Josh added parameters
             pi_ctl = true;
         }
 
@@ -559,15 +561,15 @@ void Rover::sim_pi_guide(void)
     // if (pi_ctl != true && pi_ctl_id != 9000 && pi_ctl_step != 1)
     //     return;
     
-    float dis = 0.0f, angel = 0.0f, trun = 0.0f;
+    float dis = 0.0f, angel = 0.0f, turn = 0.0f;
     g2.beacon.get_data(dis, angel);
     if (fabs(angel)<g.golf_max_degerr)
         angel = 0.0;
     
     if(angel < 0)    
-        trun = g.golf_yawrate_k*fabs(angel) > g.golf_max_turn? g.golf_max_turn:g.golf_yawrate_k*angel;
+        turn = g.golf_yawrate_k*fabs(angel) > g.golf_max_turn? g.golf_max_turn:g.golf_yawrate_k*angel;
     else
-        trun = g.golf_yawrate_k*fabs(angel) > g.golf_max_turn? -g.golf_max_turn:-g.golf_yawrate_k*angel;
+        turn = g.golf_yawrate_k*fabs(angel) > g.golf_max_turn? -g.golf_max_turn:-g.golf_yawrate_k*angel;
 
 
     if(!nd_collision)
@@ -586,7 +588,7 @@ void Rover::sim_pi_guide(void)
         case 1:
  //           gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angel=%.2f trun=%.2f", 
  //                                                   sim_pi_guide_state,dis, angel, trun);
-            rover.mode_gobatt.set_para(0,trun);
+            rover.mode_gobatt.set_para(0,turn);
             if (fabs(angel)<g.golf_max_degerr)
             {
                 pi_ctl_start = AP_HAL::millis();
