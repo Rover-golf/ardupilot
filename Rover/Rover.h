@@ -117,6 +117,7 @@ public:
     friend class ModeSmartRTL;
     friend class ModeFollow;
     friend class ModeSimple;
+    friend class ModeGoBatt;
 
     friend class RC_Channel_Rover;
     friend class RC_Channels_Rover;

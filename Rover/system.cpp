@@ -125,6 +125,7 @@ void Rover::init_ardupilot()
 
     rover.g2.sailboat.init();
 
+    init_golfpin();
     // flag that initialisation has completed
     initialised = true;
 }
