@@ -4,6 +4,7 @@
 
 #include <AP_RangeFinder/AP_RangeFinder_Backend.h>
 
+
 MAV_TYPE GCS_Rover::frame_type() const
 {
     if (rover.is_boat()) {
@@ -1181,12 +1182,26 @@ void Rover::golf_send_cmd(uint16_t cmd_id, const float &param1, const float &par
                                   param1, param2, 0, 0, 0, 0, 0);
     len = mavlink_msg_to_send_buffer(buf, &_send_msg);
     
+
+
+    // const AP_SerialManager* _serial_manager = &serial_manager;
+
     for (uint8_t i = 0; i < SERIALMANAGER_NUM_PORTS; i++) 
     {
         auto *uart = hal.serial(i);
-        if (uart) 
+        if (uart != nullptr ) 
         {
-            uart->write(buf, len);
+            switch (serial_manager.get_protocol(i)) 
+            {
+                case AP_SerialManager::SerialProtocol_Console:
+                case AP_SerialManager::SerialProtocol_MAVLink:
+                case AP_SerialManager::SerialProtocol_MAVLink2:
+                    uart->write(buf, len);
+                    break;
+                default:
+                    break;
+            }
+
         }
     }
 
