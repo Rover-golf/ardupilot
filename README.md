@@ -58,7 +58,17 @@ Parameters.h
 Rover_golf.cpp
 ```
 
+## Parameters
 
+### pull/push
+
+To use `L298N`  drive gate, AUX1~3 are using. To enable AUX1~6 set `BRD_PWM_COUNT` to 0.
+
+```
+#define AUX_ENA_PIN 50      // AUX1
+#define AUX_IN1_PIN 51      // AUX2
+#define AUX_IN2_PIN 52      // AUX3
+```
 
 ## Function Descriptions
 
