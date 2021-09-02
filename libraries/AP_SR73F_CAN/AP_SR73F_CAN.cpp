@@ -116,6 +116,17 @@ void AP_SR73F_CAN::init(uint8_t driver_index, bool enable_filters)
     _initialized = true;
     sr73f_senseor_driver_enable=1;
 	hal.console->printf( "AP_SR73F_CAN: init done\r\n");
+
+	uavcan::CanRxFrame can_tx1;
+	can_tx1.id= 0x606;
+	can_tx1.data[0]=0xC1;
+	can_tx1.data[1]=0x00;
+	can_tx1.data[2]=0x23;
+	can_tx1.data[3]=0x28;
+	can_tx1.data[4]=0x00;
+	can_tx1.dlc=0x05;
+	_can_driver->getIface(0)->send(can_tx1, can_tx1.ts_mono, 1);
+
     return;
 }
 
