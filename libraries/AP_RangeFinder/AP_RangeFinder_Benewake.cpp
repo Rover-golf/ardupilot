@@ -184,6 +184,7 @@ void AP_RangeFinder_Benewake::update(void)
 {
     if (get_reading(state.distance_cm)) {
         // update range_valid state based on distance measured
+  	    hal.console->printf("Benewake Update=%d\r\n",state.distance_cm);
         state.last_reading_ms = AP_HAL::millis();
         update_status();
     } else if (AP_HAL::millis() - state.last_reading_ms > 200) {

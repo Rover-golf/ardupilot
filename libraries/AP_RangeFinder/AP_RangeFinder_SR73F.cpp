@@ -215,12 +215,14 @@ bool AP_RangeFinder_SR73F::get_reading(uint16_t &reading_cm, float &target_deg)
 	    	break;
 	}
 	if(get_object_data.target_distance * 100 < 20 || get_object_data.target_distance * 100 > 600 
-	   || can_rx.id != OBJECT_INFORMATION || can_rx.id != CH30_DATA)
+	   || (can_rx.id != OBJECT_INFORMATION && can_rx.id != CH30_DATA))
 	{
     	reading_cm = 0;
 		target_deg = 0.0;
+	hal.console->printf("reading return false\r\n");
 	    return false;
 	}
+	hal.console->printf("reading return true\r\n");
     reading_cm = get_object_data.target_distance * 100;
     if(can_rx.id == OBJECT_INFORMATION)
 		target_deg = get_object_data.target_deg*57.29;
