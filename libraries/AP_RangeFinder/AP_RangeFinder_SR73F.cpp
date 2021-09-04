@@ -71,7 +71,8 @@ bool AP_RangeFinder_SR73F::init(void)
     
 	uavcan::CanRxFrame can_rx;
 	uavcan::CanIOFlags out_flags=0;
-    while(can_rx.id != CH30_DATA)
+	uint32_t CH30_init_start = AP_HAL::millis();
+    while(can_rx.id != CH30_DATA && (AP_HAL::millis() - CH30_init_start < 20000))
 	{
 		hal.can_mgr[0]->_driver[0].getIface(0)->send(can_tx1, can_tx1.ts_mono, 1);
 		hal.can_mgr[0]->_driver[0].getIface(0)->receive(can_rx,can_rx.ts_mono,can_rx.ts_utc,out_flags);
