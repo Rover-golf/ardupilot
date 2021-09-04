@@ -74,7 +74,10 @@ void Rover::one_hz_loop(void)
 
     // Begin Josh
  
-
+    if(pi_ctl == false && rover.control_mode->is_autopilot_mode())
+    {
+        motor_pull();
+    } 
  
 
 //#if HAL_WITH_UAVCAN
@@ -483,6 +486,7 @@ void Rover::sim_pi_ctl(void)
 //                if (yaw_complete)
 //                {
                     pi_ctl_step++;
+                    pi_ctl_step++;  // Josh Sept.4 2021, skip sim_pi_guide AOA
                     pi_ctl_start = AP_HAL::millis();
 //                }
                 break;
