@@ -27,8 +27,12 @@ class AP_RangeFinder_SR73F: public AP_RangeFinder_Backend
     void update(void)override;;
     enum{
   	  OBJECT_STATUS=1546,
-  	  OBJECT_INFORMATION=1547
+  	  OBJECT_INFORMATION=1547,
+	  CH30_HEART_BEAT=1415,
+	  CH30_DATA=1414	
     };
+    uavcan::ICanDriver* _can_driver;
+
     typedef struct{
  	   uint8_t Objects_NofObjects:8 ; //目标个数
  	   uint8_t Objects_MeasCountH:8 ; //循环计数高8位

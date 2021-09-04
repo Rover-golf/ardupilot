@@ -13,6 +13,7 @@
 #include <uavcan/time.hpp>
 #include <AP_HAL_ChibiOS/CAN.h>
 #include <GCS_MAVLink/GCS.h>   
+
 extern const AP_HAL::HAL& hal;
 
 
@@ -55,7 +56,29 @@ bool AP_RangeFinder_SR73F::init(void)
     //初始化can_mgr对象
     const_cast <AP_HAL::HAL&> (hal).can_mgr[inum] = new ChibiOS::CANManager();
 	//初始化can的波特率
-	hal.can_mgr[0]->begin(500000,0);
+	hal.can_mgr[0]->begin(250000,0);
+    hal.console->printf("SR73 init250 \r\n");
+    // benewake CH30 init     Josh Sept.2, 2021
+
+	uavcan::CanRxFrame can_tx1;
+	can_tx1.id= 0x606;  // CH30 startup command
+	can_tx1.data[0]=0xc1;
+	can_tx1.data[1]=0x00;
+	can_tx1.data[2]=0xFF;   // ROI 254 cm  (half 127 cm))
+	can_tx1.data[3]=0x23;   // deep 350 cm
+	can_tx1.data[4]=0x00;
+	can_tx1.dlc=0x05;
+    
+	uavcan::CanRxFrame can_rx;
+	uavcan::CanIOFlags out_flags=0;
+    while(can_rx.id != CH30_DATA)
+	{
+		hal.can_mgr[0]->_driver[0].getIface(0)->send(can_tx1, can_tx1.ts_mono, 1);
+		hal.can_mgr[0]->_driver[0].getIface(0)->receive(can_rx,can_rx.ts_mono,can_rx.ts_utc,out_flags);
+		hal.console->printf("CH30 id=%lu\r\n",can_rx.id);
+
+	}
+    // end  Josh Sept. 2, 2021
 	return true;
 }
 
@@ -78,7 +101,7 @@ bool AP_RangeFinder_SR73F::get_reading(uint16_t &reading_cm, float &target_deg)
 			hal.console->printf("id=%lu\r\n",can_rx.id);
 //			hal.console->printf("data[0]=%d\r\n",can_rx.data[0]);
 //			hal.console->printf("data[1]=%d\r\n",can_rx.data[1]);
-//			hal.console->printf("data[2]=%d\r\n",can_rx.data[2]);
+//			hal.console->printf("data[5]=%d\r\n",can_rx.data[5]);
 //			return 1;
 
 //    gcs().send_text(MAV_SEVERITY_INFO, "can_rx ID : %d ", can_rx.id);
@@ -162,19 +185,48 @@ bool AP_RangeFinder_SR73F::get_reading(uint16_t &reading_cm, float &target_deg)
 			hal.console->printf("speed=%f\r\n",get_object_data.target_speed);
 			hal.console->printf("rcs=%f\r\n",get_object_data.Objects_RCS);
 			break;
+	    case CH30_HEART_BEAT:    // Benewake CH30  heart beat
+	        hal.console->printf("is_run=%d\r\n", (can_rx.data[0] & 0x01));
+	        hal.console->printf("is_error=%d\r\n", (can_rx.data[0] & 0x04) >> 2);
+	        hal.console->printf("value=%d\r\n", (can_rx.data[0] & 0xE0) >> 5);
+	        hal.console->printf("centre=%d\r\n", (can_rx.data[0] & 0x10) >> 4);
+	        hal.console->printf("version_valid=%d\r\n", (can_rx.data[0] & 0x02) >> 1);
+		    break;
+		case CH30_DATA:   // Benewake CH30 data
+	        hal.console->printf("data0=%d\r\n", can_rx.data[0]);
+	        hal.console->printf("data1=%d\r\n", can_rx.data[1]);
+	        hal.console->printf("data2=%d\r\n", can_rx.data[2]);
+
+	        hal.console->printf("data3=%x\r\n", can_rx.data[3]);
+	        hal.console->printf("data3=%f\r\n", (float)(int8_t)can_rx.data[3]);
+
+	        hal.console->printf("data4=%d\r\n", can_rx.data[4]);
+	        hal.console->printf("data5=%d\r\n", can_rx.data[5]);
+	        hal.console->printf("data6=%d\r\n", can_rx.data[6]);
+	        hal.console->printf("data7=%d\r\n", can_rx.data[7]);
+	        hal.console->printf("data-long=%d\r\n", can_rx.dlc);
+            get_object_data.target_distance = (((can_rx.data[1]&(0x0f))<<8) | (can_rx.data[0]&(0xff)));
+            get_object_data.target_deg = (float)(int8_t)can_rx.data[3];
+			get_object_data.target_distance =get_object_data.target_distance / 100.0;
+			hal.console->printf("distance=%f\r\n",get_object_data.target_distance);
+			hal.console->printf("deg=%f\r\n",get_object_data.target_deg);
+			break;
 	    default:
 	    	break;
 	}
 	if(get_object_data.target_distance * 100 < 20 || get_object_data.target_distance * 100 > 600 
-	   || can_rx.id != OBJECT_INFORMATION)
-	//if(can_rx.id == OBJECT_STATUS)
+	   || can_rx.id != OBJECT_INFORMATION || can_rx.id != CH30_DATA)
 	{
     	reading_cm = 0;
 		target_deg = 0.0;
 	    return false;
 	}
     reading_cm = get_object_data.target_distance * 100;
-	target_deg = get_object_data.target_deg*57.29;
+    if(can_rx.id == OBJECT_INFORMATION)
+		target_deg = get_object_data.target_deg*57.29;
+	else
+		target_deg = get_object_data.target_deg;
+
     return true;
 }
 
@@ -190,6 +242,8 @@ void AP_RangeFinder_SR73F::update(void)
 	//读取数据
     if (get_reading(state.distance_cm, state.target_deg))
     {
+		hal.console->printf("final distance=%d\r\n",state.distance_cm);
+		hal.console->printf("final deg=%f\r\n",state.target_deg);
         //更新测量数据
 		state.last_reading_ms = AP_HAL::millis();
         update_status();
