@@ -392,6 +392,35 @@ void Rover::sim_pi_ctl(void)
                 pi_ctl_step++;
                 break;
             case 3:
+                rover.mode_gobatt.set_para(-50);
+                pi_ctl_start = AP_HAL::millis();
+                pi_ctl_step++;
+                break;
+            case 4:
+                if (AP_HAL::millis() - pi_ctl_start > 3000)
+                {
+                    yaw_desire = constrain_deg(constrain_deg(degrees(rover.ahrs.yaw)) + 45.0);
+                    yaw_enable = true;
+                    yaw_complete = false;
+                    pi_ctl_start = AP_HAL::millis();
+                    pi_ctl_step++;
+                }
+                break;
+            case 5:
+                if (AP_HAL::millis() - pi_ctl_start > 3000)
+                    pi_ctl_step++;
+                break;
+            case 6:
+                rover.mode_gobatt.set_para(50);
+                pi_ctl_start = AP_HAL::millis();
+                pi_ctl_step++;
+                break;
+            case 7:
+                rover.mode_gobatt.set_para(50);
+                pi_ctl_start = AP_HAL::millis();
+                pi_ctl_step++;
+                break;
+            case 8:
                 if (AP_HAL::millis() - pi_ctl_start > 3000)
                 {
                     pi_ctl_step = 0;

@@ -56,16 +56,18 @@ bool AP_RangeFinder_SR73F::init(void)
     //初始化can_mgr对象
     const_cast <AP_HAL::HAL&> (hal).can_mgr[inum] = new ChibiOS::CANManager();
 	//初始化can的波特率
-	hal.can_mgr[0]->begin(250000,0);
+	hal.can_mgr[0]->begin(500000,0);
     hal.console->printf("SR73 init250 \r\n");
-    // benewake CH30 init     Josh Sept.2, 2021
 
+    // benewake CH30 init     Josh Sept.2, 2021
 	uavcan::CanRxFrame can_tx1;
+
+
 	can_tx1.id= 0x606;  // CH30 startup command
 	can_tx1.data[0]=0xc1;
 	can_tx1.data[1]=0x00;
 	can_tx1.data[2]=0xFF;   // ROI 254 cm  (half 127 cm))
-	can_tx1.data[3]=0x23;   // deep 350 cm
+	can_tx1.data[3]=0x28; //    0x23;   // deep 350 cm
 	can_tx1.data[4]=0x00;
 	can_tx1.dlc=0x05;
     
@@ -76,10 +78,33 @@ bool AP_RangeFinder_SR73F::init(void)
 	{
 		hal.can_mgr[0]->_driver[0].getIface(0)->send(can_tx1, can_tx1.ts_mono, 1);
 		hal.can_mgr[0]->_driver[0].getIface(0)->receive(can_rx,can_rx.ts_mono,can_rx.ts_utc,out_flags);
-		hal.console->printf("CH30 id=%lu\r\n",can_rx.id);
+		hal.console->printf("activate CH30 id=%lu\r\n",can_rx.id);
 
 	}
+	/*
+	can_tx1.id= 0x607;  // CH30 set baud rate command
+	can_tx1.data[0]=0x86;
+	can_tx1.data[1]=0x75;
+	can_tx1.data[2]=0x58;   
+	can_tx1.data[3]=0x06;   
+	can_tx1.data[4]=0x76;
+	can_tx1.data[5]=0x60;
+	can_tx1.data[6]=0xF4;
+	can_tx1.data[7]=0x01;
+	can_tx1.dlc=0x08;
+
+	CH30_init_start = AP_HAL::millis();
+    while(AP_HAL::millis() - CH30_init_start < 10000)
+	{
+		hal.can_mgr[0]->_driver[0].getIface(0)->send(can_tx1, can_tx1.ts_mono, 1);
+		hal.console->printf("change buad rate to 500K CH30\r\n");
+
+	}
+
+	hal.can_mgr[0]->begin(500000,0);
+*/
     // end  Josh Sept. 2, 2021
+
 	return true;
 }
 
@@ -120,9 +145,9 @@ bool AP_RangeFinder_SR73F::get_reading(uint16_t &reading_cm, float &target_deg)
 			objectstatus_data.Objects_InterfaceVersion=(can_rx.data[3]>>4);
 			//循环计数数据=循环计数高8位|循环计数低8位
 			objectstatus_data.Objects_MeasCount=(objectstatus_data.Objects_MeasCountH<<8)|objectstatus_data.Objects_MeasCountL;
-			hal.console->printf("num=%d\r\n",objectstatus_data.Objects_NofObjects);
-			hal.console->printf("count=%d\r\n",objectstatus_data.Objects_MeasCount);
-			hal.console->printf("version=%d\r\n",objectstatus_data.Objects_InterfaceVersion);
+//			hal.console->printf("num=%d\r\n",objectstatus_data.Objects_NofObjects);
+//			hal.console->printf("count=%d\r\n",objectstatus_data.Objects_MeasCount);
+//			hal.console->printf("version=%d\r\n",objectstatus_data.Objects_InterfaceVersion);
 	    	break;
 	    case OBJECT_INFORMATION:
 			//雷达ID
@@ -179,21 +204,27 @@ bool AP_RangeFinder_SR73F::get_reading(uint16_t &reading_cm, float &target_deg)
 			get_object_data.target_speed=get_object_data.Objects_VrelLong*(cosf(get_object_data.target_deg))+
 					get_object_data.Objects_VrelLat*(sinf(get_object_data.target_deg));
 
+/*
 			hal.console->printf("data=%f\r\n",data);
 			hal.console->printf("myid=%f\r\n",get_object_data.Objects_ID);
 			hal.console->printf("distance=%f\r\n",get_object_data.target_distance);
 			hal.console->printf("deg=%f\r\n",get_object_data.target_deg*57.29);
 			hal.console->printf("speed=%f\r\n",get_object_data.target_speed);
 			hal.console->printf("rcs=%f\r\n",get_object_data.Objects_RCS);
+*/
 			break;
+
 	    case CH30_HEART_BEAT:    // Benewake CH30  heart beat
+/*
 	        hal.console->printf("is_run=%d\r\n", (can_rx.data[0] & 0x01));
 	        hal.console->printf("is_error=%d\r\n", (can_rx.data[0] & 0x04) >> 2);
 	        hal.console->printf("value=%d\r\n", (can_rx.data[0] & 0xE0) >> 5);
 	        hal.console->printf("centre=%d\r\n", (can_rx.data[0] & 0x10) >> 4);
 	        hal.console->printf("version_valid=%d\r\n", (can_rx.data[0] & 0x02) >> 1);
+*/
 		    break;
 		case CH30_DATA:   // Benewake CH30 data
+/*
 	        hal.console->printf("data0=%d\r\n", can_rx.data[0]);
 	        hal.console->printf("data1=%d\r\n", can_rx.data[1]);
 	        hal.console->printf("data2=%d\r\n", can_rx.data[2]);
@@ -206,17 +237,21 @@ bool AP_RangeFinder_SR73F::get_reading(uint16_t &reading_cm, float &target_deg)
 	        hal.console->printf("data6=%d\r\n", can_rx.data[6]);
 	        hal.console->printf("data7=%d\r\n", can_rx.data[7]);
 	        hal.console->printf("data-long=%d\r\n", can_rx.dlc);
+  */
             get_object_data.target_distance = (((can_rx.data[1]&(0x0f))<<8) | (can_rx.data[0]&(0xff)));
             get_object_data.target_deg = (float)(int8_t)can_rx.data[3];
 			get_object_data.target_distance =get_object_data.target_distance / 100.0;
 			hal.console->printf("distance=%f\r\n",get_object_data.target_distance);
 			hal.console->printf("deg=%f\r\n",get_object_data.target_deg);
 			break;
+
 	    default:
 	    	break;
 	}
 	if(get_object_data.target_distance * 100 < 20 || get_object_data.target_distance * 100 > 600 
-	   || (can_rx.id != OBJECT_INFORMATION && can_rx.id != CH30_DATA))
+	   || (can_rx.id != OBJECT_INFORMATION 
+	   && can_rx.id != CH30_DATA
+	   ))
 	{
     	reading_cm = 0;
 		target_deg = 0.0;

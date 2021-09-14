@@ -26,10 +26,16 @@ class AP_RangeFinder_SR73F: public AP_RangeFinder_Backend
     bool get_reading(uint16_t &reading_cm, float &target_deg);
     void update(void)override;;
     enum{
+	  // Nanoradar 
   	  OBJECT_STATUS=1546,
   	  OBJECT_INFORMATION=1547,
+	  // Benewake
 	  CH30_HEART_BEAT=1415,
-	  CH30_DATA=1414	
+	  CH30_DATA=1414,
+	  // 
+	  N28_STATUS=1025,
+	  N28_INFO=1026
+
     };
     uavcan::ICanDriver* _can_driver;
 
