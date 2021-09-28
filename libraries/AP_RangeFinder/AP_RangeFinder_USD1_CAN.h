@@ -71,6 +71,7 @@ private:
 
     bool _bRt;
     bool new_information;//radar start new scan
+    bool _bStartReceiveData; //receive the first data
     uint8_t _Address;//radar address(0-7)
     float fdata,ftarget_distance, ftarget_deg;
 };

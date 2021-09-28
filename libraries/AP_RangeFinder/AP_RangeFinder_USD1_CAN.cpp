@@ -3,7 +3,7 @@
 
 #if HAL_MAX_CAN_PROTOCOL_DRIVERS
 
-//extern const AP_HAL::HAL& hal;
+extern const AP_HAL::HAL& hal;
 /*
   constructor
  */
@@ -14,6 +14,8 @@ AP_RangeFinder_USD1_CAN::AP_RangeFinder_USD1_CAN(RangeFinder::RangeFinder_State 
     register_driver(AP_CANManager::Driver_Type_USD1);
     _Address = _params.address;// Radar ID (0-7)
     new_information = false;
+    new_data = false;
+    _bStartReceiveData = false;
 }
 
 // update state
@@ -57,7 +59,8 @@ void AP_RangeFinder_USD1_CAN::handle_frame(AP_HAL::CANFrame &frame)
     {
         _distance_cm = (uint16_t)(ftarget_distance * 100);
         _last_reading_ms = AP_HAL::millis();
-        new_data = true;                 
+        new_data = true;   
+        _bStartReceiveData = true;              
         //hal.console->printf("FrmId:%d, distance=%d, angle=%d.\n",(int)(frame.id),(int)(_distance_cm),(int)(ftarget_deg*57.29));
     }
 
@@ -85,7 +88,12 @@ bool AP_RangeFinder_USD1_CAN::CH30_Startup()
 	can_tx1.data[4]=0x00;
 	can_tx1.dlc=0x05;
 
-    _bRt = write_frame(can_tx1,20000);
+    uint32_t CH30_init_start = AP_HAL::millis();
+    while( !_bStartReceiveData && AP_HAL::millis() - CH30_init_start < 20000)
+    {
+        _bRt = write_frame(can_tx1,500);
+        hal.scheduler->delay(60); // wait loop thread to get one frame data
+    }
 
     return _bRt;
 }
