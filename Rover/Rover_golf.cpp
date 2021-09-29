@@ -107,8 +107,8 @@ void Rover::one_hz_loop(void)
         // Josh  2021August12
 
 
-        float distance0=0.0, distance45=0.0, distance315=0.0;
-        get_proximity_dis(distance0,distance45,distance315);
+    //    float distance0=0.0, distance45=0.0, distance315=0.0;
+     //   get_proximity_dis(distance0,distance45,distance315);
 
 
 //           	hal.console->printf("prx_status=%d\r\n",g2.proximity.get_status() );
@@ -128,6 +128,7 @@ void Rover::one_hz_loop(void)
             //g2.proximity.get_horizontal_distance(315.0, distance315);
            }
  */          
+      /*
             if (distance0 > 0.50 && distance0 < 5.00)
                 gcs().send_text(MAV_SEVERITY_INFO, "0=%lf ", distance0);
             if (distance45 > 0.50 && distance45 < 5.00)
@@ -145,7 +146,7 @@ void Rover::one_hz_loop(void)
             }
             gcs().send_text(MAV_SEVERITY_INFO, "0=%lf 45=%lf 315=%lf v=%i", distance0,distance45,distance315, nd_avd);
         // end of 2021August12
-
+*/
 
 
         for (uint8_t i = 0; i < rover.rangefinder.num_sensors(); i++)
