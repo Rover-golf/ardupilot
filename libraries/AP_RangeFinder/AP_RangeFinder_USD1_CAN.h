@@ -28,7 +28,7 @@ private:
     bool CH30_Analysis(AP_HAL::CANFrame &frame,float& fdist, float& fdeg);
     bool SR73_Analysis(AP_HAL::CANFrame &frame,float& fdist, float& fdeg);
     bool SetRadarAddress(uint8_t iaddress = 0x00);
-
+    bool ObjectInRegion(float fdist, float fdeg = 0,float long1 = 0.f,float lat1 = 0.6f,float long2 = 2.0f,float lat2 = -0.6f);
     enum{
         //SR73
         OBJECT_STATUS = 0x60A,
@@ -71,7 +71,6 @@ private:
 
     bool _bRt;
     bool new_information;//radar start new scan
-    bool _bStartReceiveData; //receive the first data
     uint8_t _Address;//radar address(0-7)
     float fdata,ftarget_distance, ftarget_deg;
 };
