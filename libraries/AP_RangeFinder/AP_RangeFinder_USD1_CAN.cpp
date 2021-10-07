@@ -27,6 +27,7 @@ void AP_RangeFinder_USD1_CAN::update(void)
     } else if (new_data) {
         state.distance_cm = _distance_cm;
         state.last_reading_ms = _last_reading_ms;
+        state.target_deg = _target_deg; 
         update_status();
         new_data = false;
     }
@@ -57,6 +58,7 @@ void AP_RangeFinder_USD1_CAN::handle_frame(AP_HAL::CANFrame &frame)
     if(_bRt)
     {
         _distance_cm = (uint16_t)(ftarget_distance * 100);
+        _target_deg = (uint16_t)ftarget_deg;
         _last_reading_ms = AP_HAL::millis();
         new_data = true;          
      //   hal.console->printf("handle_frame: FrmId:%d, distance=%d, angle=%d.\n",(int)(frame.id),(int)(_distance_cm),(int)ftarget_deg);
@@ -97,6 +99,11 @@ bool AP_RangeFinder_USD1_CAN::CH30_Startup()
         {
             hal.scheduler->delay(50); 
             _bRt = read_frame(can_rx1, 500);
+            //recelive CH30 info.
+            if(_bRt && (can_rx1.id == CH30_HEART_BEAT || can_rx1.id == CH30_DATA))
+                _bRt = true;
+            else
+                _bRt = false;                       
         }
         if(!_bRt)
             hal.scheduler->delay(500);

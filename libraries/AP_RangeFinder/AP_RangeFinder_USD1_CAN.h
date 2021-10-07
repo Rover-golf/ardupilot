@@ -23,6 +23,7 @@ private:
     bool new_data;
     uint16_t _distance_cm;
     uint32_t _last_reading_ms;
+    uint16_t _target_deg; 
     //Radar
     bool CH30_Startup();
     bool CH30_Analysis(AP_HAL::CANFrame &frame,float& fdist, float& fdeg);
