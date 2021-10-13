@@ -32,7 +32,7 @@ private:
     bool CH30_Analysis(AP_HAL::CANFrame &frame,float& fdist, float& fdeg);
     bool SR73_Analysis(AP_HAL::CANFrame &frame,float& fdist, float& fdeg);
     bool SetRadarAddress(uint8_t iaddress = 0x00);
-    bool ObjectInRegion(float fdist, float fdeg = 0,float long1 = 0.f,float lat1 = 0.6f,float long2 = 2.0f,float lat2 = -0.6f);
+    bool ObjectInRegion(float fdist, float fdeg = 0,float long1 = 0.f,float lat1 = 1.5f,float long2 = 5.0f,float lat2 = -1.5f);
     enum{
         //SR73
         OBJECT_STATUS = 0x60A,
