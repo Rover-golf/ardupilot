@@ -160,7 +160,7 @@ bool CANSensor::read_frame(AP_HAL::CANFrame &in_frame, const uint64_t timeout_us
     if (ret && read_select) {
         uint64_t time;
         AP_HAL::CANIface::CanIOFlags flags {};
-
+        
        // AP_HAL::CANFrame frame;
         int16_t res = _can_iface->receive(in_frame, time, flags);
         if(res==1)
@@ -206,6 +206,8 @@ void CANSensor::loop()
        if(brt){
             handle_frame(frame);
         }
+        //check connect otherwise send restart command
+        Check_SendData();
 
     }
 }

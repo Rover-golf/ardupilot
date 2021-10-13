@@ -14,6 +14,7 @@ AP_RangeFinder_USD1_CAN::AP_RangeFinder_USD1_CAN(RangeFinder::RangeFinder_State 
    _Address = _params.address;// Radar ID (0-7)
     new_information = false;
     new_data = false;
+    _last_reading_CH30 = 0;
     register_driver(AP_CANManager::Driver_Type_USD1);
 }
 
@@ -61,11 +62,11 @@ void AP_RangeFinder_USD1_CAN::handle_frame(AP_HAL::CANFrame &frame)
         _target_deg = (uint16_t)ftarget_deg;
         _last_reading_ms = AP_HAL::millis();
         new_data = true;          
-     //   hal.console->printf("handle_frame: FrmId:%d, distance=%d, angle=%d.\n",(int)(frame.id),(int)(_distance_cm),(int)ftarget_deg);
+//        hal.console->printf("Address:%d, handle_frame: FrmId:%d, distance=%d, angle=%d.\n",(int)_Address,(int)(frame.id),(int)(_distance_cm),(int)ftarget_deg);
     }
     else
     {
-     //   hal.console->printf("handle_frame: FrmId:%d.\n",(int)(frame.id));
+//        hal.console->printf("ddress:%d, handle_frame: FrmId:%d.\n",(int)_Address,(int)(frame.id));
     }
 }
 
@@ -78,7 +79,21 @@ void AP_RangeFinder_USD1_CAN::init(uint8_t driver_index, bool enable_filters)
         CH30_Startup();
 }
 
-bool AP_RangeFinder_USD1_CAN::CH30_Startup()
+void AP_RangeFinder_USD1_CAN::Check_SendData()
+{
+    //CH30 check send data correctly.
+    if(_Address == 0)
+    {
+        //if it's no data over 1000 ms,send startup. 
+        if( AP_HAL::millis() - _last_reading_CH30 > 1000)
+        {
+            CH30_Startup(true);
+        }
+
+    }
+}
+
+bool AP_RangeFinder_USD1_CAN::CH30_Startup(bool bRestart)
 {
     AP_HAL::CANFrame can_tx1, can_rx1;
 
@@ -92,21 +107,20 @@ bool AP_RangeFinder_USD1_CAN::CH30_Startup()
 
     _bRt = false;
     uint32_t CH30_init_start = AP_HAL::millis();
-    while(!_bRt && AP_HAL::millis() - CH30_init_start < 20000)
+    while(AP_HAL::millis() - CH30_init_start < 20000)
     {
         _bRt = write_frame(can_tx1,500);
+        if(bRestart)//disconnect just send command once.
+            return _bRt;
         if(_bRt)
         {
             hal.scheduler->delay(50); 
             _bRt = read_frame(can_rx1, 500);
             //recelive CH30 info.
             if(_bRt && (can_rx1.id == CH30_HEART_BEAT || can_rx1.id == CH30_DATA))
-                _bRt = true;
-            else
-                _bRt = false;                       
+                return true;                     
         }
-        if(!_bRt)
-            hal.scheduler->delay(500);
+        hal.scheduler->delay(500);
     }
 
     return _bRt;
@@ -123,6 +137,7 @@ bool AP_RangeFinder_USD1_CAN::CH30_Analysis(AP_HAL::CANFrame &frame,float& fdist
             fdist = (((frame.data[1]&(0x0f))<<8) | (frame.data[0]&(0xff)));
             fdeg = (float)(int8_t)frame.data[3];
 			fdist =fdist / 100.0;
+            _last_reading_CH30 = AP_HAL::millis();
 			//hal.console->printf("CH30_Analysis: distance=%f, deg=%f\n",fdist,fdeg);
             //check in region
             //_bRt = ObjectInRegion( fdist, fdeg);
@@ -229,7 +244,7 @@ bool AP_RangeFinder_USD1_CAN::SetRadarAddress(uint8_t iaddress)
     frame.data[7]=0x00;
 	frame.dlc=0x08;
     //SR73 set collision detection region configuration(0x401)
-	frame.id= 0x401;   // setup region
+/*	frame.id= 0x401;   // setup region
 	frame.data[0]=0xFF;//Coordinates valid, Activation valid num:63
 	frame.data[1]=0x01;//RegionID 
 	frame.data[2]=0x4E;
@@ -239,7 +254,8 @@ bool AP_RangeFinder_USD1_CAN::SetRadarAddress(uint8_t iaddress)
     frame.data[6]=0x73;
     frame.data[7]=0xFC;
 	frame.dlc=0x08;
-    _bRt = write_frame(frame,20000);
+ */
+   _bRt = write_frame(frame,20000);
     int irt = (int) _bRt;
     hal.console->printf("SetRadarAddress rt:%d\n",irt);
     return _bRt;

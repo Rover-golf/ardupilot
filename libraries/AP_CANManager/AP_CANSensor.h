@@ -35,7 +35,8 @@ public:
 
     // handler for incoming frames
     virtual void handle_frame(AP_HAL::CANFrame &frame) = 0;
-
+    //check connect and send data
+    virtual void Check_SendData() { }
     // handler for outgoing frames
     bool write_frame(AP_HAL::CANFrame &out_frame, const uint64_t timeout_us);
     bool read_frame(AP_HAL::CANFrame &in_frame, const uint64_t timeout_us);

@@ -15,6 +15,8 @@ public:
     void handle_frame(AP_HAL::CANFrame &frame) override;
     //   
     void init(uint8_t driver_index, bool enable_filters) override;
+    //check connect and send data
+    void Check_SendData() override;
 protected:
     virtual MAV_DISTANCE_SENSOR _get_mav_distance_sensor_type() const override {
         return MAV_DISTANCE_SENSOR_RADAR;
@@ -25,7 +27,8 @@ private:
     uint32_t _last_reading_ms;
     uint16_t _target_deg; 
     //Radar
-    bool CH30_Startup();
+    uint32_t _last_reading_CH30;
+    bool CH30_Startup(bool bRestart = false);
     bool CH30_Analysis(AP_HAL::CANFrame &frame,float& fdist, float& fdeg);
     bool SR73_Analysis(AP_HAL::CANFrame &frame,float& fdist, float& fdeg);
     bool SetRadarAddress(uint8_t iaddress = 0x00);
