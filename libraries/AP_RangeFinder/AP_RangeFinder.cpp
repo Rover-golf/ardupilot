@@ -38,6 +38,7 @@
 #include "AP_RangeFinder_Benewake_TF03.h"
 #include "AP_RangeFinder_Benewake_TFMini.h"
 #include "AP_RangeFinder_Benewake_TFMiniPlus.h"
+#include "AP_RangeFinder_Benewake_AJSR04.h"
 #include "AP_RangeFinder_PWM.h"
 #include "AP_RangeFinder_GYUS42v2.h"
 #include "AP_RangeFinder_HC_SR04.h"
@@ -517,6 +518,11 @@ void RangeFinder::detect_instance(uint8_t instance, uint8_t& serial_instance)
             _add_backend(new AP_RangeFinder_Benewake_TF03(state[instance], params[instance], serial_instance++), instance);
         }
         break;
+    case Type::BenewakeAJSR04:
+        if (AP_RangeFinder_AJSR04::detect(serial_instance)) {
+            _add_backend(new AP_RangeFinder_AJSR04(state[instance], params[instance], serial_instance++), instance);
+        }
+        break;        
     case Type::PWM:
 #ifndef HAL_BUILD_AP_PERIPH
         if (AP_RangeFinder_PWM::detect()) {
