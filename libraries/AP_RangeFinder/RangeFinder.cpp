@@ -36,6 +36,7 @@
 #include "AP_RangeFinder_Wasp.h"
 #include "AP_RangeFinder_Benewake.h"
 #include "AP_RangeFinder_Benewake_TFMiniPlus.h"
+#include "AP_RangeFinder_AJSR04.h"
 #include "AP_RangeFinder_PWM.h"
 #include "AP_RangeFinder_BLPing.h"
 #include "AP_RangeFinder_UAVCAN.h"
@@ -510,6 +511,11 @@ void RangeFinder::detect_instance(uint8_t instance, uint8_t& serial_instance)
             drivers[instance] = new AP_RangeFinder_Benewake(state[instance], params[instance], serial_instance++, AP_RangeFinder_Benewake::BENEWAKE_TF03);
         }
         break;
+     case BenewakeAJSR04:
+        if (AP_RangeFinder_AJSR04::detect(serial_instance)) {
+            _add_backend(new AP_RangeFinder_AJSR04(state[instance], params[instance], serial_instance++));
+        }
+        break;        
     case RangeFinder_TYPE_PWM:
         if (AP_RangeFinder_PWM::detect()) {
             drivers[instance] = new AP_RangeFinder_PWM(state[instance], params[instance], estimated_terrain_height);
