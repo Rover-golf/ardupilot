@@ -61,7 +61,7 @@ void AP_RangeFinder_AJSR04::update(void)
 {
     if (get_reading(state.distance_cm)) {
         // update range_valid state based on distance measured
-  	    hal.console->printf("AP_RangeFinder_AJSR04 Update=%d\r\n",state.distance_cm);
+  	    //hal.console->printf("AP_RangeFinder_AJSR04 Update=%d\r\n",state.distance_cm);
         state.last_reading_ms = AP_HAL::millis();
         update_status();
     } else if (AP_HAL::millis() - state.last_reading_ms > 200) {
@@ -135,13 +135,13 @@ bool AP_RangeFinder_AJSR04::get_reading(uint16_t &reading_cm)
         // if only out of range readings return larger of
         // driver defined maximum range for the model and user defined max range + 1m
         reading_cm = MAX(AJSR04_DIST_MAX_CM, max_distance_cm() + AJSR04_OUT_OF_RANGE_ADD_CM);
-        hal.console->printf("sr-04: distance=%d.\n",reading_cm);
+        //hal.console->printf("sr-04: distance=%d.\n",reading_cm);
         return true;
     }
     else if (count > 0) {
         // return distance of readings
         reading_cm = reading_cm / 10;
-        hal.console->printf("sr-04: distance=%d.\n",reading_cm);
+        //hal.console->printf("sr-04: distance=%d.\n",reading_cm);
         return true;
     }
 

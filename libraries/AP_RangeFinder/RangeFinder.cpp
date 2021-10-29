@@ -511,9 +511,9 @@ void RangeFinder::detect_instance(uint8_t instance, uint8_t& serial_instance)
             drivers[instance] = new AP_RangeFinder_Benewake(state[instance], params[instance], serial_instance++, AP_RangeFinder_Benewake::BENEWAKE_TF03);
         }
         break;
-     case BenewakeAJSR04:
+    case RangeFinder_TYPE_AJSR04:
         if (AP_RangeFinder_AJSR04::detect(serial_instance)) {
-            _add_backend(new AP_RangeFinder_AJSR04(state[instance], params[instance], serial_instance++));
+            drivers[instance] = new AP_RangeFinder_AJSR04(state[instance], params[instance], serial_instance++);
         }
         break;        
     case RangeFinder_TYPE_PWM:

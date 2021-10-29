@@ -8,12 +8,6 @@ class AP_RangeFinder_AJSR04 : public AP_RangeFinder_Backend
 
 public:
 
-    enum benewake_model_type {
-        BENEWAKE_TF02 = 0,
-        BENEWAKE_TFmini = 1,
-        BENEWAKE_TF03 = 2,
-    };
-
     // constructor
     AP_RangeFinder_AJSR04(RangeFinder::RangeFinder_State &_state,
                             AP_RangeFinder_Params &_params,
@@ -38,7 +32,6 @@ private:
     bool get_reading(uint16_t &reading_cm);
 
     AP_HAL::UARTDriver *uart = nullptr;
-    benewake_model_type model_type;
     uint8_t linebuf[10];
     uint8_t linebuf_len;
 };

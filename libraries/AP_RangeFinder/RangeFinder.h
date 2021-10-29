@@ -78,7 +78,7 @@ public:
         RangeFinder_TYPE_Lanbao = 26,
         RangeFinder_TYPE_BenewakeTF03 = 27,
         RangeFinder_TYPE_SR73F = 28,    // sr73
-        BenewakeAJSR04 = 34,
+        RangeFinder_TYPE_AJSR04 = 34,
     };
 
     enum RangeFinder_Function {
