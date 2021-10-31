@@ -21,8 +21,9 @@ class AP_RangeFinder_SR73F: public AP_RangeFinder_Backend
   public:
 	//构造函数
 	AP_RangeFinder_SR73F(RangeFinder::RangeFinder_State &_state,AP_RangeFinder_Params &_params);
-	static bool detect(RangeFinder::RangeFinder_State &_state,AP_RangeFinder_Params &_params);
-    bool init(void);
+//	static bool detect(RangeFinder::RangeFinder_State &_state,AP_RangeFinder_Params &_params);
+    static AP_RangeFinder_Backend *detect(RangeFinder::RangeFinder_State &_state,AP_RangeFinder_Params &_params);
+	bool init(void);
     bool get_reading(uint16_t &reading_cm, float &target_deg);
     void update(void)override;;
     enum{

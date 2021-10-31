@@ -35,7 +35,7 @@ AP_RangeFinder_SR73F::AP_RangeFinder_SR73F(RangeFinder::RangeFinder_State &_stat
 *修改作者：zuav
 *备注信息：
 ***************************************************************************************/
-bool AP_RangeFinder_SR73F::detect(RangeFinder::RangeFinder_State &_state,AP_RangeFinder_Params &_params)
+AP_RangeFinder_Backend *AP_RangeFinder_SR73F::detect(RangeFinder::RangeFinder_State &_state,AP_RangeFinder_Params &_params)
 {
 	AP_RangeFinder_SR73F *sensor= new AP_RangeFinder_SR73F(_state,_params);
     sensor->init();
@@ -255,10 +255,10 @@ bool AP_RangeFinder_SR73F::get_reading(uint16_t &reading_cm, float &target_deg)
 	{
     	reading_cm = 0;
 		target_deg = 0.0;
-	hal.console->printf("reading return false\r\n");
+	//hal.console->printf("reading return false\r\n");
 	    return false;
 	}
-	hal.console->printf("reading return true\r\n");
+	//hal.console->printf("reading return true\r\n");
     reading_cm = get_object_data.target_distance * 100;
     if(can_rx.id == OBJECT_INFORMATION)
 		target_deg = get_object_data.target_deg*57.29;
@@ -280,12 +280,12 @@ void AP_RangeFinder_SR73F::update(void)
 	//读取数据
     if (get_reading(state.distance_cm, state.target_deg))
     {
-		hal.console->printf("final distance=%d\r\n",state.distance_cm);
-		hal.console->printf("final deg=%f\r\n",state.target_deg);
+	//	hal.console->printf("final distance=%d\r\n",state.distance_cm);
+	//	hal.console->printf("final deg=%f\r\n",state.target_deg);
         //更新测量数据
 		state.last_reading_ms = AP_HAL::millis();
         update_status();
-    } else
+    } else if(AP_HAL::millis() - state.last_reading_ms > 200)
     {
         set_status(RangeFinder::RangeFinder_NoData);
     }
