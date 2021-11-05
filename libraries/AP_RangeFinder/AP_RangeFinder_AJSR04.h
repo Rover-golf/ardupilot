@@ -29,9 +29,18 @@ private:
 
     // get a reading
     // distance returned in reading_cm
-    bool get_reading(uint16_t &reading_cm);
-
+    bool get_reading(uint16_t &reading_cm,float& target_deg);
+    //get single sensor distance returned in reading_cm
+    bool get_reading_single(uint16_t &reading_cm);
+    //get multi sensor distance returned in reading_cm and number in sensornum
+    bool get_reading_multi(uint16_t &reading_cm, uint8_t &sensornum);
+    //require reading distance information
+    bool require_reading_distance(uint8_t sensornum);    
     AP_HAL::UARTDriver *uart = nullptr;
     uint8_t linebuf[10];
     uint8_t linebuf_len;
+    //sensor max address
+    uint8_t _Address;
+    //current sensor id
+    uint8_t _cursensorid = 0x01;
 };
