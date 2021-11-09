@@ -78,6 +78,7 @@ public:
         k_param_golf_can_0_buad,
         k_param_golf_can_1,
         k_param_golf_can_1_buad,
+        k_param_golf_yaw,
 
         // 97: RSSI
         k_param_rssi = 97,
@@ -310,7 +311,7 @@ public:
     AP_Int8 golf_can_1;
     AP_Int32 golf_can_0_buad;
     AP_Int32 golf_can_1_buad;
-
+    AP_Float golf_yaw;
 
     Parameters() {}
 };

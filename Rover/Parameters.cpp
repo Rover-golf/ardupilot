@@ -413,6 +413,7 @@ const AP_Param::Info Rover::var_info[] = {
     GSCALAR(golf_can_0_buad, "GF_CAN_0_BUAD", 500000),
     GSCALAR(golf_can_1, "GF_CAN_1", 1),
     GSCALAR(golf_can_1_buad, "GF_CAN_1_BUAD", 500000),
+    GSCALAR(golf_yaw, "GF_YAW", 0),   
     AP_VAREND
 };
 
