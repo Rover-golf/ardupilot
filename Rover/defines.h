@@ -101,3 +101,25 @@ enum frame_class {
     FRAME_BOAT = 2,
     FRAME_BALANCEBOT = 3,
 };
+
+enum golf_work_state_t
+{
+    GOLF_HOLD = 0,
+    GOLF_WORK,
+    GOLF_BACK,
+    GOLF_UNLOAD,
+    GOLF_PREP_PI,
+    GOLF_PI_CTL,
+    GOLF_LOW_BATT,
+    GOLF_PI_AVOID,
+    GOLF_NOWORK,    // Josh
+    GOLF_COLLISION, // Josh
+
+};
+
+#define AUX_ENA_PIN 50      // AUX1
+#define AUX_IN1_PIN 51      // AUX2
+#define AUX_IN2_PIN 52      // AUX3
+
+#define AUX_AVOID_PIN 54    // AUX4
+#define AUX_GOLF_PIN 53     // AUX5

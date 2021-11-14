@@ -117,6 +117,7 @@ public:
     friend class ModeSmartRTL;
     friend class ModeFollow;
     friend class ModeSimple;
+    friend class ModeGoBatt;
 
     friend class RC_Channel_Rover;
     friend class RC_Channels_Rover;
@@ -261,6 +262,7 @@ private:
     ModeSmartRTL mode_smartrtl;
     ModeFollow mode_follow;
     ModeSimple mode_simple;
+    ModeGoBatt mode_gobatt;
 
     // cruise throttle and speed learning
     typedef struct {
@@ -432,6 +434,57 @@ public:
 
     // Simple mode
     float simple_sin_yaw;
+    // golf
+    //AP_SR73F_CAN sr73f_can;
+    void one_hz_loop(void);
+    void hundred_hz_loop(void);
+    void sim_pi_ctl(void);
+    void sim_pi_guide(void);
+
+    void init_golfpin(void);
+    void motor_pull(void);
+    void motor_push(void);
+    void motor_stop(void);
+
+
+    void golf_start_mission();
+    void golf_end_mission();
+
+    
+    void start_debug();
+
+    float constrain_deg(float deg);
+    void send_golf_to_buff();
+    void golf_send_cmd(uint16_t cmd_id, const float &param1, const float &param2);  // Josh added param1,2
+
+    void get_proximity_dis(float &distance0, float &distance45,float &distance315);
+
+
+    golf_work_state_t golf_work_state = GOLF_NOWORK; // Josh changed from GOLF_HOLD
+    bool work_enable = false;
+    bool isSleep = true; // Josh
+    bool work_golf_back = false;    // Josh
+
+    bool start_auto = true;
+    uint32_t rover_golf_start = 0;
+    bool batt_nd_charge = false;
+
+
+    bool yaw_enable = false;
+    float yaw_desire = 0.0f;
+    bool yaw_complete = false;
+    
+    uint8_t sim_pi_guide_state = 0;
+    bool pi_ctl = false;
+    bool rover_reached_stick = false;
+    uint16_t pi_ctl_id = 0;
+    uint8_t pi_ctl_step = 0;
+    uint32_t pi_ctl_start = 0;
+
+    uint8_t golf_is_full = 0xff;
+    uint8_t nd_collision = 0xff;
+
+    float target_deg = 0.0f;    
 };
 
 extern Rover rover;

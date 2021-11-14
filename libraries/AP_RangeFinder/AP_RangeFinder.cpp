@@ -163,6 +163,8 @@ const AP_Param::GroupInfo *RangeFinder::backend_var_info[RANGEFINDER_MAX_INSTANC
 
 RangeFinder::RangeFinder()
 {
+    init_done = false;//Jack
+    
     AP_Param::setup_object_defaults(this, var_info);
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL

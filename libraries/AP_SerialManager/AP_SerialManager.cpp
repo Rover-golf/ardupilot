@@ -770,6 +770,18 @@ void AP_SerialManager::set_protocol_and_baud(uint8_t sernum, enum SerialProtocol
     }
 }
 
+AP_SerialManager::SerialProtocol AP_SerialManager::get_protocol(uint8_t sernum)
+{
+    if (sernum <= ARRAY_SIZE(state)) 
+    {
+        return (SerialProtocol)state[sernum].protocol.get();   
+    }
+    else
+    {
+        return SerialProtocol_None;
+    }
+    
+} 
 
 namespace AP {
 
