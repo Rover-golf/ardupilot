@@ -81,6 +81,12 @@ void Rover::one_hz_loop(void)
     uint8_t nd_avd = 0;
 
     // Begin Josh
+ 
+    if(pi_ctl == false && rover.control_mode->is_autopilot_mode())
+    {
+        motor_pull();
+    } 
+       
 //#if HAL_ENABLE_LIBUAVCAN_DRIVERS
 //     float distance_cm;
 //#endif
@@ -244,6 +250,7 @@ void Rover::one_hz_loop(void)
 */
     // 状态机
 //    gcs().send_text(MAV_SEVERITY_DEBUG, "golf_work_state = %d ", golf_work_state);
+    gcs().send_text(MAV_SEVERITY_CRITICAL, "golf_work_state = %i",golf_work_state);
 
     switch (golf_work_state)
     {
@@ -320,9 +327,11 @@ void Rover::one_hz_loop(void)
 
         if (g2.wp_nav.reached_destination())
         {
+            gcs().send_text(MAV_SEVERITY_CRITICAL, "after dest");
             golf_work_state = GOLF_BACK;
             work_golf_back = true; // Josh
             rover.set_mode(rover.mode_rtl, ModeReason::EVERYDAY_END);
+            gcs().send_text(MAV_SEVERITY_CRITICAL, "after dest, RTL");
 
             // golf_work_state = GOLF_PREP_PI;
         }
@@ -503,6 +512,7 @@ void Rover::sim_pi_ctl(void)
         }  
         case 9000:  // reached home then unload ball
         {
+//            gcs().send_text(MAV_SEVERITY_INFO, "ready to unload bsll");
             switch (pi_ctl_step)
             {
             case 0:
@@ -513,8 +523,9 @@ void Rover::sim_pi_ctl(void)
 //                }
                 break;
             case 1:
-                // run guided
-                sim_pi_guide();
+                // run guided  using UWB 
+                //sim_pi_guide();
+                rover_reached_stick = true;
                 if (rover_reached_stick)
                 {
                     rover_reached_stick = false;
@@ -655,6 +666,7 @@ void Rover::golf_start_mission(void)
     rover.rover_golf_start = AP_HAL::millis();
     work_enable = true;
     start_auto = false;
+    golf_work_state = GOLF_WORK;
     if (isSleep) // Josh
     {
         golf_work_state = GOLF_HOLD;
@@ -664,6 +676,7 @@ void Rover::golf_start_mission(void)
 
 void Rover::golf_end_mission(void)
 {
+     gcs().send_text(MAV_SEVERITY_DEBUG, "golf_end_mission");
     rover_golf_start = 0;
     work_enable = false;
     batt_nd_charge = true;

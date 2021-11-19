@@ -673,101 +673,101 @@ MAV_RESULT GCS_MAVLINK_Rover::handle_command_long_packet(const mavlink_command_l
         gcs().send_text(MAV_SEVERITY_DEBUG, "AUX4:%d", rover.check_digital_pin(AUX_AVOID_PIN));
         gcs().send_text(MAV_SEVERITY_DEBUG, "AUX5:%d", rover.check_digital_pin(AUX_GOLF_PIN));
         return MAV_RESULT_ACCEPTED;
-    // case 7021:
-    //     gcs().send_text(MAV_SEVERITY_DEBUG, "GOLF_START1 at %02d:%02d GOLF_END1 at %02d:%02d",
-    //                     rover.g2.start_1_hour, rover.g2.start_1_min,
-    //                     rover.g2.end_1_hour, rover.g2.end_1_min);
-    //     gcs().send_text(MAV_SEVERITY_DEBUG, "GOLF_START2 at %02d:%02d GOLF_END2 at %02d:%02d",
-    //                     rover.g2.start_2_hour, rover.g2.start_2_min,
-    //                     rover.g2.end_2_hour, rover.g2.end_2_min);
-    //     gcs().send_text(MAV_SEVERITY_DEBUG, "GOLF_START3 at %02d:%02d GOLF_END3 at %02d:%02d",
-    //                     rover.g2.start_3_hour, rover.g2.start_3_min,
-    //                     rover.g2.end_3_hour, rover.g2.end_3_min);
-    //     return MAV_RESULT_ACCEPTED;
+/*    case 7021:
+         gcs().send_text(MAV_SEVERITY_DEBUG, "GOLF_START1 at %02d:%02d GOLF_END1 at %02d:%02d",
+                         rover.g2.start_1_hour, rover.g2.start_1_min,
+                         rover.g2.end_1_hour, rover.g2.end_1_min);
+         gcs().send_text(MAV_SEVERITY_DEBUG, "GOLF_START2 at %02d:%02d GOLF_END2 at %02d:%02d",
+                         rover.g2.start_2_hour, rover.g2.start_2_min,
+                         rover.g2.end_2_hour, rover.g2.end_2_min);
+         gcs().send_text(MAV_SEVERITY_DEBUG, "GOLF_START3 at %02d:%02d GOLF_END3 at %02d:%02d",
+                         rover.g2.start_3_hour, rover.g2.start_3_min,
+                         rover.g2.end_3_hour, rover.g2.end_3_min);
+         return MAV_RESULT_ACCEPTED;
+*/
+    case 8001:
+         if (!rover.control_mode->in_guided_mode())
+         {
+             return MAV_RESULT_TEMPORARILY_REJECTED;
+         }
+         rover.mode_guided.set_desired_heading_and_speed(packet.param1, 0.0f);
 
-    // case 8001:
-    //     if (!rover.control_mode->in_guided_mode())
-    //     {
-    //         return MAV_RESULT_TEMPORARILY_REJECTED;
-    //     }
-    //     rover.mode_guided.set_desired_heading_and_speed(packet.param1, 0.0f);
+         return MAV_RESULT_ACCEPTED;
+    case 8002:
+         gcs().send_text(MAV_SEVERITY_CRITICAL, "try set set_throttle%f", packet.param1);
+         rover.g2.motors.set_throttle(packet.param1);
+         return MAV_RESULT_ACCEPTED;
+    case 8003:
+         rover.g2.motors.set_steering(packet.param1, false);
+         return MAV_RESULT_ACCEPTED;
 
-    //     return MAV_RESULT_ACCEPTED;
-    // case 8002:
-    //     gcs().send_text(MAV_SEVERITY_CRITICAL, "try set set_throttle%f", packet.param1);
-    //     rover.g2.motors.set_throttle(packet.param1);
-    //     return MAV_RESULT_ACCEPTED;
-    // case 8003:
-    //     rover.g2.motors.set_steering(packet.param1, false);
-    //     return MAV_RESULT_ACCEPTED;
+    case 8004:
+         rover.g2.motors.set_lateral(packet.param1);
+         return MAV_RESULT_ACCEPTED;
+    case 8008:
+         rover.work_enable = true;
+         return MAV_RESULT_ACCEPTED;
 
-    // case 8004:
-    //     rover.g2.motors.set_lateral(packet.param1);
-    //     return MAV_RESULT_ACCEPTED;
-    // case 8008:
-    //     rover.work_enable = true;
-    //     return MAV_RESULT_ACCEPTED;
+    // 设置油门
+    case 8010:
+         if (!rover.control_mode->in_gobatt_mode())
+         {
+             gcs().send_text(MAV_SEVERITY_DEBUG, "mode gobatt needed");
 
-    // // 设置油门
-    // case 8010:
-    //     if (!rover.control_mode->in_gobatt_mode())
-    //     {
-    //         gcs().send_text(MAV_SEVERITY_DEBUG, "mode gobatt needed");
+             return MAV_RESULT_TEMPORARILY_REJECTED;
+         }
+         // para1,油门-100-+100,目测15-30ok，20
+         // para2,-4500-4500，光滑室内1000能转，室外1500
+         // 正为顺时针
+         rover.mode_gobatt.set_para(packet.param1, packet.param2);
+         gcs().send_text(MAV_SEVERITY_DEBUG, "speed:%f\trot:%f", packet.param1, packet.param2);
+         return MAV_RESULT_ACCEPTED;
 
-    //         return MAV_RESULT_TEMPORARILY_REJECTED;
-    //     }
-    //     // para1,油门-100-+100,目测15-30ok，20
-    //     // para2,-4500-4500，光滑室内1000能转，室外1500
-    //     // 正为顺时针
-    //     rover.mode_gobatt.set_para(packet.param1, packet.param2);
-    //     gcs().send_text(MAV_SEVERITY_DEBUG, "speed:%f\trot:%f", packet.param1, packet.param2);
-    //     return MAV_RESULT_ACCEPTED;
+    // 设定给定的朝向,角度制
+    // 设置0-360
+    case 8011:
+         if (!rover.control_mode->in_gobatt_mode())
+         {
+             gcs().send_text(MAV_SEVERITY_DEBUG, "mode gobatt needed");
+             return MAV_RESULT_TEMPORARILY_REJECTED;
+         }
+         rover.yaw_enable = true;
+         rover.yaw_complete = false;
+         rover.yaw_desire = packet.param1;
+         gcs().send_text(MAV_SEVERITY_DEBUG, "yaw rot to:%f", packet.param1);
+         return MAV_RESULT_ACCEPTED;
 
-    // // 设定给定的朝向,角度制
-    // // 设置0-360
-    // case 8011:
-    //     if (!rover.control_mode->in_gobatt_mode())
-    //     {
-    //         gcs().send_text(MAV_SEVERITY_DEBUG, "mode gobatt needed");
-    //         return MAV_RESULT_TEMPORARILY_REJECTED;
-    //     }
-    //     rover.yaw_enable = true;
-    //     rover.yaw_complete = false;
-    //     rover.yaw_desire = packet.param1;
-    //     gcs().send_text(MAV_SEVERITY_DEBUG, "yaw rot to:%f", packet.param1);
-    //     return MAV_RESULT_ACCEPTED;
+    // 针对当前朝向旋转，顺时针为正
+    // 强行计算出应该转到的角度
+    case 8012:
+         if (!rover.control_mode->in_gobatt_mode())
+         {
+           gcs().send_text(MAV_SEVERITY_DEBUG, "mode gobatt needed");
+             return MAV_RESULT_TEMPORARILY_REJECTED;
+         }
+         gcs().send_text(MAV_SEVERITY_DEBUG, "turn:%f", packet.param1);
 
-    // // 针对当前朝向旋转，顺时针为正
-    // // 强行计算出应该转到的角度
-    // case 8012:
-    //     if (!rover.control_mode->in_gobatt_mode())
-    //     {
-    //         gcs().send_text(MAV_SEVERITY_DEBUG, "mode gobatt needed");
-    //         return MAV_RESULT_TEMPORARILY_REJECTED;
-    //     }
-    //     gcs().send_text(MAV_SEVERITY_DEBUG, "turn:%f", packet.param1);
+         rover.yaw_enable = true;
+         rover.yaw_complete = false;
+         rover.yaw_desire = rover.constrain_deg(rover.constrain_deg(degrees(rover.ahrs.yaw_sensor)) + packet.param1);
 
-    //     rover.yaw_enable = true;
-    //     rover.yaw_complete = false;
-    //     rover.yaw_desire = rover.constrain_deg(rover.constrain_deg(degrees(rover.ahrs.yaw_sensor)) + packet.param1);
+         return MAV_RESULT_ACCEPTED;
 
-    //     return MAV_RESULT_ACCEPTED;
-
-    // case 8013:
-    //     rover.yaw_enable = false;
-    //     rover.mode_gobatt.set_para();
-    //     gcs().send_text(MAV_SEVERITY_DEBUG, "gobatt now stop");
-    //     return MAV_RESULT_ACCEPTED;
+    case 8013:
+         rover.yaw_enable = false;
+         rover.mode_gobatt.set_para();
+         gcs().send_text(MAV_SEVERITY_DEBUG, "gobatt now stop");
+         return MAV_RESULT_ACCEPTED;
     
-    // case 8020:
-    //     rover.motor_pull();
-    //     return MAV_RESULT_ACCEPTED;
-    // case 8021:
-    //     rover.motor_push();
-    //     return MAV_RESULT_ACCEPTED;
-    // case 8022:
-    //     rover.motor_stop();
-    //     return MAV_RESULT_ACCEPTED;
+    case 8020:
+         rover.motor_pull();
+         return MAV_RESULT_ACCEPTED;
+    case 8021:
+         rover.motor_push();
+         return MAV_RESULT_ACCEPTED;
+    case 8022:
+         rover.motor_stop();
+         return MAV_RESULT_ACCEPTED;
         
     // // 飞控发出9000切换给树莓派控制
     // // 飞控发9010切换为避障模式

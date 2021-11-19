@@ -166,6 +166,8 @@ void Rover::startup_ground(void)
     // we don't want writes to the serial port to cause us to pause
     // so set serial ports non-blocking once we are ready to drive
     serial_manager.set_blocking_writes_all(false);
+
+    init_golfpin();
 }
 
 // update the ahrs flyforward setting which can allow
