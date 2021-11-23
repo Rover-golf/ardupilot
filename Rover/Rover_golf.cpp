@@ -250,7 +250,6 @@ void Rover::one_hz_loop(void)
 */
     // 状态机
 //    gcs().send_text(MAV_SEVERITY_DEBUG, "golf_work_state = %d ", golf_work_state);
-    gcs().send_text(MAV_SEVERITY_CRITICAL, "golf_work_state = %i",golf_work_state);
 
     switch (golf_work_state)
     {
@@ -327,7 +326,7 @@ void Rover::one_hz_loop(void)
 
         if (g2.wp_nav.reached_destination())
         {
-            gcs().send_text(MAV_SEVERITY_CRITICAL, "after dest");
+         //   gcs().send_text(MAV_SEVERITY_CRITICAL, "after dest");
             golf_work_state = GOLF_BACK;
             work_golf_back = true; // Josh
             rover.set_mode(rover.mode_rtl, ModeReason::EVERYDAY_END);
@@ -349,9 +348,10 @@ void Rover::one_hz_loop(void)
         rover.set_mode(rover.mode_gobatt, ModeReason::EVERYDAY_END);
         golf_work_state = GOLF_PI_CTL;
         pi_ctl_id = 9000;
-//        yaw_enable = true;
-//        yaw_complete = false;
-//        yaw_desire = 0;
+        //adjust direction
+        yaw_enable = true;
+        yaw_complete = false;
+        yaw_desire = g.golf_yaw;//180
         pi_ctl = true;
 //        golf_send_cmd(pi_ctl_id, rover.ahrs.yaw_sensor, target_deg); // Josh added parameters
         break;
@@ -516,17 +516,21 @@ void Rover::sim_pi_ctl(void)
             switch (pi_ctl_step)
             {
             case 0:
-//                if (yaw_complete)
-//                {
+                // wait for adjusting direction
+                if (yaw_complete)
+                {
                     pi_ctl_step++;
                     pi_ctl_start = AP_HAL::millis();
-//                }
+                }
                 break;
             case 1:
                 // run guided  using UWB 
                 //sim_pi_guide();
-                rover_reached_stick = true;
-                if (rover_reached_stick)
+                //rover_reached_stick = true;
+                //if (rover_reached_stick)
+                // go straight to the platform
+                rover.mode_gobatt.set_para(g.golf_throttle);//50
+                if (AP_HAL::millis() - pi_ctl_start > g.golf_time_forward)//2000
                 {
                     rover_reached_stick = false;
                     pi_ctl_start = AP_HAL::millis();
@@ -536,15 +540,16 @@ void Rover::sim_pi_ctl(void)
             case 2:
                 // open door and wait 10s
                 motor_push();     
-                if (AP_HAL::millis() - pi_ctl_start > 10000)
+                if (AP_HAL::millis() - pi_ctl_start > g.golf_time_opendoor)//10000
                 {
                     pi_ctl_start = AP_HAL::millis();
                     pi_ctl_step++;
                 }
                 break;
             case 3:
-                rover.mode_gobatt.set_para(-50);
-                if (AP_HAL::millis() - pi_ctl_start > 5000)
+                // backward
+                rover.mode_gobatt.set_para(-g.golf_throttle);//-50
+                if (AP_HAL::millis() - pi_ctl_start > g.golf_time_backward)//5000
                 {
                     pi_ctl_start = AP_HAL::millis();
                     pi_ctl_step++;
@@ -553,7 +558,7 @@ void Rover::sim_pi_ctl(void)
             case 4:
                 // close door and wait 3s
                 motor_pull();    
-                if (AP_HAL::millis() - pi_ctl_start > 3000)
+                if (AP_HAL::millis() - pi_ctl_start > g.golf_time_closedoor)//3000
                 {
                     pi_ctl_step = 0;
                     pi_ctl = false;

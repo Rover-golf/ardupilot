@@ -79,6 +79,11 @@ public:
         k_param_golf_can_1,
         k_param_golf_can_1_buad,
         k_param_golf_yaw,
+        k_param_golf_throttle,
+        k_param_golf_time_forward,
+        k_param_golf_time_opendoor,
+        k_param_golf_time_backward,
+        k_param_golf_time_closedoor,
 
         // 97: RSSI
         k_param_rssi = 97,
@@ -312,6 +317,11 @@ public:
     AP_Int32 golf_can_0_buad;
     AP_Int32 golf_can_1_buad;
     AP_Float golf_yaw;
+    AP_Float golf_throttle;
+    AP_Int32 golf_time_forward;
+    AP_Int32 golf_time_opendoor;
+    AP_Int32 golf_time_backward;
+    AP_Int32 golf_time_closedoor;
 
     Parameters() {}
 };

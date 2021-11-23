@@ -413,7 +413,13 @@ const AP_Param::Info Rover::var_info[] = {
     GSCALAR(golf_can_0_buad, "GF_CAN_0_BUAD", 500000),
     GSCALAR(golf_can_1, "GF_CAN_1", 1),
     GSCALAR(golf_can_1_buad, "GF_CAN_1_BUAD", 500000),
-    GSCALAR(golf_yaw, "GF_YAW", 0),   
+    GSCALAR(golf_yaw, "GF_YAW", 180),
+    GSCALAR(golf_throttle, "GF_THROTTLE", 50),    
+    GSCALAR(golf_time_forward, "GF_TM_FORWARD", 2000),
+    GSCALAR(golf_time_opendoor, "GF_TM_OPENDOOR", 10000),
+    GSCALAR(golf_time_backward, "GF_TM_BACKWARD", 5000),
+    GSCALAR(golf_time_closedoor, "GF_TM_CLOSEDOOR", 3000),
+    
     AP_VAREND
 };
 
