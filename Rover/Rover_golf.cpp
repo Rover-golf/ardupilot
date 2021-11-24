@@ -86,7 +86,7 @@ void Rover::one_hz_loop(void)
     {
         motor_pull();
     } 
-       
+
 //#if HAL_ENABLE_LIBUAVCAN_DRIVERS
 //     float distance_cm;
 //#endif
@@ -349,9 +349,9 @@ void Rover::one_hz_loop(void)
         golf_work_state = GOLF_PI_CTL;
         pi_ctl_id = 9000;
         //adjust direction
-        yaw_enable = true;
-        yaw_complete = false;
-        yaw_desire = g.golf_yaw;//180
+       // yaw_enable = true;
+        //yaw_complete = false;
+        //yaw_desire = g.golf_yaw;//180
         pi_ctl = true;
 //        golf_send_cmd(pi_ctl_id, rover.ahrs.yaw_sensor, target_deg); // Josh added parameters
         break;
@@ -512,32 +512,55 @@ void Rover::sim_pi_ctl(void)
         }  
         case 9000:  // reached home then unload ball
         {
-//            gcs().send_text(MAV_SEVERITY_INFO, "ready to unload bsll");
+            gcs().send_text(MAV_SEVERITY_INFO, "9000 step=%i", pi_ctl_step );
             switch (pi_ctl_step)
             {
             case 0:
                 // wait for adjusting direction
-                if (yaw_complete)
-                {
+               // if (yaw_complete)
+                //{
                     pi_ctl_step++;
                     pi_ctl_start = AP_HAL::millis();
-                }
+                //}
                 break;
             case 1:
+                //adjust direction
+                //yaw_enable = true;
+                //yaw_complete = false;
+
+                float turn_degree;
+                turn_degree = g.golf_yaw - rover.constrain_deg(rover.constrain_deg(degrees(rover.ahrs.yaw_sensor)));
+
+                gcs().send_text(MAV_SEVERITY_INFO, "9000 g_yaw=%f yaw=%f, turn=%f",  
+                (float)g.golf_yaw, rover.constrain_deg(rover.constrain_deg(degrees(rover.ahrs.yaw_sensor))), turn_degree);
+
+                //yaw_desire = g.golf_yaw;//180
+  
+                rover.mode_gobatt.set_para(0,turn_degree);
+
+                pi_ctl_step++;
+                pi_ctl_start = AP_HAL::millis();
+                            
+                break;   
+            case 2:
                 // run guided  using UWB 
-                //sim_pi_guide();
+//                sim_pi_guide();
                 //rover_reached_stick = true;
                 //if (rover_reached_stick)
                 // go straight to the platform
-                rover.mode_gobatt.set_para(g.golf_throttle);//50
-                if (AP_HAL::millis() - pi_ctl_start > g.golf_time_forward)//2000
-                {
-                    rover_reached_stick = false;
-                    pi_ctl_start = AP_HAL::millis();
-                    pi_ctl_step++;
-                }
+//                if (yaw_complete)
+//                {
+                    rover.mode_gobatt.set_para(g.golf_throttle);//50
+                    if (AP_HAL::millis() - pi_ctl_start > g.golf_time_forward)//2000
+                    {
+                        rover.mode_gobatt.set_para();//stop
+                        rover_reached_stick = false;
+                        pi_ctl_start = AP_HAL::millis();
+                        pi_ctl_step++;
+                    }
+//                }
                 break;
-            case 2:
+            case 3:
                 // open door and wait 10s
                 motor_push();     
                 if (AP_HAL::millis() - pi_ctl_start > g.golf_time_opendoor)//10000
@@ -546,16 +569,17 @@ void Rover::sim_pi_ctl(void)
                     pi_ctl_step++;
                 }
                 break;
-            case 3:
+            case 4:
                 // backward
                 rover.mode_gobatt.set_para(-g.golf_throttle);//-50
                 if (AP_HAL::millis() - pi_ctl_start > g.golf_time_backward)//5000
                 {
+                    rover.mode_gobatt.set_para();//stop
                     pi_ctl_start = AP_HAL::millis();
                     pi_ctl_step++;
                 }
                 break;
-            case 4:
+            case 5:
                 // close door and wait 3s
                 motor_pull();    
                 if (AP_HAL::millis() - pi_ctl_start > g.golf_time_closedoor)//3000
