@@ -19,7 +19,7 @@ void Rover::hundred_hz_loop(void)
         if (yaw_get < 0)
             yaw_get += 360.0f;
         //Jacktest    
-        yaw_desire = g.golf_yaw;
+        //yaw_desire = g.golf_yaw;
 
         yaw_rate_to = yaw_desire - yaw_get;
         if (yaw_rate_to < 0)
@@ -43,6 +43,7 @@ void Rover::hundred_hz_loop(void)
             yaw_enable = false;
             yaw_complete = true;
             yaw_rate_to = 0;
+            pi_ctl_start = AP_HAL::millis();
         }
         rover.mode_gobatt.set_para(0.0f, yaw_rate_to);
     }
@@ -561,7 +562,7 @@ void Rover::sim_pi_ctl(void)
                     rover.mode_gobatt.set_para(g.golf_throttle);//50
                     if (AP_HAL::millis() - pi_ctl_start > g.golf_time_forward)//2000
                     {
-                        rover.mode_gobatt.set_para();//stop
+                      //  rover.mode_gobatt.set_para();//stop
                         rover_reached_stick = false;
                         pi_ctl_start = AP_HAL::millis();
                         pi_ctl_step++;
@@ -582,7 +583,7 @@ void Rover::sim_pi_ctl(void)
                 rover.mode_gobatt.set_para(-g.golf_throttle);//-50
                 if (AP_HAL::millis() - pi_ctl_start > g.golf_time_backward)//5000
                 {
-                    rover.mode_gobatt.set_para();//stop
+                //    rover.mode_gobatt.set_para();//stop
                     pi_ctl_start = AP_HAL::millis();
                     pi_ctl_step++;
                 }
@@ -703,6 +704,7 @@ void Rover::golf_start_mission(void)
     rover.rover_golf_start = AP_HAL::millis();
     work_enable = true;
     start_auto = false;
+    pi_ctl_step = 0;
     golf_work_state = GOLF_WORK;
     if (isSleep) // Josh
     {
