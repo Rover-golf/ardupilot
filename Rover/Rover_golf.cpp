@@ -13,21 +13,31 @@ void Rover::hundred_hz_loop(void)
 {
     if (yaw_enable)
     {
-        float yaw_get = degrees(ahrs.yaw_sensor);
+        float yaw_get = degrees(ahrs.yaw);
         float yaw_rate_to = 0;
         // 全部转到0-360比较
         if (yaw_get < 0)
             yaw_get += 360.0f;
+        //Jacktest    
+        yaw_desire = g.golf_yaw;
 
         yaw_rate_to = yaw_desire - yaw_get;
         if (yaw_rate_to < 0)
             yaw_rate_to += 360.0f;
-        if (yaw_rate_to > 180)
+ /*       if (yaw_rate_to > 180)
             //yaw_rate_to = 360-yaw_rate_to;//反向转yaw_rate_to
             yaw_rate_to = -1;
 
         //否则正向
         yaw_rate_to = yaw_rate_to > 0 ? g.steer_rate_use : -g.steer_rate_use;
+ */
+        //--------------update 20211124------------
+        if (yaw_rate_to > 180)
+            yaw_rate_to = yaw_rate_to - 360;//反向转
+        gcs().send_text(MAV_SEVERITY_INFO, "hundred_hz_loop yaw_desire=%.0f yaw_get=%.0f, turn=%.0f",  
+            (float)yaw_desire,yaw_get, yaw_rate_to);       
+        yaw_rate_to = yaw_rate_to / 180.f * g.steer_rate_use; // scale +-180 to +-4500
+        //--------------end------------------------       
         if (fabsf(yaw_desire - yaw_get) < g.steer_error)
         {
             yaw_enable = false;
@@ -525,19 +535,17 @@ void Rover::sim_pi_ctl(void)
                 break;
             case 1:
                 //adjust direction
-                //yaw_enable = true;
-                //yaw_complete = false;
+                yaw_desire = g.golf_yaw;                 
+                yaw_enable = true;
+                yaw_complete = false;             
 
-                float turn_degree;
+/*              float turn_degree;
                 turn_degree = g.golf_yaw - rover.constrain_deg(rover.constrain_deg(degrees(rover.ahrs.yaw_sensor)));
 
                 gcs().send_text(MAV_SEVERITY_INFO, "9000 g_yaw=%f yaw=%f, turn=%f",  
                 (float)g.golf_yaw, rover.constrain_deg(rover.constrain_deg(degrees(rover.ahrs.yaw_sensor))), turn_degree);
-
-                //yaw_desire = g.golf_yaw;//180
-  
                 rover.mode_gobatt.set_para(0,turn_degree);
-
+*/
                 pi_ctl_step++;
                 pi_ctl_start = AP_HAL::millis();
                             
@@ -548,8 +556,8 @@ void Rover::sim_pi_ctl(void)
                 //rover_reached_stick = true;
                 //if (rover_reached_stick)
                 // go straight to the platform
-//                if (yaw_complete)
-//                {
+                if (yaw_complete)
+                {
                     rover.mode_gobatt.set_para(g.golf_throttle);//50
                     if (AP_HAL::millis() - pi_ctl_start > g.golf_time_forward)//2000
                     {
@@ -558,7 +566,7 @@ void Rover::sim_pi_ctl(void)
                         pi_ctl_start = AP_HAL::millis();
                         pi_ctl_step++;
                     }
-//                }
+                }
                 break;
             case 3:
                 // open door and wait 10s
