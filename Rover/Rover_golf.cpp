@@ -18,8 +18,6 @@ void Rover::hundred_hz_loop(void)
         // 全部转到0-360比较
         if (yaw_get < 0)
             yaw_get += 360.0f;
-        //Jacktest    
-        //yaw_desire = g.golf_yaw;
 
         yaw_rate_to = yaw_desire - yaw_get;
         if (yaw_rate_to < 0)
@@ -37,6 +35,11 @@ void Rover::hundred_hz_loop(void)
         gcs().send_text(MAV_SEVERITY_INFO, "hundred_hz_loop yaw_desire=%.0f yaw_get=%.0f, turn=%.0f",  
             (float)yaw_desire,yaw_get, yaw_rate_to);       
         yaw_rate_to = yaw_rate_to / 180.f * g.steer_rate_use; // scale +-180 to +-4500
+        
+        if(yaw_rate_to > 0 && yaw_rate_to < g.steer_yaw_min)
+            yaw_rate_to = g.steer_yaw_min;
+        else if(yaw_rate_to < 0 && yaw_rate_to > -g.steer_yaw_min)
+            yaw_rate_to = -g.steer_yaw_min;
         //--------------end------------------------       
         if (fabsf(yaw_desire - yaw_get) < g.steer_error)
         {

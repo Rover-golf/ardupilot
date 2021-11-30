@@ -400,8 +400,8 @@ const AP_Param::Info Rover::var_info[] = {
     GSCALAR(test_full_sec, "GF_RTL_SEC", 1800),
     GSCALAR(pwm_unload, "GF_PWM_UNLOAD", 1000),
     GSCALAR(pwm_normal, "GF_PWM_NORMAL", 2000),
-    GSCALAR(steer_rate_use, "GF_STEER_RATE", 2000),
-    GSCALAR(steer_yaw_to, "GF_STEER_DEG", 0),
+    GSCALAR(steer_rate_use, "GF_STEER_RATE", 4500),
+    GSCALAR(steer_yaw_min, "GF_STEER_MIN", 700),
     GSCALAR(steer_error, "GF_STEER_ERR", 3),
 
     GSCALAR(golf_yawrate_k, "GF_GD_YAWRATE", 100),

@@ -67,7 +67,7 @@ public:
         k_param_pwm_unload,
         k_param_pwm_normal,
         k_param_steer_rate_use,
-        k_param_steer_yaw_to,
+        k_param_steer_yaw_min,
         k_param_steer_error,
 
         k_param_golf_yawrate_k,
@@ -304,7 +304,7 @@ public:
     AP_Int16 pwm_unload;
     AP_Int16 pwm_normal;
     AP_Float steer_rate_use;
-    AP_Float steer_yaw_to;
+    AP_Float steer_yaw_min;
     AP_Float steer_error;
 
     AP_Float golf_yawrate_k;
