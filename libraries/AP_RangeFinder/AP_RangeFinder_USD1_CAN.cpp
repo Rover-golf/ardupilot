@@ -28,7 +28,7 @@ void AP_RangeFinder_USD1_CAN::update(void)
     } else if (new_data) {
         state.distance_cm = _distance_cm;
         state.last_reading_ms = _last_reading_ms;
-        //state.target_deg = _target_deg; 
+        state.target_deg = _target_deg; 
         update_status();
         new_data = false;
     }

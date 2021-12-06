@@ -84,7 +84,7 @@ public:
         k_param_golf_time_opendoor,
         k_param_golf_time_backward,
         k_param_golf_time_closedoor,
-
+        k_param_golf_near_distence,
         // 97: RSSI
         k_param_rssi = 97,
         k_param_rpm_sensor,     // rpm sensor 98
@@ -317,6 +317,7 @@ public:
     AP_Int32 golf_can_0_buad;
     AP_Int32 golf_can_1_buad;
     AP_Float golf_yaw;
+    AP_Int32 golf_near_distence;
     AP_Float golf_throttle;
     AP_Int32 golf_time_forward;
     AP_Int32 golf_time_opendoor;

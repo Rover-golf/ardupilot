@@ -419,7 +419,8 @@ const AP_Param::Info Rover::var_info[] = {
     GSCALAR(golf_time_opendoor, "GF_TM_OPENDOOR", 10000),
     GSCALAR(golf_time_backward, "GF_TM_BACKWARD", 5000),
     GSCALAR(golf_time_closedoor, "GF_TM_CLOSEDOOR", 3000),
-    
+    GSCALAR(golf_near_distence, "GF_NEAR_DIS", 50),
+      
     AP_VAREND
 };
 

@@ -526,35 +526,18 @@ void Rover::sim_pi_ctl(void)
         }  
         case 9000:  // reached home then unload ball
         {
-            gcs().send_text(MAV_SEVERITY_INFO, "9000 step=%i", pi_ctl_step );
+            //gcs().send_text(MAV_SEVERITY_INFO, "9000 step=%i", pi_ctl_step );
             switch (pi_ctl_step)
             {
             case 0:
-                // wait for adjusting direction
-               // if (yaw_complete)
-                //{
-                    pi_ctl_step++;
-                    pi_ctl_start = AP_HAL::millis();
-                //}
-                break;
-            case 1:
                 //adjust direction
                 yaw_desire = g.golf_yaw;                 
                 yaw_enable = true;
                 yaw_complete = false;             
-
-/*              float turn_degree;
-                turn_degree = g.golf_yaw - rover.constrain_deg(rover.constrain_deg(degrees(rover.ahrs.yaw_sensor)));
-
-                gcs().send_text(MAV_SEVERITY_INFO, "9000 g_yaw=%f yaw=%f, turn=%f",  
-                (float)g.golf_yaw, rover.constrain_deg(rover.constrain_deg(degrees(rover.ahrs.yaw_sensor))), turn_degree);
-                rover.mode_gobatt.set_para(0,turn_degree);
-*/
                 pi_ctl_step++;
-                pi_ctl_start = AP_HAL::millis();
-                            
+                pi_ctl_start = AP_HAL::millis();                           
                 break;   
-            case 2:
+            case 1:
                 // run guided  using UWB 
 //                sim_pi_guide();
                 //rover_reached_stick = true;
@@ -563,7 +546,10 @@ void Rover::sim_pi_ctl(void)
                 if (yaw_complete)
                 {
                     rover.mode_gobatt.set_para(g.golf_throttle);//50
-                    if (AP_HAL::millis() - pi_ctl_start > g.golf_time_forward)//2000
+                    uint8_t collision = rover.check_digital_pin(AUX_AVOID_PIN);
+                    bool neartarget = near_target(g.golf_near_distence);
+                    gcs().send_text(MAV_SEVERITY_INFO, "9000 wait stop:collision=%i neartarget = %d", collision,(int)neartarget );
+                    if ( collision==0 || neartarget || AP_HAL::millis() - pi_ctl_start > g.golf_time_forward)//2000
                     {
                       //  rover.mode_gobatt.set_para();//stop
                         rover_reached_stick = false;
@@ -572,6 +558,14 @@ void Rover::sim_pi_ctl(void)
                     }
                 }
                 break;
+            case 2:
+                // wait for stop
+                if (AP_HAL::millis() - pi_ctl_start > 2000)
+                {
+                    pi_ctl_step++;
+                    pi_ctl_start = AP_HAL::millis();
+                }
+                break;                   
             case 3:
                 // open door and wait 10s
                 motor_push();     
@@ -757,4 +751,25 @@ void Rover::get_proximity_dis(float &distance0, float &distance45,float &distanc
  
         }
     }
+}
+
+bool Rover::near_target(int distmax, int distmin)
+{
+    for (uint8_t i = 0; i < rover.rangefinder.num_sensors(); i++)
+    {
+
+        AP_RangeFinder_Backend *s = rover.rangefinder.get_backend(i);
+        if (s == nullptr)
+        {
+            continue;
+        }
+        int distance = s->distance_cm();
+        //gcs().send_text(MAV_SEVERITY_INFO, "#i=%i dist=%lf status = %i", i,distance, s->status());
+        if (distance >= distmin && distance < distmax )
+        {
+            //gcs().send_text(MAV_SEVERITY_INFO, "lidar dist #%i =  %lf", i, distance);
+            return true;
+        }
+    }
+    return false;
 }
