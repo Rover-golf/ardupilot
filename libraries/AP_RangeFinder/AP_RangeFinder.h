@@ -88,7 +88,8 @@ public:
         GYUS42v2 = 31,
         MSP = 32,
         USD1_CAN = 33,
-        BenewakeAJSR04 = 34,        
+        BenewakeAJSR04 = 34,
+        CYGLidar = 35,
         SITL = 100,
     };
 
