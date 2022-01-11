@@ -85,6 +85,7 @@ public:
         k_param_golf_time_backward,
         k_param_golf_time_closedoor,
         k_param_golf_near_distence,
+        k_param_golf_timing_enable,
         // 97: RSSI
         k_param_rssi = 97,
         k_param_rpm_sensor,     // rpm sensor 98
@@ -323,6 +324,8 @@ public:
     AP_Int32 golf_time_opendoor;
     AP_Int32 golf_time_backward;
     AP_Int32 golf_time_closedoor;
+    //timing work mode
+    AP_Int8 golf_timing_enable;
 
     Parameters() {}
 };
@@ -461,6 +464,7 @@ public:
 
     // FS options
     AP_Int32 fs_options;
+
 
     AP_Int8 start_1_hour;
     AP_Int8 start_1_min;

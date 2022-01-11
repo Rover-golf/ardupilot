@@ -53,4 +53,6 @@ private:
 
     void send_rangefinder() const override;
 
+    void golf_send_cmd(uint16_t cmd_id, const float param1 = 0, const float param2 = 0);
+
 };

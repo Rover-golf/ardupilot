@@ -70,13 +70,13 @@ void Rover::one_hz_loop(void)
     //sr73f_can.update();
     //golf: regular start&return
     static uint16_t test_work_s = 0;
-    //uint8_t hour, min, sec;
-    //uint16_t ms;
-    //获取现在的UTC时间 时 分 秒
-    //if (!AP::rtc().get_local_time(hour, min, sec, ms))
-    //     gcs().send_text(MAV_SEVERITY_DEBUG, "UTC get time faild!");
-    //else
-    //     gcs().send_text(MAV_SEVERITY_CRITICAL, "H:M:S %d:%d:%d", hour, min, sec);
+    uint8_t hour, min, sec;
+    uint16_t ms;
+    //获取现在的UTC时间 时 分 秒 
+    if (!AP::rtc().get_local_time(hour, min, sec, ms))
+        gcs().send_text(MAV_SEVERITY_DEBUG, "UTC get time faild!");
+    else
+        gcs().send_text(MAV_SEVERITY_CRITICAL, "H:M:S %d:%d:%d", hour, min, sec);
     batt_nd_charge = false;
 
     float batt_volt = battery.voltage();
@@ -209,59 +209,58 @@ void Rover::one_hz_loop(void)
     if (batt_is_low) { batt_nd_charge = true; }
 
     //定时启动
-    // bool time1_avaiable = !((g2.start_1_hour == 0) && (g2.start_1_min == 0) && (g2.end_1_hour == 0) && (g2.end_1_min == 0));
-    // bool time1_to_start = ((hour == (uint8_t)g2.start_1_hour) && (min == (uint8_t)g2.start_1_min) && (sec < 4));
-    // //    bool time1_to_start = ((hour*24+min >= (uint8_t)g2.start_1_hour*24+(uint8_t)g2.start_1_min)
-    // //                        && (hour*24+min < (uint8_t)g2.end_1_hour*24 +(uint8_t)g2.end_1_min) && (sec < 4));
-    // bool time1_to_end = ((hour == (uint8_t)g2.end_1_hour) && (min == (uint8_t)g2.end_1_min) && (sec < 4));
-    // bool time2_avaiable = !((g2.start_2_hour == 0) && (g2.start_2_min == 0) && (g2.end_2_hour == 0) && (g2.end_2_min == 0));
-    // bool time2_to_start = ((hour == (uint8_t)g2.start_2_hour) && (min == (uint8_t)g2.start_2_min) && (sec < 4));
-    // //    bool time2_to_start = ((hour*24+min >= (uint8_t)g2.start_2_hour*24+(uint8_t)g2.start_2_min)
-    // //                        && (hour*24+min < (uint8_t)g2.end_2_hour*24 +(uint8_t)g2.end_2_min) && (sec < 4));
-    // bool time2_to_end = ((hour == (uint8_t)g2.end_2_hour) && (min == (uint8_t)g2.end_2_min) && (sec < 4));
-    // bool time3_avaiable = !((g2.start_3_hour == 0) && (g2.start_3_min == 0) && (g2.end_3_hour == 0) && (g2.end_3_min == 0));
-    // bool time3_to_start = ((hour == (uint8_t)g2.start_3_hour) && (min == (uint8_t)g2.start_3_min) && (sec < 4));
-    // //    bool time3_to_start = ((hour*24+min >= (uint8_t)g2.start_3_hour*24+(uint8_t)g2.start_3_min)
-    // //                        && (hour*24+min < (uint8_t)g2.end_3_hour*24 +(uint8_t)g2.end_3_min) && (sec < 4));
-    // bool time3_to_end = ((hour == (uint8_t)g2.end_3_hour) && (min == (uint8_t)g2.end_3_min) && (sec < 4));
-
-//    gcs().send_text(MAV_SEVERITY_INFO, "t2s=%i ta=%i, slp=%i", time1_to_start, time1_avaiable, isSleep);
-    
-
-
-
-
-    /*
-    if ((time1_to_start && time1_avaiable) ||
-        (time2_to_start && time2_avaiable) ||
-        (time3_to_start && time3_avaiable))
+    if(g.golf_timing_enable==1)
     {
-        //      if(!work_enable)
-        //      {
-        work_enable = true;
-        if (isSleep) // Josh
+        bool time1_avaiable = !((g2.start_1_hour == 0) && (g2.start_1_min == 0) && (g2.end_1_hour == 0) && (g2.end_1_min == 0));
+        bool time1_to_start = ((hour == (uint8_t)g2.start_1_hour) && (min == (uint8_t)g2.start_1_min) && (sec < 4));
+        //    bool time1_to_start = ((hour*24+min >= (uint8_t)g2.start_1_hour*24+(uint8_t)g2.start_1_min)
+        //                        && (hour*24+min < (uint8_t)g2.end_1_hour*24 +(uint8_t)g2.end_1_min) && (sec < 4));
+        bool time1_to_end = ((hour == (uint8_t)g2.end_1_hour) && (min == (uint8_t)g2.end_1_min) && (sec < 4));
+        bool time2_avaiable = !((g2.start_2_hour == 0) && (g2.start_2_min == 0) && (g2.end_2_hour == 0) && (g2.end_2_min == 0));
+        bool time2_to_start = ((hour == (uint8_t)g2.start_2_hour) && (min == (uint8_t)g2.start_2_min) && (sec < 4));
+        //    bool time2_to_start = ((hour*24+min >= (uint8_t)g2.start_2_hour*24+(uint8_t)g2.start_2_min)
+        //                        && (hour*24+min < (uint8_t)g2.end_2_hour*24 +(uint8_t)g2.end_2_min) && (sec < 4));
+        bool time2_to_end = ((hour == (uint8_t)g2.end_2_hour) && (min == (uint8_t)g2.end_2_min) && (sec < 4));
+        bool time3_avaiable = !((g2.start_3_hour == 0) && (g2.start_3_min == 0) && (g2.end_3_hour == 0) && (g2.end_3_min == 0));
+        bool time3_to_start = ((hour == (uint8_t)g2.start_3_hour) && (min == (uint8_t)g2.start_3_min) && (sec < 4));
+        //    bool time3_to_start = ((hour*24+min >= (uint8_t)g2.start_3_hour*24+(uint8_t)g2.start_3_min)
+        //                        && (hour*24+min < (uint8_t)g2.end_3_hour*24 +(uint8_t)g2.end_3_min) && (sec < 4));
+        bool time3_to_end = ((hour == (uint8_t)g2.end_3_hour) && (min == (uint8_t)g2.end_3_min) && (sec < 4));
+
+        gcs().send_text(MAV_SEVERITY_INFO, "t2s=%i ta=%i, slp=%i", time1_to_start, time1_avaiable, isSleep);
+        
+        
+        if ((time1_to_start && time1_avaiable) ||
+            (time2_to_start && time2_avaiable) ||
+            (time3_to_start && time3_avaiable))
         {
-            golf_work_state = GOLF_HOLD;
-            isSleep = false;
+            //      if(!work_enable)
+            //      {
+            work_enable = true;
+            if (isSleep) // Josh
+            {
+                golf_work_state = GOLF_HOLD;
+                isSleep = false;
+            }
+            //      }
         }
-        //      }
-    }
 
-    if ((time1_to_end && time1_avaiable) ||
-        (time2_to_end && time2_avaiable) ||
-        (time3_to_end && time3_avaiable)
+        if ((time1_to_end && time1_avaiable) ||
+            (time2_to_end && time2_avaiable) ||
+            (time3_to_end && time3_avaiable)
 
-    )
-    {
-        // 结束了之后回去充电
-        work_enable = false;
-        batt_nd_charge = true;
-        golf_work_state = GOLF_BACK;
-        work_golf_back = true; // Josh
-        isSleep = true;        // Josh
-        rover.set_mode(rover.mode_rtl, ModeReason::EVERYDAY_END);
+        )
+        {
+            // 结束了之后回去充电
+            work_enable = false;
+            batt_nd_charge = true;
+            golf_work_state = GOLF_BACK;
+            work_golf_back = true; // Josh
+            isSleep = true;        // Josh
+            rover.set_mode(rover.mode_rtl, ModeReason::EVERYDAY_END);
+        }
+
     }
-*/
     // 状态机
 //    gcs().send_text(MAV_SEVERITY_DEBUG, "golf_work_state = %d ", golf_work_state);
 

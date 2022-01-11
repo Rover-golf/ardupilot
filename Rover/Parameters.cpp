@@ -420,7 +420,7 @@ const AP_Param::Info Rover::var_info[] = {
     GSCALAR(golf_time_backward, "GF_TM_BACKWARD", 5000),
     GSCALAR(golf_time_closedoor, "GF_TM_CLOSEDOOR", 3000),
     GSCALAR(golf_near_distence, "GF_NEAR_DIS", 50),
-      
+    GSCALAR(golf_timing_enable,"GF_TIMING_ENABLE",0),     
     AP_VAREND
 };
 
@@ -692,6 +692,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     AP_GROUPINFO("GOLF2_END_MIN", 58, ParametersG2, end_2_min, 0),
     AP_GROUPINFO("GOLF3_END_HOUR", 59, ParametersG2, end_3_hour, 0),
     AP_GROUPINFO("GOLF3_END_MIN", 60, ParametersG2, end_3_min, 0),
+    
 
     AP_GROUPEND
 };

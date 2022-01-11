@@ -768,7 +768,15 @@ MAV_RESULT GCS_MAVLINK_Rover::handle_command_long_packet(const mavlink_command_l
     case 8022:
          rover.motor_stop();
          return MAV_RESULT_ACCEPTED;
-        
+
+    case 8030:
+         gcs().send_text(MAV_SEVERITY_CRITICAL, "try set Timing enable = %f", packet.param1);
+         rover.g.golf_timing_enable = packet.param1;
+         return MAV_RESULT_ACCEPTED;
+     case 8031:
+        gcs().send_text(MAV_SEVERITY_CRITICAL, "try respond Timing enable = %d", (int)(rover.g.golf_timing_enable));             
+        golf_send_cmd(8032, rover.g.golf_timing_enable); 
+        return MAV_RESULT_ACCEPTED;   
     // // 飞控发出9000切换给树莓派控制
     // // 飞控发9010切换为避障模式
     // // pi发出的结束那啥的信号
@@ -1179,7 +1187,7 @@ void Rover::golf_send_cmd(uint16_t cmd_id, const float &param1, const float &par
                                   cmd_id, 0,
                                   param1, param2, 0, 0, 0, 0, 0);
     len = mavlink_msg_to_send_buffer(buf, &_send_msg);
-    
+
 
 
     // const AP_SerialManager* _serial_manager = &serial_manager;
@@ -1203,4 +1211,17 @@ void Rover::golf_send_cmd(uint16_t cmd_id, const float &param1, const float &par
         }
     }
 
+}
+
+void GCS_MAVLINK_Rover::golf_send_cmd(uint16_t cmd_id, const float param1, const float param2)
+{
+    if (HAVE_PAYLOAD_SPACE(chan, COMMAND_LONG)) {
+        mavlink_msg_command_long_send(
+            chan,
+            0,0,
+            cmd_id,
+            0,
+            param1, param2, 0, 0, 0, 0, 0);
+       //gcs().send_text(MAV_SEVERITY_CRITICAL, "try send golf command cmd_id= %d", cmd_id); 
+    }
 }
