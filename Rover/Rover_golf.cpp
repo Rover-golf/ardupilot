@@ -547,7 +547,7 @@ void Rover::sim_pi_ctl(void)
                     rover.mode_gobatt.set_para(g.golf_throttle);//50
                     uint8_t collision = rover.check_digital_pin(AUX_AVOID_PIN);
                     bool neartarget = near_target(g.golf_near_distence);
-                    gcs().send_text(MAV_SEVERITY_INFO, "9000 wait stop:collision=%i neartarget = %d", collision,(int)neartarget );
+                    gcs().send_text(MAV_SEVERITY_INFO, "9000 wait stop:collision=%i neartarget = %d, forward=%d", collision,(int)neartarget,(int)(g.golf_time_forward) );
                     if ( collision==0 || neartarget || AP_HAL::millis() - pi_ctl_start > g.golf_time_forward)//2000
                     {
                       //  rover.mode_gobatt.set_para();//stop
@@ -766,7 +766,7 @@ bool Rover::near_target(int distmax, int distmin)
         //gcs().send_text(MAV_SEVERITY_INFO, "#i=%i dist=%lf status = %i", i,distance, s->status());
         if (distance >= distmin && distance < distmax )
         {
-            //gcs().send_text(MAV_SEVERITY_INFO, "lidar dist #%i =  %lf", i, distance);
+            gcs().send_text(MAV_SEVERITY_INFO, "lidar dist #%i =  %d", i, distance);
             return true;
         }
     }
