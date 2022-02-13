@@ -459,7 +459,7 @@ public:
 
     void get_proximity_dis(float &distance0, float &distance45,float &distance315);
 
-    bool near_target(int distmax = 30, int distmin = 0);// cm
+    bool near_target(int distmax = 50, int distmin = 0);// cm
 
     golf_work_state_t golf_work_state = GOLF_NOWORK; // Josh changed from GOLF_HOLD
     bool work_enable = false;
