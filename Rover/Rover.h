@@ -460,6 +460,8 @@ public:
     void get_proximity_dis(float &distance0, float &distance45,float &distance315);
 
     bool near_target(int distmax = 50, int distmin = 0);// cm
+    float calc_triangle_angleC(float a, float b, float c);
+    float calc_triangle_sidelen(float a, float b, float angleC = 90.f);
 
     golf_work_state_t golf_work_state = GOLF_NOWORK; // Josh changed from GOLF_HOLD
     bool work_enable = false;
@@ -474,6 +476,7 @@ public:
     bool yaw_enable = false;
     float yaw_desire = 0.0f;
     bool yaw_complete = false;
+    bool uwb_complete = false;
     
     uint8_t sim_pi_guide_state = 0;
     bool pi_ctl = false;

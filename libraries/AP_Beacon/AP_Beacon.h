@@ -43,8 +43,8 @@ public:
         AP_BeaconType_Pozyx  = 1,
         AP_BeaconType_Marvelmind = 2,
         AP_BeaconType_Nooploop  = 3,
+        AP_BeaconType_Nooploop_AOA  = 4,
         AP_BeaconType_SITL   = 10,
-        AP_BeaconType_Nooploop_AOA  = 15
     };
 
     // The AP_BeaconState structure is filled in by the backend driver
