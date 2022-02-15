@@ -623,7 +623,8 @@ void Rover::sim_pi_guide(void)
 {
     // if (pi_ctl != true && pi_ctl_id != 9000 && pi_ctl_step != 1)
     //     return;
-    float uwb_admire = 0.0f, uwb_offset = 0.f, sidelen = 0.f;
+    //float uwb_admire = 0.0f, uwb_offset = 0.f, sidelen = 0.f;
+    float uwb_offset = 0.f, sidelen = 0.f;
     float delt = 0.f;
     float dis = 0.0f, angle = 0.0f, turn = 0.0f;
     g2.beacon.get_data(dis, angle);

@@ -477,7 +477,8 @@ public:
     float yaw_desire = 0.0f;
     bool yaw_complete = false;
     bool uwb_complete = false;
-    
+    float uwb_admire = 0.0f;
+
     uint8_t sim_pi_guide_state = 0;
     bool pi_ctl = false;
     bool rover_reached_stick = false;
