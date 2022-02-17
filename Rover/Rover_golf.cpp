@@ -532,7 +532,7 @@ void Rover::sim_pi_ctl(void)
             gcs().send_text(MAV_SEVERITY_INFO, "9000 step=%i", pi_ctl_step );
             switch (pi_ctl_step)
             {
-            case 0://GPS
+            case 0://start GPS
                 //adjust direction
                 yaw_desire = g.golf_yaw;                 
                 yaw_enable = true;
@@ -540,7 +540,7 @@ void Rover::sim_pi_ctl(void)
                 pi_ctl_step++;
                 pi_ctl_start = AP_HAL::millis();                           
                 break;
-            case 1://uwb
+            case 1://start uwb
                 if (yaw_complete)
                 {
                     uwb_complete = false;
@@ -548,32 +548,35 @@ void Rover::sim_pi_ctl(void)
                     pi_ctl_step++;
                     pi_ctl_start = AP_HAL::millis();                  
                 }
+                break;
+            case 2:// do uwb
+                if(uwb_complete)
+                {
+                    pi_ctl_step++;
+                    pi_ctl_start = AP_HAL::millis();                          
+                }
+                else
+                    sim_pi_guide();
                 break;   
-            case 2://forward
+            case 3://forward
                 // run guided  using UWB 
                 //sim_pi_guide();
                 //rover_reached_stick = true;
                 //if (rover_reached_stick)
                 // go straight to the platform
-                if (uwb_complete)
+                rover.mode_gobatt.set_para(g.golf_throttle);//50
+                // bool neartarget = near_target(g.golf_near_distence);
+                // gcs().send_text(MAV_SEVERITY_INFO, "9000 wait stop:collision=%i forward=%d", nd_collision,(int)(g.golf_time_forward) );
+                if ( nd_collision || AP_HAL::millis() - pi_ctl_start > g.golf_time_forward)//2000
                 {
-                    rover.mode_gobatt.set_para(g.golf_throttle);//50
-                   // uint8_t collision = rover.check_digital_pin(AUX_AVOID_PIN);
-                   // bool neartarget = near_target(g.golf_near_distence);
-                   // gcs().send_text(MAV_SEVERITY_INFO, "9000 wait stop:collision=%i forward=%d", nd_collision,(int)(g.golf_time_forward) );
-                    if ( nd_collision || AP_HAL::millis() - pi_ctl_start > g.golf_time_forward)//2000
-                    {
-                        rover.mode_gobatt.set_para();//stop
-                        rover_reached_stick = false;
-                        pi_ctl_start = AP_HAL::millis();
-                        pi_ctl_step++;
-                        gcs().send_text(MAV_SEVERITY_INFO, "9000 reach platform.");
-                    }
+                    rover.mode_gobatt.set_para();//stop
+                    rover_reached_stick = false;
+                    pi_ctl_start = AP_HAL::millis();
+                    pi_ctl_step++;
+                    gcs().send_text(MAV_SEVERITY_INFO, "9000 reach platform.");
                 }
-                else
-                    sim_pi_guide();
                 break;
-            case 3:
+            case 4:
                 // wait for stop
                 if (AP_HAL::millis() - pi_ctl_start > 2000)
                 {
@@ -581,7 +584,7 @@ void Rover::sim_pi_ctl(void)
                     pi_ctl_start = AP_HAL::millis();
                 }
                 break;                   
-            case 4:
+            case 5:
                 // open door and wait 10s
                 motor_push();     
                 if (AP_HAL::millis() - pi_ctl_start > g.golf_time_opendoor)//10000
@@ -590,7 +593,7 @@ void Rover::sim_pi_ctl(void)
                     pi_ctl_step++;
                 }
                 break;
-            case 5:
+            case 6:
                 // backward
                 rover.mode_gobatt.set_para(-g.golf_throttle);//-50
                 if (AP_HAL::millis() - pi_ctl_start > g.golf_time_backward)//5000
@@ -600,7 +603,7 @@ void Rover::sim_pi_ctl(void)
                     pi_ctl_step++;
                 }
                 break;
-            case 6:
+            case 7:
                 // close door and wait 3s
                 motor_pull();    
                 if (AP_HAL::millis() - pi_ctl_start > g.golf_time_closedoor)//3000
@@ -623,15 +626,16 @@ void Rover::sim_pi_guide(void)
 {
     // if (pi_ctl != true && pi_ctl_id != 9000 && pi_ctl_step != 1)
     //     return;
-    //float uwb_admire = 0.0f, uwb_offset = 0.f, sidelen = 0.f;
-    float uwb_offset = 0.f, sidelen = 0.f;
+    //float sidelen = 0.f;
     float delt = 0.f;
     float dis = 0.0f, angle = 0.0f, turn = 0.0f;
     g2.beacon.get_data(dis, angle);
-    if (fabsf(angle)<g.golf_max_degerr)
-        angle = 0.0;
+    //if (fabsf(angle)<g.golf_max_degerr)
+    //    angle = 0.0;
     dis = dis * 100;//m->cm
-
+    delt = uwb_admire - angle;
+    gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angle=%.2f uwb_admire=%.2f", 
+                                                    sim_pi_guide_state,dis, angle, uwb_admire);
     if(!nd_collision)
     {
         switch (sim_pi_guide_state)
@@ -640,22 +644,20 @@ void Rover::sim_pi_guide(void)
         case 0:
             if (AP_HAL::millis() - pi_ctl_start > 3000)
             {
-                uwb_offset = angle;//store the offset angle
                 //calculate admire offset angle
-                sidelen = calc_triangle_sidelen(dis,g.golf_platform_deep,angle);
-                uwb_admire = calc_triangle_angleC(dis,sidelen,g.golf_platform_deep);
-                if(uwb_offset > 0)
-                    uwb_admire = -uwb_admire;
-        
+                //sidelen = calc_triangle_sidelen(dis,g.golf_near_distence,angle);
+                //uwb_admire = calc_triangle_angleC(dis,sidelen,g.golf_near_distence);
+                //if(angle > 0)
+                //    uwb_admire = -uwb_admire;
+                uwb_admire = 0;
                 pi_ctl_start = AP_HAL::millis();
                 sim_pi_guide_state++;
             }
             break;
-        // try to turn till angle in error file
+        // try to turn till angle in error
         case 1:
            // gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angle=%.2f trun=%.2f", 
             //                                        sim_pi_guide_state,dis, angle, turn);
-            delt = uwb_admire - angle;
             if (fabsf(delt)<g.golf_max_degerr)
             {
                 pi_ctl_start = AP_HAL::millis();
@@ -673,55 +675,46 @@ void Rover::sim_pi_guide(void)
                 else if(turn < 0 && turn > -g.steer_yaw_min)
                         turn = -g.steer_yaw_min;
                     
-                gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angle=%.2f uwb_admire=%.2f", 
-                                                    sim_pi_guide_state,dis, angle, uwb_admire);
+                //gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angle=%.2f uwb_admire=%.2f", 
+                //                                    sim_pi_guide_state,dis, angle, uwb_admire);
                 rover.mode_gobatt.set_para(0,turn);    
             }
 
             break;
-            // go straight to close platform
+            // go straight to tag
         case 2:
-            gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f", sim_pi_guide_state,dis);
+            //gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f", sim_pi_guide_state,dis);
             if(dis < g.golf_near_distence)
             {
                 pi_ctl_start = AP_HAL::millis();
                 rover.mode_gobatt.set_para(0,0);
                 sim_pi_guide_state++;
             }
-            else
+            else if(fabsf(delt)<g.golf_max_degerr)
                 rover.mode_gobatt.set_para(g.golf_forward,0);
-//            if (AP_HAL::millis() - pi_ctl_start > 3000)
-//            {
-//                rover.mode_gobatt.set_para(0,0);
-//                pi_ctl_start = AP_HAL::millis();
-//                sim_pi_guide_state = 0;
-//            }
+            else
+            //if (AP_HAL::millis() - pi_ctl_start > 3000)
+            {
+                rover.mode_gobatt.set_para(0,0);
+                pi_ctl_start = AP_HAL::millis();
+                sim_pi_guide_state = 1;
+            }
             break;
-            //rotate to face platform.
+            //rotate to face tag.
         case 3:
-            delt = 0 - angle;
             if(fabsf(delt) < g.golf_max_degerr)
             {
                 rover.mode_gobatt.set_para(0,0);
                 pi_ctl_start = AP_HAL::millis();
                 sim_pi_guide_state = 0;
-                uwb_complete = true;
+                uwb_complete = true;//uwb adjust finished.
 
             }
             else
             {
-                 if(delt > 0)    
-                    turn = g.golf_yawrate_k*fabsf(delt) > g.golf_max_turn? g.golf_max_turn:g.golf_yawrate_k*delt;
-                else
-                    turn = g.golf_yawrate_k*fabsf(delt) > g.golf_max_turn? -g.golf_max_turn:g.golf_yawrate_k*delt;
-                
-                if(turn > 0 && turn < g.steer_yaw_min)
-                        turn = g.steer_yaw_min;
-                else if(turn < 0 && turn > -g.steer_yaw_min)
-                        turn = -g.steer_yaw_min;
-                    
-                gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angle=%.2f", sim_pi_guide_state,dis, angle);
-                rover.mode_gobatt.set_para(0,turn);           
+                rover.mode_gobatt.set_para(0,0);
+                pi_ctl_start = AP_HAL::millis();
+                sim_pi_guide_state = 1;          
             }
             break;
         default:

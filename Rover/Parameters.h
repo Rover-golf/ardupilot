@@ -74,7 +74,6 @@ public:
         k_param_golf_forward,
         k_param_golf_max_degerr,
         k_param_golf_max_turn,
-        k_param_golf_platform_deep,
         k_param_golf_can_0,
         k_param_golf_can_0_buad,
         k_param_golf_can_1,
@@ -312,8 +311,7 @@ public:
     AP_Float golf_yawrate_k;
     AP_Float golf_max_degerr;
     AP_Float golf_forward;
-    AP_Float golf_max_turn;
-    AP_Float golf_platform_deep;    
+    AP_Float golf_max_turn;  
 
     AP_Int8 golf_can_0;
     AP_Int8 golf_can_1;

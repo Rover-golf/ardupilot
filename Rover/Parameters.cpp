@@ -408,7 +408,6 @@ const AP_Param::Info Rover::var_info[] = {
     GSCALAR(golf_forward, "GF_GD_AHEAD", 30),
     GSCALAR(golf_max_degerr, "GF_GD_DEGERR", 5),
     GSCALAR(golf_max_turn, "GF_GD_MAXTURN", 1500),
-    GSCALAR(golf_platform_deep, "GF_GD_PFDEEP", 150),
 
     GSCALAR(golf_can_0, "GF_CAN_0", 0),
     GSCALAR(golf_can_0_buad, "GF_CAN_0_BUAD", 500000),
