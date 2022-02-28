@@ -543,14 +543,14 @@ void Rover::sim_pi_ctl(void)
             case 1://start uwb
                 if (yaw_complete)
                 {
-                    uwb_complete = false;
-                    sim_pi_guide_state = 0;
+                    //uwb_complete = false;
+                    //sim_pi_guide_state = 0;
                     pi_ctl_step++;
                     pi_ctl_start = AP_HAL::millis();                  
                 }
                 break;
             case 2:// do uwb
-                if(uwb_complete)
+                if(true)//uwb_complete)
                 {
                     pi_ctl_step++;
                     pi_ctl_start = AP_HAL::millis();                          
