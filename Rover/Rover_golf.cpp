@@ -36,8 +36,8 @@ void Rover::hundred_hz_loop(void)
         //--------------update 20211124------------
         if (yaw_rate_to > 180)
             yaw_rate_to = yaw_rate_to - 360;//反向转
-        gcs().send_text(MAV_SEVERITY_INFO, "hundred_hz_loop yaw_desire=%.0f yaw_get=%.0f, turn=%.0f",  
-            (float)yaw_desire,yaw_get, yaw_rate_to);       
+ //       gcs().send_text(MAV_SEVERITY_INFO, "hundred_hz_loop yaw_desire=%.0f yaw_get=%.0f, turn=%.0f",  
+ //           (float)yaw_desire,yaw_get, yaw_rate_to);       
         yaw_rate_to = yaw_rate_to / 180.f * g.steer_rate_use; // scale +-180 to +-4500
         
         if(yaw_rate_to > 0 && yaw_rate_to < g.steer_yaw_min)
@@ -550,10 +550,11 @@ void Rover::sim_pi_ctl(void)
                 }
                 break;
             case 2:// do uwb
-                if(true)//uwb_complete)
+                if(uwb_complete)
                 {
                     pi_ctl_step++;
-                    pi_ctl_start = AP_HAL::millis();                          
+                    pi_ctl_start = AP_HAL::millis();
+                    uwb_complete = false;                          
                 }
                 else
                     sim_pi_guide();
@@ -573,7 +574,7 @@ void Rover::sim_pi_ctl(void)
                     rover_reached_stick = false;
                     pi_ctl_start = AP_HAL::millis();
                     pi_ctl_step++;
-                    gcs().send_text(MAV_SEVERITY_INFO, "9000 reach platform.");
+             //       gcs().send_text(MAV_SEVERITY_INFO, "9000 reach platform.");
                 }
                 break;
             case 4:
@@ -586,7 +587,7 @@ void Rover::sim_pi_ctl(void)
                 break;                   
             case 5:
                 // open door and wait 10s
-                motor_push();     
+                motor_push();  
                 if (AP_HAL::millis() - pi_ctl_start > g.golf_time_opendoor)//10000
                 {
                     pi_ctl_start = AP_HAL::millis();
@@ -656,8 +657,8 @@ void Rover::sim_pi_guide(void)
             break;
         // try to turn till angle in error
         case 1:
-           // gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angle=%.2f trun=%.2f", 
-            //                                        sim_pi_guide_state,dis, angle, turn);
+//            gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angle=%.2f trun=%.2f", 
+//                                                    sim_pi_guide_state,dis, angle, turn);
             if (fabsf(delt)<g.golf_max_degerr)
             {
                 pi_ctl_start = AP_HAL::millis();
@@ -764,6 +765,7 @@ void Rover::golf_start_mission(void)
     rover.rover_golf_start = AP_HAL::millis();
     work_enable = true;
     start_auto = false;
+    uwb_complete = false;
     pi_ctl_step = 0;
     golf_work_state = GOLF_WORK;
     if (isSleep) // Josh
