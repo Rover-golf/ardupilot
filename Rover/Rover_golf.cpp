@@ -79,8 +79,8 @@ void Rover::one_hz_loop(void)
     //获取现在的UTC时间 时 分 秒 
     if (!AP::rtc().get_local_time(hour, min, sec, ms))
         gcs().send_text(MAV_SEVERITY_DEBUG, "UTC get time faild!");
-   // else
-   //     gcs().send_text(MAV_SEVERITY_CRITICAL, "H:M:S %d:%d:%d", hour, min, sec);
+    else
+        gcs().send_text(MAV_SEVERITY_CRITICAL, "H:M:S %d:%d:%d", hour, min, sec);
     batt_nd_charge = false;
 
     float batt_volt = battery.voltage();
@@ -231,7 +231,7 @@ void Rover::one_hz_loop(void)
         //                        && (hour*24+min < (uint8_t)g2.end_3_hour*24 +(uint8_t)g2.end_3_min) && (sec < 4));
         bool time3_to_end = ((hour == (uint8_t)g2.end_3_hour) && (min == (uint8_t)g2.end_3_min) && (sec < 4));
 
-        gcs().send_text(MAV_SEVERITY_INFO, "t2s=%i ta=%i, slp=%i", time1_to_start, time1_avaiable, isSleep);
+        gcs().send_text(MAV_SEVERITY_INFO, "t1s=%i t1e=%i, slp=%i", time1_to_start, time1_to_end, isSleep);
         
         
         if ((time1_to_start && time1_avaiable) ||
@@ -241,11 +241,12 @@ void Rover::one_hz_loop(void)
             //      if(!work_enable)
             //      {
             work_enable = true;
-            if (isSleep) // Josh
-            {
-                golf_work_state = GOLF_HOLD;
-                isSleep = false;
-            }
+            isSleep = false;
+//            if (isSleep) // Josh
+//            {
+//               golf_work_state = GOLF_HOLD;
+//                isSleep = false;
+//            }
             //      }
         }
 
@@ -257,11 +258,15 @@ void Rover::one_hz_loop(void)
         {
             // 结束了之后回去充电
             work_enable = false;
-            batt_nd_charge = true;
-            golf_work_state = GOLF_BACK;
-            work_golf_back = true; // Josh
             isSleep = true;        // Josh
-            rover.set_mode(rover.mode_rtl, ModeReason::EVERYDAY_END);
+            batt_nd_charge = true;
+            if(golf_work_state != GOLF_PREP_PI && golf_work_state != GOLF_PI_CTL)
+            {
+                golf_work_state = GOLF_BACK;
+                work_golf_back = true; // Josh
+                rover.set_mode(rover.mode_rtl, ModeReason::EVERYDAY_END);
+            }
+
         }
 
     }
@@ -588,7 +593,7 @@ void Rover::sim_pi_ctl(void)
             case 5:
                 // open door and wait 10s
                 motor_push();  
-                if (AP_HAL::millis() - pi_ctl_start > g.golf_time_opendoor)//10000
+                if (AP_HAL::millis() - pi_ctl_start > g.golf_time_opendoor && !isSleep)//10000
                 {
                     pi_ctl_start = AP_HAL::millis();
                     pi_ctl_step++;
