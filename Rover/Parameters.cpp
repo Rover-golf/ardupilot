@@ -390,6 +390,37 @@ const AP_Param::Info Rover::var_info[] = {
     // @Group:
     // @Path: ../libraries/AP_Vehicle/AP_Vehicle.cpp
     { AP_PARAM_GROUP, "", Parameters::k_param_vehicle, (const void *)&rover, {group_info : AP_Vehicle::var_info} },
+    //golf
+    GSCALAR(press_up, "GF_PUP", 0),
+    GSCALAR(press_low, "GF_PLOW", 0),
+
+    GSCALAR(batt_nd_rtl, "GF_BAT_ND_RTL", 0),
+    GSCALAR(batt_charge_to, "GF_BAT_CHARGE", 12),
+    GSCALAR(unload_sec, "GF_UNLOAD_SEC", 30),
+    GSCALAR(test_full_sec, "GF_RTL_SEC", 1800),
+    GSCALAR(pwm_unload, "GF_PWM_UNLOAD", 1000),
+    GSCALAR(pwm_normal, "GF_PWM_NORMAL", 2000),
+    GSCALAR(steer_rate_use, "GF_STEER_RATE", 4500),
+    GSCALAR(steer_yaw_min, "GF_STEER_MIN", 700),
+    GSCALAR(steer_error, "GF_STEER_ERR", 3),
+
+    GSCALAR(golf_yawrate_k, "GF_GD_YAWRATE", 100),
+    GSCALAR(golf_forward, "GF_GD_AHEAD", 30),
+    GSCALAR(golf_max_degerr, "GF_GD_DEGERR", 5),
+    GSCALAR(golf_max_turn, "GF_GD_MAXTURN", 1500),
+
+    GSCALAR(golf_can_0, "GF_CAN_0", 0),
+    GSCALAR(golf_can_0_buad, "GF_CAN_0_BUAD", 500000),
+    GSCALAR(golf_can_1, "GF_CAN_1", 1),
+    GSCALAR(golf_can_1_buad, "GF_CAN_1_BUAD", 500000),
+    GSCALAR(golf_yaw, "GF_YAW", 180),
+    GSCALAR(golf_throttle, "GF_THROTTLE", 50),    
+    GSCALAR(golf_time_forward, "GF_TM_FORWARD", 2000),
+    GSCALAR(golf_time_opendoor, "GF_TM_OPENDOOR", 10000),
+    GSCALAR(golf_time_backward, "GF_TM_BACKWARD", 5000),
+    GSCALAR(golf_time_closedoor, "GF_TM_CLOSEDOOR", 3000),
+    GSCALAR(golf_near_distence, "GF_NEAR_DIS", 50),
+    GSCALAR(golf_timing_enable,"GF_TIMING_ENABLE",0),
 
     AP_VAREND
 };
@@ -659,6 +690,19 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Path: ../libraries/AP_AIS/AP_AIS.cpp
     AP_SUBGROUPINFO(ais, "AIS_",  50, ParametersG2, AP_AIS),
 #endif
+    //golf
+    AP_GROUPINFO("GOLF1_START_HOUR", 49, ParametersG2, start_1_hour, 0),
+    AP_GROUPINFO("GOLF1_START_MIN", 50, ParametersG2, start_1_min, 0),
+    AP_GROUPINFO("GOLF2_START_HOUR", 51, ParametersG2, start_2_hour, 0),
+    AP_GROUPINFO("GOLF2_START_MIN", 52, ParametersG2, start_2_min, 0),
+    AP_GROUPINFO("GOLF3_START_HOUR", 53, ParametersG2, start_3_hour, 0),
+    AP_GROUPINFO("GOLF3_START_MIN", 54, ParametersG2, start_3_min, 0),
+    AP_GROUPINFO("GOLF1_END_HOUR", 55, ParametersG2, end_1_hour, 0),
+    AP_GROUPINFO("GOLF1_END_MIN", 56, ParametersG2, end_1_min, 0),
+    AP_GROUPINFO("GOLF2_END_HOUR", 57, ParametersG2, end_2_hour, 0),
+    AP_GROUPINFO("GOLF2_END_MIN", 58, ParametersG2, end_2_min, 0),
+    AP_GROUPINFO("GOLF3_END_HOUR", 59, ParametersG2, end_3_hour, 0),
+    AP_GROUPINFO("GOLF3_END_MIN", 60, ParametersG2, end_3_min, 0),
 
     AP_GROUPEND
 };

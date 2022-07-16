@@ -539,6 +539,9 @@ Mode *Rover::mode_from_mode_num(const enum Mode::Number num)
     case Mode::Number::INITIALISING:
         ret = &mode_initializing;
         break;
+     case Mode::Number::GO_BATT://golf
+        ret = &mode_gobatt;
+        break;             
     default:
         break;
     }

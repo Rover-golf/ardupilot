@@ -38,6 +38,8 @@
 #include "AP_RangeFinder_Benewake_TF03.h"
 #include "AP_RangeFinder_Benewake_TFMini.h"
 #include "AP_RangeFinder_Benewake_TFMiniPlus.h"
+#include "AP_RangeFinder_Benewake_AJSR04.h"
+#include "AP_RangeFinder_CYGLidar.h"
 #include "AP_RangeFinder_PWM.h"
 #include "AP_RangeFinder_GYUS42v2.h"
 #include "AP_RangeFinder_HC_SR04.h"
@@ -164,6 +166,8 @@ const AP_Param::GroupInfo *RangeFinder::backend_var_info[RANGEFINDER_MAX_INSTANC
 
 RangeFinder::RangeFinder()
 {
+    init_done = false;//Jack
+
     AP_Param::setup_object_defaults(this, var_info);
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
@@ -522,6 +526,17 @@ void RangeFinder::detect_instance(uint8_t instance, uint8_t& serial_instance)
             _add_backend(new AP_RangeFinder_Benewake_TF03(state[instance], params[instance]), instance, serial_instance++);
         }
         break;
+    //golf
+    case Type::BenewakeAJSR04:
+        if (AP_RangeFinder_AJSR04::detect(serial_instance)) {
+            _add_backend(new AP_RangeFinder_AJSR04(state[instance], params[instance]), instance, serial_instance++);
+        }
+        break;
+    case Type::CYGLidar:
+        if (AP_RangeFinder_CYGLidar::detect(serial_instance)) {
+            _add_backend(new AP_RangeFinder_CYGLidar(state[instance], params[instance]), instance, serial_instance++);
+        }
+        break;        
     case Type::PWM:
 #ifndef HAL_BUILD_AP_PERIPH
         if (AP_RangeFinder_PWM::detect()) {

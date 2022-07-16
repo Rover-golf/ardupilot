@@ -89,6 +89,9 @@ public:
         MSP = 32,
         USD1_CAN = 33,
         Benewake_CAN = 34,
+        //golf
+        BenewakeAJSR04 = 44,
+        CYGLidar = 45,        
         SIM = 100,
     };
 
@@ -108,6 +111,7 @@ public:
 
     // The RangeFinder_State structure is filled in by the backend driver
     struct RangeFinder_State {
+        uint16_t target_deg;            // angle:in degree golf
         float distance_m;               // distance in meters
         uint16_t voltage_mv;            // voltage in millivolts, if applicable, otherwise 0
         enum RangeFinder::Status status; // sensor status

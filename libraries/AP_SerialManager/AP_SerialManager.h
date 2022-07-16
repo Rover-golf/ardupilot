@@ -227,7 +227,9 @@ public:
 
     // accessors for AP_Periph to set baudrate and type
     void set_protocol_and_baud(uint8_t sernum, enum SerialProtocol protocol, uint32_t baudrate);
-
+    //golf
+    SerialProtocol get_protocol(uint8_t sernum); 
+    
     static uint32_t map_baudrate(int32_t rate);
 
     // parameter var table

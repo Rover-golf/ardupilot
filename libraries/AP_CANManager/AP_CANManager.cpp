@@ -297,10 +297,13 @@ bool AP_CANManager::register_driver(Driver_Type dtype, AP_CANDriver *driver)
         if (dtype != (Driver_Type)_drv_param[drv_num]._driver_type.get()) {
             continue;
         }
+        //Jack change to process second CAN_USD1 device, if there are the second same device, also need to register with interface and init.
+        bool bnewdriver = true;
         if (_drivers[drv_num] != nullptr) {
-            continue;
+            bnewdriver = false;
+            //continue;
         }
-        if (_num_drivers >= HAL_MAX_CAN_PROTOCOL_DRIVERS) {
+        if (_num_drivers >= HAL_MAX_CAN_PROTOCOL_DRIVERS  && bnewdriver) {
             continue;
         }
 
@@ -323,7 +326,9 @@ bool AP_CANManager::register_driver(Driver_Type dtype, AP_CANDriver *driver)
         _drivers[drv_num]->init(drv_num, false);
         _driver_type_cache[drv_num] = dtype;
 
-        _num_drivers++;
+        //Jack for judging the second same device
+        if(bnewdriver)
+            _num_drivers++;
 
         return true;
     }

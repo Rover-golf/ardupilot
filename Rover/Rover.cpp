@@ -133,6 +133,10 @@ const AP_Scheduler::Task Rover::scheduler_tasks[] = {
 #if HAL_AIS_ENABLED
     SCHED_TASK_CLASS(AP_AIS, &rover.g2.ais, update, 5, 100, 135),
 #endif
+    //golf
+    SCHED_TASK(one_hz_loop,         1,   500, 138),
+    SCHED_TASK(hundred_hz_loop, 100, 50, 141),
+    SCHED_TASK(sim_pi_ctl, 100, 50, 144),
 };
 
 

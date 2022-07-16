@@ -35,10 +35,12 @@ public:
 
     // handler for incoming frames
     virtual void handle_frame(AP_HAL::CANFrame &frame) = 0;
-
+    //golf
+    //check connect and send data
+    virtual void Check_SendData() { }
     // handler for outgoing frames
     bool write_frame(AP_HAL::CANFrame &out_frame, const uint64_t timeout_us);
-
+    bool read_frame(AP_HAL::CANFrame &in_frame, const uint64_t timeout_us);
 #ifdef HAL_BUILD_AP_PERIPH
     static void set_periph(const uint8_t i, const AP_CANManager::Driver_Type protocol, AP_HAL::CANIface* iface) {
         if (i < HAL_NUM_CAN_IFACES) {

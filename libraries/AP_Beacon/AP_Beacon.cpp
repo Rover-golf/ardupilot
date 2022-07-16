@@ -19,6 +19,7 @@
 #include "AP_Beacon_Marvelmind.h"
 #include "AP_Beacon_Nooploop.h"
 #include "AP_Beacon_SITL.h"
+#include "AP_Beacon_Nooploop_AOA.h"
 
 #include <AP_Common/Location.h>
 
@@ -100,12 +101,32 @@ void AP_Beacon::init(void)
         _driver = new AP_Beacon_Marvelmind(*this);
     } else if (_type == AP_BeaconType_Nooploop) {
         _driver = new AP_Beacon_Nooploop(*this);
+    } else if (_type == AP_BeaconType_Nooploop_AOA) {//golf
+        _driver = new AP_Beacon_Nooploop_AOA(*this, serial_manager);
     }
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
     if (_type == AP_BeaconType_SITL) {
         _driver = new AP_Beacon_SITL(*this);
     }
 #endif
+}
+//golf
+// 在rover中调用传到基类
+void AP_Beacon::get_data(float &dis, float &angel)
+{
+    if (_type == AP_BeaconType_Nooploop_AOA)
+    {
+        // AP_Beacon_Backend中的getdata
+        _driver->get_data(dis, angel);
+    }
+}
+void AP_Beacon::get_data_raw(float &dis, float &angel)
+{
+    if (_type == AP_BeaconType_Nooploop_AOA)
+    {
+        // AP_Beacon_Backend中的getdata
+        _driver->get_data_raw(dis, angel);
+    }
 }
 
 // return true if beacon feature is enabled

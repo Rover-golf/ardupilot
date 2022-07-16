@@ -67,4 +67,6 @@ enum class ModeReason : uint8_t {
   LOITER_ALT_IN_VTOL = 47,
   RADIO_FAILSAFE_RECOVERY = 48,
   QLAND_INSTEAD_OF_RTL = 49,
+  EVERYDAY_START,  //golf
+  EVERYDAY_END     //golf
 };
