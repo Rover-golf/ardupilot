@@ -436,7 +436,7 @@ public:
     void motor_stop(void);
 
 
-    void golf_start_mission();
+    bool golf_start_mission();
     void golf_end_mission();
 
     
@@ -444,7 +444,7 @@ public:
 
     float constrain_deg(float deg);
     void send_golf_to_buff();
-    void golf_send_cmd(uint16_t cmd_id, const float &param1, const float &param2);  // Josh added param1,2
+    //void golf_send_cmd(uint16_t cmd_id, const float &param1, const float &param2);  // Josh added param1,2
 
     void get_proximity_dis(float &distance0, float &distance45,float &distance315);
 
@@ -478,7 +478,15 @@ public:
     uint8_t golf_is_full = 0xff;
     uint8_t nd_collision = 0xff;
 
-    float target_deg = 0.0f;     
+    float target_deg = 0.0f;
+ 
+    bool nd_backward = false;
+    void golf_backward(int second = 10);  
+    bool golf_is_athome();  
+    void golf_set_sleepflg(float sleepflg = 1.0f);
+    int unload_times = 0;
+    float unload_flg = 1.0;
+    int one_hz_times = 0;        
 };
 
 extern Rover rover;

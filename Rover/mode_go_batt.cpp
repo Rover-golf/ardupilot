@@ -14,6 +14,12 @@ bool ModeGoBatt::_enter()
     return true;
 }
 
+bool ModeGoBatt::stop_rover()
+{
+    set_para();
+    return stop_vehicle();
+}
+
 void ModeGoBatt::set_para(float throttle, float steering)
 {
     _throttle = throttle;
@@ -45,19 +51,24 @@ void ModeGoBatt::update()
         _lateral = 0;
         _mainsail = 0;
     }
+    //check RC throttle
+    float RC_throttle = 0.0;
+    float RC_steering = 0.0;
+    get_pilot_input(RC_steering,RC_throttle);
 
     float desired_steering = _steering;
-    float desired_throttle = _throttle;
+    float desired_throttle = _throttle + RC_throttle;
     float desired_lateral = _lateral;
     float desired_mainsail = _mainsail;
-
+ 
     g2.motors.set_mainsail(desired_mainsail);
 
     // copy RC scaled inputs to outputs
     g2.motors.set_throttle(desired_throttle);
     g2.motors.set_steering(desired_steering, false);
     g2.motors.set_lateral(desired_lateral);
-
+   
+    //gcs().send_text(MAV_SEVERITY_INFO, "gobattmode: throttle= %f, steering= %f, lateral= %f",desired_throttle,desired_steering,desired_lateral);   
     // gcs().send_text(MAV_SEVERITY_CONTINUE, "%f/%f/%f/%f",
     //                 desired_mainsail, desired_throttle, desired_steering, desired_lateral);
 }

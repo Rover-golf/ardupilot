@@ -812,6 +812,7 @@ void AP_SerialManager::set_protocol_and_baud(uint8_t sernum, enum SerialProtocol
     }
 }
 //golf
+/*
 AP_SerialManager::SerialProtocol AP_SerialManager::get_protocol(uint8_t sernum)
 {
     if (sernum <= ARRAY_SIZE(state)) 
@@ -824,7 +825,7 @@ AP_SerialManager::SerialProtocol AP_SerialManager::get_protocol(uint8_t sernum)
     }
     
 } 
-
+*/
 namespace AP {
 
 AP_SerialManager &serialmanager()

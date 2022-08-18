@@ -409,10 +409,6 @@ const AP_Param::Info Rover::var_info[] = {
     GSCALAR(golf_max_degerr, "GF_GD_DEGERR", 5),
     GSCALAR(golf_max_turn, "GF_GD_MAXTURN", 1500),
 
-    GSCALAR(golf_can_0, "GF_CAN_0", 0),
-    GSCALAR(golf_can_0_buad, "GF_CAN_0_BUAD", 500000),
-    GSCALAR(golf_can_1, "GF_CAN_1", 1),
-    GSCALAR(golf_can_1_buad, "GF_CAN_1_BUAD", 500000),
     GSCALAR(golf_yaw, "GF_YAW", 180),
     GSCALAR(golf_throttle, "GF_THROTTLE", 50),    
     GSCALAR(golf_time_forward, "GF_TM_FORWARD", 2000),
@@ -420,7 +416,21 @@ const AP_Param::Info Rover::var_info[] = {
     GSCALAR(golf_time_backward, "GF_TM_BACKWARD", 5000),
     GSCALAR(golf_time_closedoor, "GF_TM_CLOSEDOOR", 3000),
     GSCALAR(golf_near_distence, "GF_NEAR_DIS", 50),
+
     GSCALAR(golf_timing_enable,"GF_TIMING_ENABLE",0),
+    //golf
+    GSCALAR(start_1_hour,"GOLF1_START_HOUR", 0),
+    GSCALAR(start_1_min, "GOLF1_START_MIN", 0),
+    GSCALAR(start_2_hour,"GOLF2_START_HOUR", 0),
+    GSCALAR(start_2_min, "GOLF2_START_MIN", 0),
+    GSCALAR(start_3_hour, "GOLF3_START_HOUR", 0),
+    GSCALAR(start_3_min, "GOLF3_START_MIN", 0),
+    GSCALAR(end_1_hour, "GOLF1_END_HOUR", 0),
+    GSCALAR(end_1_min, "GOLF1_END_MIN", 0),
+    GSCALAR(end_2_hour, "GOLF2_END_HOUR", 0),
+    GSCALAR(end_2_min, "GOLF2_END_MIN", 0),
+    GSCALAR(end_3_hour, "GOLF3_END_HOUR", 0),
+    GSCALAR(end_3_min, "GOLF3_END_MIN", 0),
 
     AP_VAREND
 };
@@ -690,19 +700,6 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Path: ../libraries/AP_AIS/AP_AIS.cpp
     AP_SUBGROUPINFO(ais, "AIS_",  50, ParametersG2, AP_AIS),
 #endif
-    //golf
-    AP_GROUPINFO("GOLF1_START_HOUR", 49, ParametersG2, start_1_hour, 0),
-    AP_GROUPINFO("GOLF1_START_MIN", 50, ParametersG2, start_1_min, 0),
-    AP_GROUPINFO("GOLF2_START_HOUR", 51, ParametersG2, start_2_hour, 0),
-    AP_GROUPINFO("GOLF2_START_MIN", 52, ParametersG2, start_2_min, 0),
-    AP_GROUPINFO("GOLF3_START_HOUR", 53, ParametersG2, start_3_hour, 0),
-    AP_GROUPINFO("GOLF3_START_MIN", 54, ParametersG2, start_3_min, 0),
-    AP_GROUPINFO("GOLF1_END_HOUR", 55, ParametersG2, end_1_hour, 0),
-    AP_GROUPINFO("GOLF1_END_MIN", 56, ParametersG2, end_1_min, 0),
-    AP_GROUPINFO("GOLF2_END_HOUR", 57, ParametersG2, end_2_hour, 0),
-    AP_GROUPINFO("GOLF2_END_MIN", 58, ParametersG2, end_2_min, 0),
-    AP_GROUPINFO("GOLF3_END_HOUR", 59, ParametersG2, end_3_hour, 0),
-    AP_GROUPINFO("GOLF3_END_MIN", 60, ParametersG2, end_3_min, 0),
 
     AP_GROUPEND
 };

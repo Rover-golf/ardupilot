@@ -75,10 +75,6 @@ public:
         k_param_golf_forward,
         k_param_golf_max_degerr,
         k_param_golf_max_turn,
-        k_param_golf_can_0,
-        k_param_golf_can_0_buad,
-        k_param_golf_can_1,
-        k_param_golf_can_1_buad,
         k_param_golf_yaw,
         k_param_golf_throttle,
         k_param_golf_time_forward,
@@ -86,8 +82,21 @@ public:
         k_param_golf_time_backward,
         k_param_golf_time_closedoor,
         k_param_golf_near_distence,
+        //golf
         k_param_golf_timing_enable,
-
+        k_param_start_1_hour,
+        k_param_start_1_min,
+        k_param_end_1_hour,
+        k_param_end_1_min,
+        k_param_start_2_hour,
+        k_param_start_2_min,
+        k_param_end_2_hour,
+        k_param_end_2_min,
+        k_param_start_3_hour,
+        k_param_start_3_min,
+        k_param_end_3_hour,
+        k_param_end_3_min,//94
+          
         // 97: RSSI
         k_param_rssi = 97,
         k_param_rpm_sensor,     // rpm sensor 98
@@ -315,10 +324,6 @@ public:
     AP_Float golf_forward;
     AP_Float golf_max_turn;  
 
-    AP_Int8 golf_can_0;
-    AP_Int8 golf_can_1;
-    AP_Int32 golf_can_0_buad;
-    AP_Int32 golf_can_1_buad;
     AP_Float golf_yaw;
     AP_Int32 golf_near_distence;
     AP_Float golf_throttle;
@@ -328,6 +333,21 @@ public:
     AP_Int32 golf_time_closedoor;
     //timing work mode
     AP_Int8 golf_timing_enable;
+    //golf
+    AP_Int8 start_1_hour;
+    AP_Int8 start_1_min;
+    AP_Int8 end_1_hour;
+    AP_Int8 end_1_min;
+
+    AP_Int8 start_2_hour;
+    AP_Int8 start_2_min;
+    AP_Int8 end_2_hour;
+    AP_Int8 end_2_min;
+
+    AP_Int8 start_3_hour;
+    AP_Int8 start_3_min;
+    AP_Int8 end_3_hour;
+    AP_Int8 end_3_min;        
 
     Parameters() {}
 };
@@ -473,21 +493,6 @@ public:
     // Automatic Identification System - for tracking sea-going vehicles
     AP_AIS ais;
 #endif
-    //golf
-    AP_Int8 start_1_hour;
-    AP_Int8 start_1_min;
-    AP_Int8 end_1_hour;
-    AP_Int8 end_1_min;
-
-    AP_Int8 start_2_hour;
-    AP_Int8 start_2_min;
-    AP_Int8 end_2_hour;
-    AP_Int8 end_2_min;
-
-    AP_Int8 start_3_hour;
-    AP_Int8 start_3_min;
-    AP_Int8 end_3_hour;
-    AP_Int8 end_3_min;    
 };
 
 extern const AP_Param::Info var_info[];

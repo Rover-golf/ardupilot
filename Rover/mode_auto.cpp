@@ -5,6 +5,11 @@
 
 bool ModeAuto::_enter()
 {
+    // if (rover.start_auto) //for sim RTL uwb202207
+    // {
+        if(!rover.golf_start_mission())
+            return false;
+    // }
     // fail to enter auto if no mission commands
     if (mission.num_commands() <= 1) {
         gcs().send_text(MAV_SEVERITY_NOTICE, "No Mission. Can't set AUTO.");

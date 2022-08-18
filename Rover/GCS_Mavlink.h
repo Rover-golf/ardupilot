@@ -62,6 +62,7 @@ private:
     uint8_t high_latency_wind_direction() const override;
 #endif // HAL_HIGH_LATENCY2_ENABLED
     //golf
+public:
     void golf_send_cmd(uint16_t cmd_id, const float param1 = 0, const float param2 = 0);
-
+    void send_golf_info();
 };
