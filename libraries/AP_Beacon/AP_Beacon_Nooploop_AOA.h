@@ -11,7 +11,7 @@
 #define NOOPLOOP_NODE_FRAME2_ANGEL  26
 
 
-#define AVERAGE_ANGEL_MAX   100
+#define AVERAGE_ANGEL_MAX   20 //100 uwb202207
 
 class AP_Beacon_Nooploop_AOA : public AP_Beacon_Backend
 {

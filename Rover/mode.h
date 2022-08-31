@@ -713,7 +713,7 @@ class ModeGoBatt : public Mode
 {
 public:
 
-    uint32_t mode_number() const override { return MANUAL; }
+    uint32_t mode_number() const override { return GO_BATT; }//MANUAL
     const char *name4() const override { return "MANU"; }
 
     // methods that affect movement of the vehicle in this mode
@@ -730,7 +730,7 @@ public:
     bool in_gobatt_mode() const override { return true; }
     void set_para(float throttle=0, float steering=0);
     bool set_yaw(float yaw);
-
+    bool stop_rover();
 protected:
     //需要初始化一些东西
     bool _enter() override;

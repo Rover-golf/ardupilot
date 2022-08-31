@@ -343,7 +343,14 @@ bool GCS_MAVLINK_Rover::try_send_message(enum ap_message id)
     }
 
     default:
+    {
+        if(id == MSG_HEARTBEAT)//send golf info
+        {
+            send_golf_info();
+        }
         return GCS_MAVLINK::try_send_message(id);
+    }
+    
     }
     return true;
 }
@@ -775,7 +782,11 @@ MAV_RESULT GCS_MAVLINK_Rover::handle_command_long_packet(const mavlink_command_l
          return MAV_RESULT_ACCEPTED;
      case 8031:
         gcs().send_text(MAV_SEVERITY_CRITICAL, "try respond Timing enable = %d", (int)(rover.g.golf_timing_enable));             
-        golf_send_cmd(8032, rover.g.golf_timing_enable); 
+        golf_send_cmd(8032, rover.g.golf_timing_enable,rover.isSleep);
+        return MAV_RESULT_ACCEPTED;
+    case 8036://issleep
+        gcs().send_text(MAV_SEVERITY_CRITICAL, "try set isSleep = %f", packet.param1);
+        rover.golf_set_sleepflg(packet.param1);
         return MAV_RESULT_ACCEPTED;   
     // // 飞控发出9000切换给树莓派控制
     // // 飞控发9010切换为避障模式
@@ -783,6 +794,10 @@ MAV_RESULT GCS_MAVLINK_Rover::handle_command_long_packet(const mavlink_command_l
     // case 9001:
     //     rover.pi_ctl = false;
     //     return MAV_RESULT_ACCEPTED;
+    case 8037://end mission to mannual
+        gcs().send_text(MAV_SEVERITY_CRITICAL, "run end_mission to clear state for mannual.");
+        rover.golf_end_mission();
+        return MAV_RESULT_ACCEPTED;   
     default:
         return GCS_MAVLINK::handle_command_long_packet(packet);
     }
@@ -1222,6 +1237,11 @@ void GCS_MAVLINK_Rover::golf_send_cmd(uint16_t cmd_id, const float param1, const
             cmd_id,
             0,
             param1, param2, 0, 0, 0, 0, 0);
-       //gcs().send_text(MAV_SEVERITY_CRITICAL, "try send golf command cmd_id= %d", cmd_id); 
+       //gcs().send_text(MAV_SEVERITY_INFO, "golf_send_cmd send chan= %d", chan); 
     }
+}
+
+void GCS_MAVLINK_Rover::send_golf_info()
+{
+    golf_send_cmd(8032, rover.g.golf_timing_enable,rover.isSleep);  
 }

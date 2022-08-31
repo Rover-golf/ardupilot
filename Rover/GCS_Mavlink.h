@@ -52,7 +52,7 @@ private:
     int16_t vfr_hud_throttle() const override;
 
     void send_rangefinder() const override;
-
+public:
     void golf_send_cmd(uint16_t cmd_id, const float param1 = 0, const float param2 = 0);
-
+    void send_golf_info();
 };

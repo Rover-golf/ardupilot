@@ -5,10 +5,11 @@
 
 bool ModeAuto::_enter()
 {
-    if (rover.start_auto)
-    {
-        rover.golf_start_mission();
-    }
+   // if (rover.start_auto) //for sim RTL uwb202207
+   // {
+        if(!rover.golf_start_mission())
+            return false;
+   // }
 
     // fail to enter auto if no mission commands
     if (mission.num_commands() <= 1) {
