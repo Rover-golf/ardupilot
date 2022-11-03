@@ -16,7 +16,7 @@
 #include "AP_Beacon_Backend.h"
 // debug
 #include <stdio.h>
-
+#include <GCS_MAVLink/GCS.h> //gcs
 /*
   base class constructor. 
   This incorporates initialisation as well.
@@ -29,7 +29,7 @@ AP_Beacon_Backend::AP_Beacon_Backend(AP_Beacon &frontend) :
     if (uart == nullptr) {
         return;
     }
-
+    tag_position_m.zero();
     uart->begin(serialmanager.find_baudrate(AP_SerialManager::SerialProtocol_Beacon, 0));
 }
 

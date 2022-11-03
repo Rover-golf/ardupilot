@@ -410,12 +410,13 @@ const AP_Param::Info Rover::var_info[] = {
     GSCALAR(golf_max_turn, "GF_GD_MAXTURN", 1500),
 
     GSCALAR(golf_yaw, "GF_YAW", 180),
-    GSCALAR(golf_throttle, "GF_THROTTLE", 50),    
-    GSCALAR(golf_time_forward, "GF_TM_FORWARD", 2000),
-    GSCALAR(golf_time_opendoor, "GF_TM_OPENDOOR", 10000),
-    GSCALAR(golf_time_backward, "GF_TM_BACKWARD", 5000),
-    GSCALAR(golf_time_closedoor, "GF_TM_CLOSEDOOR", 3000),
-    GSCALAR(golf_near_distence, "GF_NEAR_DIS", 50),
+    GSCALAR(golf_throttle, "GF_THROTTLE", 60),  
+    GSCALAR(golf_throttleR, "GF_THROTTLER", 30),  
+    GSCALAR(golf_time_forward, "GF_TM_FORWARD", 8),
+    GSCALAR(golf_time_opendoor, "GF_TM_OPENDOOR", 10),
+    GSCALAR(golf_time_backward, "GF_TM_BACKWARD", 8),
+    GSCALAR(golf_time_closedoor, "GF_TM_CLOSEDOOR", 10),
+    GSCALAR(golf_near_distence, "GF_NEAR_DIS", 450),
 
     GSCALAR(golf_timing_enable,"GF_TIMING_ENABLE",0),
     //golf

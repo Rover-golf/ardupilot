@@ -33,6 +33,8 @@ public:
     //golf
     virtual void get_data(float &dis, float &angel){};
     virtual void get_data_raw(float &dis, float &angel){};
+    Vector3f tag_position_m;
+    void get_position(Vector3f& pos){pos = tag_position_m;}
     
     // set vehicle position
     // pos should be in meters in NED frame from the beacon's local origin

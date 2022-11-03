@@ -23,6 +23,8 @@
 
 #include <AP_Common/Location.h>
 
+#include <GCS_MAVLink/GCS.h> //gcs
+
 extern const AP_HAL::HAL &hal;
 
 // table of user settable parameters
@@ -89,6 +91,9 @@ AP_Beacon::AP_Beacon(AP_SerialManager &_serial_manager) :
 // initialise the AP_Beacon class
 void AP_Beacon::init(void)
 {
+    //uwbmsg
+    gcs().send_text(MAV_SEVERITY_INFO, "UWB AP_Beacon::init type = %d",(int)_type);
+
     if (_driver != nullptr) {
         // init called a 2nd time?
         return;
@@ -127,6 +132,11 @@ void AP_Beacon::get_data_raw(float &dis, float &angel)
         // AP_Beacon_Backend中的getdata
         _driver->get_data_raw(dis, angel);
     }
+}
+void AP_Beacon::get_position(Vector3f& pos)
+{
+    // AP_Beacon_Backend中的get_position
+    _driver->get_position(pos); 
 }
 
 // return true if beacon feature is enabled

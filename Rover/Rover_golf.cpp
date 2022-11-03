@@ -61,10 +61,15 @@ void Rover::one_hz_loop(void)
 {
     //debug info
     int imode = control_mode->mode_number();
-     gcs().send_text(MAV_SEVERITY_INFO, "Mode= %d, work_enable= %d, isSleep=%d",imode, work_enable,isSleep);
-     gcs().send_text(MAV_SEVERITY_INFO, "golf_work_state = %d ", golf_work_state);
-     gcs().send_text(MAV_SEVERITY_INFO, "pi_ctl= %d, pi_ctl_step=%d", pi_ctl,pi_ctl_step);
-  
+//    gcs().send_text(MAV_SEVERITY_INFO, "Mode= %d, work_enable= %d, isSleep=%d",imode, work_enable,isSleep);
+ //   gcs().send_text(MAV_SEVERITY_INFO, "golf_work_state = %d ", golf_work_state);
+    if(pi_ctl)
+        gcs().send_text(MAV_SEVERITY_INFO, "pi_ctl= %d, pi_ctl_step=%d", pi_ctl,pi_ctl_step);
+    //uwbmsg
+ //   Vector3f pos;
+ //   g2.beacon.get_position(pos);
+ //   gcs().send_text(MAV_SEVERITY_INFO, "UWB rover x= %f, y=%f, z=%f", pos.x,pos.y,pos.z);
+
     if(imode == 0)//manual
         return;
     //if (work_enable && (AP_HAL::millis() - rover_golf_start > 5 * 3600 * 1000) && rover_golf_start!=0)
@@ -95,10 +100,11 @@ void Rover::one_hz_loop(void)
     uint8_t hour, min, sec;
     uint16_t ms;
     //获取现在的UTC时间 时 分 秒 
-    if (!AP::rtc().get_local_time(hour, min, sec, ms))
-        gcs().send_text(MAV_SEVERITY_DEBUG, "UTC get time faild!");
-    //else
-    //    gcs().send_text(MAV_SEVERITY_CRITICAL, "H:M:S %d:%d:%d", hour, min, sec);
+    AP::rtc().get_local_time(hour, min, sec, ms);
+    //if (!AP::rtc().get_local_time(hour, min, sec, ms))
+        //gcs().send_text(MAV_SEVERITY_DEBUG, "UTC get time faild!");
+   // else
+        //gcs().send_text(MAV_SEVERITY_CRITICAL, "H:M:S %d:%d:%d", hour, min, sec);
     batt_nd_charge = false;
 
     float batt_volt = battery.voltage();
@@ -249,7 +255,8 @@ void Rover::one_hz_loop(void)
         //                        && (hour*24+min < (uint8_t)g.end_3_hour*24 +(uint8_t)g.end_3_min) && (sec < 4));
         bool time3_to_end = ((hour == (uint8_t)g.end_3_hour) && (min == (uint8_t)g.end_3_min) && (sec < 4));
 
-//        gcs().send_text(MAV_SEVERITY_INFO, "t1s=%i t1e=%i, slp=%i", time1_to_start, time1_to_end, isSleep);
+        gcs().send_text(MAV_SEVERITY_INFO, "s1h=%d s1m=%d, e1h=%d,e1m=%d", (int)g.start_1_hour, (int)g.start_1_min, (int)g.end_1_hour,(int)g.end_1_min);
+        gcs().send_text(MAV_SEVERITY_INFO, "t1s=%i t1e=%i, t1a=%i", time1_to_start, time1_to_end, time1_avaiable);
         
         
         if ((time1_to_start && time1_avaiable) ||
@@ -558,7 +565,7 @@ void Rover::sim_pi_ctl(void)
                 // after return home, wait until GPS stable
                  rover.mode_gobatt.stop_rover();//stop
                 //if (AP_HAL::millis() - pi_ctl_start > 3000)
-                if(one_hz_times>3)
+                if(one_hz_times>2)
                 {
                     pi_ctl_step++;
                     pi_ctl_start = AP_HAL::millis();
@@ -595,7 +602,7 @@ void Rover::sim_pi_ctl(void)
                 else
                     sim_pi_guide();
                 break;   
-            case 4://forward
+            case 4://forward5
                 // run guided  using UWB 
                 //sim_pi_guide();
                 //rover_reached_stick = true;
@@ -607,7 +614,7 @@ void Rover::sim_pi_ctl(void)
                 //if ( nd_collision || AP_HAL::millis() - pi_ctl_start > g.golf_time_forward)//2000
                 if(one_hz_times> g.golf_time_forward)
                 {
-                    rover.mode_gobatt.set_para();//stop
+                    //rover.mode_gobatt.set_para();//stop
                     rover_reached_stick = false;
                     pi_ctl_start = AP_HAL::millis();
                     one_hz_times = 0;
@@ -622,23 +629,17 @@ void Rover::sim_pi_ctl(void)
                 //if (AP_HAL::millis() - pi_ctl_start > g.golf_time_closedoor)//3000
                 if (one_hz_times > g.golf_time_closedoor)//5
                 {
+                    rover.mode_gobatt.set_para();//stop
                     pi_ctl_start = AP_HAL::millis();
                     one_hz_times = 0;
                     pi_ctl_step++;
                 }
                 break;
             case 6://unload ball
-                unload_times++;
-                if(unload_times % 5 == 0)
-                {
-                    unload_flg = -1.0 * unload_flg;
-                    rover.mode_gobatt.set_para(g.golf_throttle/3 * unload_flg);                               
-                }
-
+                rover.mode_gobatt.set_para();//stop
                 //if (AP_HAL::millis() - pi_ctl_start > g.golf_time_opendoor)//30000
                 if (one_hz_times > g.golf_time_opendoor)//30
                 {
-                    unload_times = 0;
                     pi_ctl_start = AP_HAL::millis();
                     one_hz_times = 0;
                     pi_ctl_step++;
@@ -646,15 +647,15 @@ void Rover::sim_pi_ctl(void)
                 break;
            case 7:
                 // close door and wait 3s
+                rover.mode_gobatt.set_para();//stop
                 //if (AP_HAL::millis() - pi_ctl_start < g.golf_time_closedoor)//3000
                 if (one_hz_times < g.golf_time_closedoor)//5
                 {
                     motor_pull();
-                    rover.mode_gobatt.set_para(g.golf_throttle/2);
+                //    rover.mode_gobatt.set_para(g.golf_throttle/2);
                 }
                 else if(!isSleep)
                 {
-                //    rover.mode_gobatt.set_para();//stop
                     pi_ctl_start = AP_HAL::millis();
                     one_hz_times = 0;
                     pi_ctl_step++;
@@ -663,10 +664,11 @@ void Rover::sim_pi_ctl(void)
                 break;                
             case 8:
                 // backward
-                rover.mode_gobatt.set_para(-g.golf_throttle);//-50
+                rover.mode_gobatt.set_para(-g.golf_throttleR);//-50
                 //if (AP_HAL::millis() - pi_ctl_start > g.golf_time_backward)//5000
                 if (one_hz_times > g.golf_time_backward)//12
                 {
+                    rover.mode_gobatt.set_para();//stop
                     pi_ctl_step = 0;
                     pi_ctl = false;
                     pi_ctl_start = 0;
@@ -707,7 +709,7 @@ void Rover::sim_pi_guide(void)
     //output end
 //    gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angle=%.2f uwb_admire=%.2f", 
 //                                                    sim_pi_guide_state,dis, angle, uwb_admire);
-    if(!nd_collision)
+    if(true)//(!nd_collision)
     {
         switch (sim_pi_guide_state)
         {
@@ -869,7 +871,7 @@ void Rover::golf_end_mission(void)
     pi_ctl = false; // //202207uwb 
     pi_ctl_step = 0;
     sim_pi_guide_state = 0; //202207uwb
-    golf_work_state = GOLF_NOWORK;//GOLF_BACK
+    golf_work_state = GOLF_BACK;
     work_golf_back = true; // Josh
     isSleep = true;        // Josh
     start_auto = true;

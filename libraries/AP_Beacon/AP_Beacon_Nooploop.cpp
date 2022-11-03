@@ -20,27 +20,26 @@
 #include <stdio.h>
 
 #define NOOPLOOP_INVALID_VAL -8388000 // indicates data unavailable or invalid
-#define NOOPLOOP_SF0_SZ 128 // setting_frame0 packet size
+#define NOOPLOOP_SF0_SZ 128           // setting_frame0 packet size
 
-#define NOOPLOOP_HEADER                     0x55    // message header
-#define NOOPLOOP_FUNCTION_MARK_NODE_FRAME2  4
-#define NOOPLOOP_NODE_FRAME2_FRAMELEN_MAX   4096    // frames should be less than 4k bytes
-#define NOOPLOOP_NODE_FRAME2_SYSTIME        6       // start of 4 bytes holding system time in ms
-#define NOOPLOOP_NODE_FRAME2_PRECISION_X    10      // start of 1 byte holding precision in m*100 in x axis
-#define NOOPLOOP_NODE_FRAME2_PRECISION_Y    11      // start of 1 byte holding precision in m*100 in y axis
-#define NOOPLOOP_NODE_FRAME2_PRECISION_Z    12      // start of 1 byte holding precision in m*100 in y axis
-#define NOOPLOOP_NODE_FRAME2_POSX           13      // start of 3 bytes holding x position in m*1000
-#define NOOPLOOP_NODE_FRAME2_POSY           16      // start of 3 bytes holding y position in m*1000
-#define NOOPLOOP_NODE_FRAME2_POSZ           19      // start of 3 bytes holding z position in m*1000
-#define NOOPLOOP_NODE_FRAME2_VALID_NODES    118
-#define NOOPLOOP_NODE_FRAME2_NODE_BLOCK     119
+#define NOOPLOOP_HEADER 0x55 // message header
+#define NOOPLOOP_FUNCTION_MARK_NODE_FRAME2 4
+#define NOOPLOOP_NODE_FRAME2_FRAMELEN_MAX 4096 // frames should be less than 4k bytes
+#define NOOPLOOP_NODE_FRAME2_SYSTIME 6         // start of 4 bytes holding system time in ms
+#define NOOPLOOP_NODE_FRAME2_PRECISION_X 10    // start of 1 byte holding precision in m*100 in x axis
+#define NOOPLOOP_NODE_FRAME2_PRECISION_Y 11    // start of 1 byte holding precision in m*100 in y axis
+#define NOOPLOOP_NODE_FRAME2_PRECISION_Z 12    // start of 1 byte holding precision in m*100 in y axis
+#define NOOPLOOP_NODE_FRAME2_POSX 13           // start of 3 bytes holding x position in m*1000
+#define NOOPLOOP_NODE_FRAME2_POSY 16           // start of 3 bytes holding y position in m*1000
+#define NOOPLOOP_NODE_FRAME2_POSZ 19           // start of 3 bytes holding z position in m*1000
+#define NOOPLOOP_NODE_FRAME2_VALID_NODES 118
+#define NOOPLOOP_NODE_FRAME2_NODE_BLOCK 119
 
-#define NOOPLOOP_HEADER2                    0x54    // message header
-#define NOOPLOOP_FUNCTION_MARK_SETTING_FRAME0  0
-#define NOOPLOOP_SETTING_FRAME0_A0          37
+#define NOOPLOOP_HEADER2 0x54 // message header
+#define NOOPLOOP_FUNCTION_MARK_SETTING_FRAME0 0
+#define NOOPLOOP_SETTING_FRAME0_A0 37
 
-
-extern const AP_HAL::HAL& hal;
+extern const AP_HAL::HAL &hal;
 
 // return true if sensor is basically healthy (we are receiving data)
 bool AP_Beacon_Nooploop::healthy()
@@ -53,38 +52,52 @@ bool AP_Beacon_Nooploop::healthy()
 void AP_Beacon_Nooploop::update(void)
 {
     // return immediately if not serial port
-    if (uart == nullptr) {
+    if (uart == nullptr)
+    {
         return;
     }
 
     // check uart for any incoming messages
     uint32_t nbytes = MIN(uart->available(), 1024U);
-    while (nbytes-- > 0) {
+    while (nbytes-- > 0)
+    {
         int16_t b = uart->read();
-        if (b >= 0 ) {
+        if (b >= 0)
+        {
             MsgType type = parse_byte((uint8_t)b);
-            if (type == MsgType::NODE_FRAME2) {
-                if (_anchor_pos_avail) {
+            if (type == MsgType::NODE_FRAME2)
+            {
+                if (_anchor_pos_avail)
+                {                
                     parse_node_frame2();
-                } else if (AP_HAL::millis() - _last_request_setting_ms > 2000) {
+                }
+                else if (AP_HAL::millis() - _last_request_setting_ms > 2000)
+                {
+                    //uwbmsg
+                    gcs().send_text(MAV_SEVERITY_INFO, " UWB update 3: request_setting");                   
                     _last_request_setting_ms = AP_HAL::millis();
                     request_setting();
                 }
-            } else if (type == MsgType::SETTING_FRAME0) {
+            }
+            else if (type == MsgType::SETTING_FRAME0)
+            {
+                //uwbmsg
+                gcs().send_text(MAV_SEVERITY_INFO, " UWB update 4: parse_setting_frame0");
                 parse_setting_frame0();
-            } 
+            }
         }
     }
 }
 
 void AP_Beacon_Nooploop::request_setting()
 {
-    //send setting_frame0 to tag, tag will fill anchor position and ack
+    // send setting_frame0 to tag, tag will fill anchor position and ack
     uart->write((uint8_t)0x54);
     uart->write((uint8_t)0);
     uart->write((uint8_t)1);
-    for (uint8_t i = 0; i < 124; i++) {
-        uart->write((uint8_t)0); //manual states filled with any char, but in fact only 0 works
+    for (uint8_t i = 0; i < 124; i++)
+    {
+        uart->write((uint8_t)0); // manual states filled with any char, but in fact only 0 works
     }
     uart->write((uint8_t)0x55);
 }
@@ -94,15 +107,19 @@ void AP_Beacon_Nooploop::request_setting()
 AP_Beacon_Nooploop::MsgType AP_Beacon_Nooploop::parse_byte(uint8_t b)
 {
     // process byte depending upon current state
-    switch (_state) {
+    switch (_state)
+    {
 
     case ParseState::HEADER:
-        if (b == NOOPLOOP_HEADER) {
+        if (b == NOOPLOOP_HEADER)
+        {
             _msgbuf[0] = b;
             _msg_len = 1;
             _crc_expected = b;
             _state = ParseState::H55_FUNCTION_MARK;
-        } else if (b == NOOPLOOP_HEADER2) {
+        }
+        else if (b == NOOPLOOP_HEADER2)
+        {
             _msgbuf[0] = b;
             _msg_len = 1;
             _crc_expected = b;
@@ -111,23 +128,29 @@ AP_Beacon_Nooploop::MsgType AP_Beacon_Nooploop::parse_byte(uint8_t b)
         break;
 
     case ParseState::H55_FUNCTION_MARK:
-        if (b == NOOPLOOP_FUNCTION_MARK_NODE_FRAME2) {
+        if (b == NOOPLOOP_FUNCTION_MARK_NODE_FRAME2)
+        {
             _msgbuf[1] = b;
             _msg_len++;
             _crc_expected += b;
             _state = ParseState::LEN_L;
-        } else {
+        }
+        else
+        {
             _state = ParseState::HEADER;
         }
         break;
 
     case ParseState::H54_FUNCTION_MARK:
-        if (b == NOOPLOOP_FUNCTION_MARK_SETTING_FRAME0) {
+        if (b == NOOPLOOP_FUNCTION_MARK_SETTING_FRAME0)
+        {
             _msgbuf[1] = b;
             _msg_len++;
             _crc_expected += b;
             _state = ParseState::SF0_PAYLOAD;
-        } else {
+        }
+        else
+        {
             _state = ParseState::HEADER;
         }
         break;
@@ -142,9 +165,12 @@ AP_Beacon_Nooploop::MsgType AP_Beacon_Nooploop::parse_byte(uint8_t b)
     case ParseState::LEN_H:
         // extract and sanity check frame length
         _frame_len = UINT16_VALUE(b, _msgbuf[2]);
-        if (_frame_len > NOOPLOOP_NODE_FRAME2_FRAMELEN_MAX) {
+        if (_frame_len > NOOPLOOP_NODE_FRAME2_FRAMELEN_MAX)
+        {
             _state = ParseState::HEADER;
-        } else {
+        }
+        else
+        {
             _msgbuf[3] = b;
             _msg_len++;
             _crc_expected += b;
@@ -154,34 +180,44 @@ AP_Beacon_Nooploop::MsgType AP_Beacon_Nooploop::parse_byte(uint8_t b)
 
     case ParseState::NF2_PAYLOAD:
         // add byte to buffer if there is room
-        if (_msg_len < NOOPLOOP_MSG_BUF_MAX) {
+        if (_msg_len < NOOPLOOP_MSG_BUF_MAX)
+        {
             _msgbuf[_msg_len] = b;
         }
         _msg_len++;
-        if (_msg_len >= _frame_len) {
+        if (_msg_len >= _frame_len)
+        {
             _state = ParseState::HEADER;
             // check crc
-            if (b == _crc_expected) {
+            if (b == _crc_expected)
+            {
                 return MsgType::NODE_FRAME2;
             }
-        } else {
+        }
+        else
+        {
             _crc_expected += b;
         }
         break;
 
     case ParseState::SF0_PAYLOAD:
         // add byte to buffer if there is room
-        if (_msg_len < NOOPLOOP_MSG_BUF_MAX) {
+        if (_msg_len < NOOPLOOP_MSG_BUF_MAX)
+        {
             _msgbuf[_msg_len] = b;
         }
         _msg_len++;
-        if (_msg_len >= NOOPLOOP_SF0_SZ) {
+        if (_msg_len >= NOOPLOOP_SF0_SZ)
+        {
             _state = ParseState::HEADER;
             // check crc
-            if (b == _crc_expected) {
+            if (b == _crc_expected)
+            {
                 return MsgType::SETTING_FRAME0;
             }
-        } else {
+        }
+        else
+        {
             _crc_expected += b;
         }
         break;
@@ -198,53 +234,71 @@ void AP_Beacon_Nooploop::parse_node_frame2()
     // estimated precision for x,y position in meters
     const float precision_x = _msgbuf[NOOPLOOP_NODE_FRAME2_PRECISION_X] * 0.01;
     const float precision_y = _msgbuf[NOOPLOOP_NODE_FRAME2_PRECISION_Y] * 0.01;
-    //EKF's estimate goes very bad if the error value sent into the EKF is unrealistically low. ensure it's never less than a reasonable value
-    const float pos_err = MAX(0.1f, sqrtf(sq(precision_x)+sq(precision_y)));
+    // EKF's estimate goes very bad if the error value sent into the EKF is unrealistically low. ensure it's never less than a reasonable value
+    const float pos_err = MAX(0.1f, sqrtf(sq(precision_x) + sq(precision_y)));
 
     // x,y,z position in m*1000 in ENU frame
-    const int32_t pos_x = ((int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSX+2] << 24 | (int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSX+1] << 16 | (int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSX] << 8) >> 8;
-    const int32_t pos_y = ((int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSY+2] << 24 | (int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSY+1] << 16 | (int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSY] << 8) >> 8;
-    const int32_t pos_z = ((int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSZ+2] << 24 | (int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSZ+1] << 16 | (int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSZ] << 8) >> 8;
-
+    const int32_t pos_x = ((int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSX + 2] << 24 | (int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSX + 1] << 16 | (int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSX] << 8) >> 8;
+    const int32_t pos_y = ((int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSY + 2] << 24 | (int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSY + 1] << 16 | (int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSY] << 8) >> 8;
+    const int32_t pos_z = ((int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSZ + 2] << 24 | (int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSZ + 1] << 16 | (int32_t)_msgbuf[NOOPLOOP_NODE_FRAME2_POSZ] << 8) >> 8;
+   
     // position scaled to meters and changed to NED
-    const Vector3f pos_m {pos_y * 0.001f, pos_x * 0.001f, -pos_z * 0.001f};
-
+    const Vector3f pos_m{pos_y * 0.001f, pos_x * 0.001f, -pos_z * 0.001f};
+ //uwbmsg
+    tag_position_m = pos_m;
+    gcs().send_text(MAV_SEVERITY_INFO, " UWB posx = %f, y = %f, z = %f", pos_m.x,pos_m.y,pos_m.z);
     set_vehicle_position(pos_m, pos_err);
 
     const uint8_t valid_nodes = _msgbuf[NOOPLOOP_NODE_FRAME2_VALID_NODES];
-    for (uint8_t i = 0; i < valid_nodes; i++) {
+    for (uint8_t i = 0; i < valid_nodes; i++)
+    {
         uint16_t offset = NOOPLOOP_NODE_FRAME2_NODE_BLOCK + i * 13;
-        uint8_t id = _msgbuf[offset+1]; //nooploop id starts from 0, increments clockwise, 0 -> 1 define Y axis.
-        const int32_t dist = ((int32_t)_msgbuf[offset+2+2] << 24 | (int32_t)_msgbuf[offset+2+1] << 16 | (int32_t)_msgbuf[offset+2] << 8) >> 8;
+        uint8_t id = _msgbuf[offset + 1]; // nooploop id starts from 0, increments clockwise, 0 -> 1 define Y axis.
+        const int32_t dist = ((int32_t)_msgbuf[offset + 2 + 2] << 24 | (int32_t)_msgbuf[offset + 2 + 1] << 16 | (int32_t)_msgbuf[offset + 2] << 8) >> 8;
         set_beacon_distance(id, dist * 0.001f);
     }
 }
 
 void AP_Beacon_Nooploop::parse_setting_frame0()
 {
-    for (uint8_t i = 0; i < 4; i++) {
+    int cnt = 0;
+    for (uint8_t i = 0; i < 4; i++)
+    {
         uint16_t offset = NOOPLOOP_SETTING_FRAME0_A0 + i * 9;
 
         // x,y,z position in m*1000 in ENU frame
-        const int32_t pos_x = ((int32_t)_msgbuf[offset+2] << 24 | (int32_t)_msgbuf[offset+1] << 16 | (int32_t)_msgbuf[offset] << 8) >> 8;
-        if (pos_x == NOOPLOOP_INVALID_VAL) { //anchor position not available
-            return;
+        const int32_t pos_x = ((int32_t)_msgbuf[offset + 2] << 24 | (int32_t)_msgbuf[offset + 1] << 16 | (int32_t)_msgbuf[offset] << 8) >> 8;
+        if (pos_x == NOOPLOOP_INVALID_VAL)
+        { // anchor position not available
+            //uwbmsg
+            gcs().send_text(MAV_SEVERITY_INFO, " UWB2 return i=%i",i);
+            //return;
+            continue;
         }
-        offset+=3;
-        const int32_t pos_y = ((int32_t)_msgbuf[offset+2] << 24 | (int32_t)_msgbuf[offset+1] << 16 | (int32_t)_msgbuf[offset] << 8) >> 8;
-        if (pos_y == NOOPLOOP_INVALID_VAL) {
-            return;
+        offset += 3;
+        const int32_t pos_y = ((int32_t)_msgbuf[offset + 2] << 24 | (int32_t)_msgbuf[offset + 1] << 16 | (int32_t)_msgbuf[offset] << 8) >> 8;
+        if (pos_y == NOOPLOOP_INVALID_VAL)
+        {
+            //return;
+            continue;
         }
-        offset+=3;
-        const int32_t pos_z = ((int32_t)_msgbuf[offset+2] << 24 | (int32_t)_msgbuf[offset+1] << 16 | (int32_t)_msgbuf[offset] << 8) >> 8;
-        if (pos_z == NOOPLOOP_INVALID_VAL) {
-            return;
+        offset += 3;
+        const int32_t pos_z = ((int32_t)_msgbuf[offset + 2] << 24 | (int32_t)_msgbuf[offset + 1] << 16 | (int32_t)_msgbuf[offset] << 8) >> 8;
+        if (pos_z == NOOPLOOP_INVALID_VAL)
+        {
+            //return;
+            continue;
         }
-
+        cnt++;
         // position scaled to meters and changed to NED
-        const Vector3f pos_m {pos_y * 0.001f, pos_x * 0.001f, -pos_z * 0.001f};
-        
+        const Vector3f pos_m{pos_y * 0.001f, pos_x * 0.001f, -pos_z * 0.001f};
+        //uwbmsg
+        gcs().send_text(MAV_SEVERITY_INFO, " UWB2 i=%i, posx = %f, y = %f, z = %f",i, pos_m.x,pos_m.y,pos_m.z);
         set_beacon_position(i, pos_m);
     }
+    if(cnt<3)
+        return;
+    //uwbmsg
+    gcs().send_text(MAV_SEVERITY_INFO, " UWB2 _anchor_pos_avail");
     _anchor_pos_avail = true;
 }

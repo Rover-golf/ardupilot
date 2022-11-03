@@ -31,16 +31,17 @@ bool Mode::enter()
 
         // check position estimate.  requires origin and at least one horizontal position flag to be true
         const bool position_ok = rover.ekf_position_ok() && !rover.failsafe.ekf;
+        gcs().send_text(MAV_SEVERITY_INFO, "enter0");
         if (requires_position() && !position_ok) {
             return false;
         }
-
+        gcs().send_text(MAV_SEVERITY_INFO, "enter1");
         // check velocity estimate (if we have position estimate, we must have velocity estimate)
         if (requires_velocity() && !position_ok && !filt_status.flags.horiz_vel) {
             return false;
         }
     }
-
+    gcs().send_text(MAV_SEVERITY_INFO, "enter2");
     bool ret = _enter();
 
     // initialisation common to all modes

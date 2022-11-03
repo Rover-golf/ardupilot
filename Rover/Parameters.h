@@ -77,6 +77,7 @@ public:
         k_param_golf_max_turn,
         k_param_golf_yaw,
         k_param_golf_throttle,
+        k_param_golf_throttleR,
         k_param_golf_time_forward,
         k_param_golf_time_opendoor,
         k_param_golf_time_backward,
@@ -95,7 +96,7 @@ public:
         k_param_start_3_hour,
         k_param_start_3_min,
         k_param_end_3_hour,
-        k_param_end_3_min,//94
+        k_param_end_3_min,//95
           
         // 97: RSSI
         k_param_rssi = 97,
@@ -327,6 +328,7 @@ public:
     AP_Float golf_yaw;
     AP_Int32 golf_near_distence;
     AP_Float golf_throttle;
+    AP_Float golf_throttleR;
     AP_Int32 golf_time_forward;
     AP_Int32 golf_time_opendoor;
     AP_Int32 golf_time_backward;

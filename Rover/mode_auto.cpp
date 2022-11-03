@@ -5,17 +5,19 @@
 
 bool ModeAuto::_enter()
 {
+    gcs().send_text(MAV_SEVERITY_INFO, "_enter0");
     // if (rover.start_auto) //for sim RTL uwb202207
     // {
         if(!rover.golf_start_mission())
             return false;
     // }
     // fail to enter auto if no mission commands
+        gcs().send_text(MAV_SEVERITY_INFO, "_enter1");
     if (mission.num_commands() <= 1) {
         gcs().send_text(MAV_SEVERITY_NOTICE, "No Mission. Can't set AUTO.");
         return false;
     }
-
+    gcs().send_text(MAV_SEVERITY_INFO, "_enter2");
     // initialise waypoint speed
     g2.wp_nav.set_desired_speed_to_default();
 
