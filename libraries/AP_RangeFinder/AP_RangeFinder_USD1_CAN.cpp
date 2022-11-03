@@ -110,6 +110,7 @@ bool AP_RangeFinder_USD1_CAN::CH30_Startup(bool bRestart)
     while(AP_HAL::millis() - CH30_init_start < 20000)
     {
         _bRt = write_frame(can_tx1,500);
+        gcs().send_text(MAV_SEVERITY_INFO, "CH30_Startup write_frame = %i ", _bRt);
         if(bRestart)//disconnect just send command once.
             return _bRt;
         if(_bRt)

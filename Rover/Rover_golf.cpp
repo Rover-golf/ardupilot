@@ -633,16 +633,9 @@ void Rover::sim_pi_ctl(void)
                 break;
             case 6://unload ball
                 rover.mode_gobatt.set_para();//stop
-                unload_times++;
-                if(unload_times % 5 == 0)
-                {
-                    unload_flg = -1.0 * unload_flg;
-                 //   rover.mode_gobatt.set_para(g.golf_throttle/3 * unload_flg);                               
-                }
                 //if (AP_HAL::millis() - pi_ctl_start > g.golf_time_opendoor)//30000
                 if (one_hz_times > g.golf_time_opendoor)//30
                 {
-                    unload_times = 0;
                     pi_ctl_start = AP_HAL::millis();
                     one_hz_times = 0;
                     pi_ctl_step++;
@@ -667,7 +660,7 @@ void Rover::sim_pi_ctl(void)
                 break;                
             case 8:
                 // backward
-                rover.mode_gobatt.set_para(-g.golf_throttle);//-50
+                rover.mode_gobatt.set_para(-g.golf_throttleR);//-50
                 //if (AP_HAL::millis() - pi_ctl_start > g.golf_time_backward)//5000
                 if (one_hz_times > g.golf_time_backward)//12
                 {
@@ -712,7 +705,7 @@ void Rover::sim_pi_guide(void)
     //output end
 //    gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angle=%.2f uwb_admire=%.2f", 
 //                                                    sim_pi_guide_state,dis, angle, uwb_admire);
-    if(!nd_collision)
+    if(true)//if(!nd_collision)
     {
         switch (sim_pi_guide_state)
         {

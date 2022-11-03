@@ -74,12 +74,9 @@ public:
         k_param_golf_forward,
         k_param_golf_max_degerr,
         k_param_golf_max_turn,
-        k_param_golf_can_0,
-        k_param_golf_can_0_buad,
-        k_param_golf_can_1,
-        k_param_golf_can_1_buad,
         k_param_golf_yaw,
         k_param_golf_throttle,
+        k_param_golf_throttleR,
         k_param_golf_time_forward,
         k_param_golf_time_opendoor,
         k_param_golf_time_backward,
@@ -313,13 +310,10 @@ public:
     AP_Float golf_forward;
     AP_Float golf_max_turn;  
 
-    AP_Int8 golf_can_0;
-    AP_Int8 golf_can_1;
-    AP_Int32 golf_can_0_buad;
-    AP_Int32 golf_can_1_buad;
     AP_Float golf_yaw;
     AP_Int32 golf_near_distence;
     AP_Float golf_throttle;
+    AP_Float golf_throttleR;
     AP_Int32 golf_time_forward;
     AP_Int32 golf_time_opendoor;
     AP_Int32 golf_time_backward;

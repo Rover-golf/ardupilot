@@ -495,7 +495,6 @@ public:
     void golf_backward(int second = 10);  
     bool golf_is_athome();  
     void golf_set_sleepflg(float sleepflg = 1.0f);
-    int unload_times = 0;
     float unload_flg = 1.0;
     int one_hz_times = 0;
 };
