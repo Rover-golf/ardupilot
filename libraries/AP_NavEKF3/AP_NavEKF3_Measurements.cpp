@@ -618,9 +618,9 @@ void NavEKF3_core::readGpsData()
         gpsHgtAccuracy = MIN(gpsHgtAccuracy,100.0f);
         gpsHgtAccuracy = MAX(gpsHgtAccuracy, 1.5f * frontend->_gpsHorizPosNoise);
     }
-
+    //UWB FAKE-GPS CHANGE 6 TO 3
     // check if we have enough GPS satellites and increase the gps noise scaler if we don't
-    if (gps.num_sats(selected_gps) >= 6 && (PV_AidingMode == AID_ABSOLUTE)) {
+    if (gps.num_sats(selected_gps) >= 3 && (PV_AidingMode == AID_ABSOLUTE)) {
         gpsNoiseScaler = 1.0f;
     } else if (gps.num_sats(selected_gps) == 5 && (PV_AidingMode == AID_ABSOLUTE)) {
         gpsNoiseScaler = 1.4f;
