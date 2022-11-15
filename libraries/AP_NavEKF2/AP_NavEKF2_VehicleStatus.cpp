@@ -181,9 +181,9 @@ void NavEKF2_core::calcGpsGoodToAlign(void)
     } else {
         gpsCheckStatus.bad_hdop = false;
     }
-
+    //UWB FAKE-GPS CHANGE 6 TO 3
     // fail if not enough sats
-    bool numSatsFail = (gps.num_sats() < 6) && (frontend->_gpsCheck & MASK_GPS_NSATS);
+    bool numSatsFail = (gps.num_sats() < 3) && (frontend->_gpsCheck & MASK_GPS_NSATS);
 
     // Report check result as a text string and bitmask
     if (numSatsFail) {
