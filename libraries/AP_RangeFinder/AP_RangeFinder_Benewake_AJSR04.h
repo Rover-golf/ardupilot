@@ -26,12 +26,14 @@ private:
     //get multi sensor distance returned in reading_cm and number in sensornum
     bool get_reading_multi(uint16_t &reading_cm, uint8_t &sensornum);
     //require reading distance information
-    bool require_reading_distance(uint8_t sensornum);     
+    bool require_reading_distance(uint8_t sensornum);  
+    //get LakiBeam1S Ladar distance returned in reading_cm
+    bool get_reading_LakiBeam1S(uint16_t &reading_cm, float &reading_deg);
 
     uint8_t linebuf[10];
     uint8_t linebuf_len;
     //sensor max address
-    uint8_t _Address;
+    uint8_t _Address;//0:LakiBeam1S; 1:single >=2:muilt
     //current sensor id
     uint8_t _cursensorid = 0x01;    
 };
