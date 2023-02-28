@@ -61,7 +61,7 @@ void Rover::one_hz_loop(void)
 {
     //debug info
     int imode = control_mode->mode_number();
-//    gcs().send_text(MAV_SEVERITY_INFO, "Mode= %d, work_enable= %d, isSleep=%d",imode, work_enable,isSleep);
+    gcs().send_text(MAV_SEVERITY_INFO, "Mode= %d, work_enable= %d, isSleep=%d",imode, work_enable,isSleep);
  //   gcs().send_text(MAV_SEVERITY_INFO, "golf_work_state = %d ", golf_work_state);
     if(pi_ctl)
         gcs().send_text(MAV_SEVERITY_INFO, "pi_ctl= %d, pi_ctl_step=%d", pi_ctl,pi_ctl_step);
@@ -90,8 +90,7 @@ void Rover::one_hz_loop(void)
     //    angle = 0.0;
     //dis = dis * 100;//m->cm
     
-    //gcs().send_text(MAV_SEVERITY_NOTICE, "uwb dis=%.2f angle=%.2f ", 
-    //                                                dis, angle);
+    //gcs().send_text(MAV_SEVERITY_NOTICE, "uwb dis=%.2f angle=%.2f ",dis, angle);
 
 
     //sr73f_can.update();
