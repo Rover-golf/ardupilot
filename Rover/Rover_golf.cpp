@@ -23,6 +23,16 @@ void Rover::hundred_hz_loop(void)
         if (yaw_get < 0)
             yaw_get += 360.0f;
 
+        //update last time angle
+        if(fabsf(old_yaw - yaw_get) < g.steer_error/2)
+            pie_ctl_times ++;
+        else
+        {
+            old_yaw = yaw_get;
+            pie_ctl_times = 0;
+        }
+ 
+
         yaw_rate_to = yaw_desire - yaw_get;
         if (yaw_rate_to < 0)
             yaw_rate_to += 360.0f;
@@ -36,14 +46,21 @@ void Rover::hundred_hz_loop(void)
         //--------------update 20211124------------
         if (yaw_rate_to > 180)
             yaw_rate_to = yaw_rate_to - 360;//反向转
- //       gcs().send_text(MAV_SEVERITY_INFO, "hundred_hz_loop yaw_desire=%.0f yaw_get=%.0f, turn=%.0f",  
- //           (float)yaw_desire,yaw_get, yaw_rate_to);       
-        yaw_rate_to = yaw_rate_to / 180.f * g.steer_rate_use; // scale +-180 to +-4500
+        //yaw_rate_to = yaw_rate_to / 180.f * g.steer_rate_use; // scale +-180 to +-4500
+
+        if(yaw_rate_to > 0)
+        {
+            yaw_rate_to = g.steer_yaw_min + (yaw_rate_to+pie_ctl_times) * g.golf_yawrate_k;
+            if(yaw_rate_to > g.steer_rate_use)
+                yaw_rate_to = g.steer_rate_use;
+        }
+        else if(yaw_rate_to < 0)
+        {
+            yaw_rate_to = -g.steer_yaw_min + (yaw_rate_to-pie_ctl_times) * g.golf_yawrate_k;
+            if(yaw_rate_to < -g.steer_rate_use)
+                yaw_rate_to = -g.steer_rate_use;
+        } 
         
-        if(yaw_rate_to > 0 && yaw_rate_to < g.steer_yaw_min)
-            yaw_rate_to = g.steer_yaw_min;
-        else if(yaw_rate_to < 0 && yaw_rate_to > -g.steer_yaw_min)
-            yaw_rate_to = -g.steer_yaw_min;
         //--------------end------------------------       
         if (fabsf(yaw_desire - yaw_get) < g.steer_error)
         {
@@ -53,8 +70,11 @@ void Rover::hundred_hz_loop(void)
             yaw_rate_to = 0;
             pi_ctl_start = AP_HAL::millis();
             one_hz_times = 0;
+            pie_ctl_times = 0;
         }
         rover.mode_gobatt.set_para(0.0f, yaw_rate_to);
+        gcs().send_text(MAV_SEVERITY_INFO, "gps yaw_desire=%.0f yaw_get=%.0f, turn=%.0f",yaw_desire,yaw_get, yaw_rate_to);       
+         
     }
 }
 
@@ -63,8 +83,9 @@ void Rover::one_hz_loop(void)
     //debug info
     int imode = control_mode->mode_number();
      gcs().send_text(MAV_SEVERITY_INFO, "Mode= %d, work_enable= %d, isSleep=%d",imode, work_enable,isSleep);
-     gcs().send_text(MAV_SEVERITY_INFO, "golf_work_state = %d ", golf_work_state);
-     gcs().send_text(MAV_SEVERITY_INFO, "pi_ctl= %d, pi_ctl_step=%d", pi_ctl,pi_ctl_step);
+     //gcs().send_text(MAV_SEVERITY_INFO, "golf_work_state = %d ", golf_work_state);
+     if(pi_ctl)
+        gcs().send_text(MAV_SEVERITY_INFO, "pi_ctl= %d, pi_ctl_step=%d", pi_ctl,pi_ctl_step);
   
     if(imode == 0)//manual
         return;
@@ -722,6 +743,7 @@ void Rover::sim_pi_guide(void)
                 uwb_admire = 0;
                 pi_ctl_start = AP_HAL::millis();
                 sim_pi_guide_state++;
+                pie_ctl_times = 0;
             }
             break;
         // try to turn till angle in error
@@ -731,22 +753,32 @@ void Rover::sim_pi_guide(void)
                 rover.mode_gobatt.set_para();//stop
                 pi_ctl_start = AP_HAL::millis();
                 sim_pi_guide_state++;
+                pie_ctl_times = 0;
             }
             else
             {
-                if(delt > 0)    
-                    turn = g.golf_yawrate_k*fabsf(delt) > g.golf_max_turn? g.golf_max_turn:g.golf_yawrate_k*delt;
+                if(fabsf(old_yaw - angle) < g.golf_max_degerr/2)
+                    pie_ctl_times++;
                 else
-                    turn = g.golf_yawrate_k*fabsf(delt) > g.golf_max_turn? -g.golf_max_turn:g.golf_yawrate_k*delt;
+                {
+                    old_yaw = angle;
+                    pie_ctl_times = 0;
+                }
+               
+                if(delt > 0)    
+                    turn = g.steer_yaw_min + g.golf_yawrate_k*(fabsf(delt)+pie_ctl_times) > g.golf_max_turn? g.golf_max_turn:(g.steer_yaw_min+g.golf_yawrate_k*(delt+pie_ctl_times));
+                else
+                    turn = g.steer_yaw_min + g.golf_yawrate_k*(fabsf(delt)+pie_ctl_times) > g.golf_max_turn? -g.golf_max_turn:(-g.steer_yaw_min+g.golf_yawrate_k*(delt-pie_ctl_times));
                 
-                if(turn > 0 && turn < g.steer_yaw_min)
-                        turn = g.steer_yaw_min;
-                else if(turn < 0 && turn > -g.steer_yaw_min)
-                        turn = -g.steer_yaw_min;
+                //if(turn > 0 && turn < g.steer_yaw_min)
+                //        turn = g.steer_yaw_min;
+                //else if(turn < 0 && turn > -g.steer_yaw_min)
+                //        turn = -g.steer_yaw_min;
                     
                 //gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angle=%.2f uwb_admire=%.2f", 
                 //                                    sim_pi_guide_state,dis, angle, uwb_admire);
-                rover.mode_gobatt.set_para(0,turn);    
+                rover.mode_gobatt.set_para(0,turn);
+                gcs().send_text(MAV_SEVERITY_INFO, "times= %d angle= %.0f, turn= %.0f", pie_ctl_times,angle,turn);
             }
 
             break;
@@ -758,40 +790,52 @@ void Rover::sim_pi_guide(void)
                 pi_ctl_start = AP_HAL::millis();
                 rover.mode_gobatt.set_para(0,0);
                 sim_pi_guide_state++;
+                pie_ctl_times = 0;
             }
             else if(fabsf(delt)<g.golf_max_degerr)
-                rover.mode_gobatt.set_para(g.golf_forward,0);
+            {
+                if(fabsf(old_dis - dis) < 20)//cm
+                    pie_ctl_times++;
+                else
+                {
+                    old_dis = dis;
+                    pie_ctl_times = 0;
+                }
+                float f = g.golf_forward+pie_ctl_times;
+                rover.mode_gobatt.set_para(f,0);
+                gcs().send_text(MAV_SEVERITY_INFO, "times= %d, dis= %.0f, forward= %.0f", pie_ctl_times,dis,f);
+            }
             else
             //if (AP_HAL::millis() - pi_ctl_start > 3000)
             {
                 rover.mode_gobatt.set_para(0,0);
                 pi_ctl_start = AP_HAL::millis();
                 sim_pi_guide_state = 1;
+                pie_ctl_times = 0;
             }
             break;
             //rotate to face tag.
         case 3:
-            if(fabsf(delt) < g.golf_max_degerr)
-            {
+           // if(fabsf(delt) < g.golf_max_degerr)
+        //    {
                 rover.mode_gobatt.set_para(0,0);
                 pi_ctl_start = AP_HAL::millis();
                 sim_pi_guide_state = 0;
                 uwb_complete = true;//uwb adjust finished.
+                pie_ctl_times = 0;
 
-            }
-            else
-            {
-                rover.mode_gobatt.set_para(0,0);
-                pi_ctl_start = AP_HAL::millis();
-                sim_pi_guide_state = 1;          
-            }
+        //    }
+        //    else
+        //    {
+        //        rover.mode_gobatt.set_para(0,0);
+        //        pi_ctl_start = AP_HAL::millis();
+        //        sim_pi_guide_state = 1; 
+        //        pie_ctl_times = 0;         
+        //    }
             break;
         default:
             break;
         }
-        int t = turn;
-        int f = g.golf_forward;
-        gcs().send_text(MAV_SEVERITY_INFO, "sim_pi_guide_state= %d, turn= %d, forward= %d", sim_pi_guide_state,t,f);
     }
     else
     {

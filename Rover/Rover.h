@@ -497,6 +497,9 @@ public:
     void golf_set_sleepflg(float sleepflg = 1.0f);
     float unload_flg = 1.0;
     int one_hz_times = 0;
+    int pie_ctl_times = 0; //add times when gps or uwb contral
+    float old_yaw = 0;
+    float old_dis = 0;
 };
 
 extern Rover rover;
