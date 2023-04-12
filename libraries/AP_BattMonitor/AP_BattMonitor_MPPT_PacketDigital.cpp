@@ -265,7 +265,7 @@ const char* AP_BattMonitor_MPPT_PacketDigital::get_fault_code_string(const Fault
     default:
         return "Unknown";
     }
-}now_ms
+}
 // when returning false, no values were changed.
 bool AP_BattMonitor_MPPT_PacketDigital::get_voltage_and_current_and_temp(const int32_t serialnumber, float &voltage, float &current, float &temperature) const
 {

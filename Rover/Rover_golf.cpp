@@ -86,7 +86,10 @@ void Rover::one_hz_loop(void)
      //gcs().send_text(MAV_SEVERITY_INFO, "golf_work_state = %d ", golf_work_state);
      if(pi_ctl)
         gcs().send_text(MAV_SEVERITY_INFO, "pi_ctl= %d, pi_ctl_step=%d", pi_ctl,pi_ctl_step);
-  
+    
+    float batt_volt = battery.voltage();
+    gcs().send_text(MAV_SEVERITY_INFO, "batt_volt %.2f", batt_volt); 
+    
     if(imode == 0)//manual
         return;
     //if (work_enable && (AP_HAL::millis() - rover_golf_start > 5 * 3600 * 1000) && rover_golf_start!=0)
@@ -122,12 +125,9 @@ void Rover::one_hz_loop(void)
     //else
     //    gcs().send_text(MAV_SEVERITY_CRITICAL, "H:M:S %d:%d:%d", hour, min, sec);
     batt_nd_charge = false;
-
-    float batt_volt = battery.voltage();
-
     bool batt_is_low = (batt_volt < g.batt_nd_rtl) ? true : false;
     bool batt_is_full = (batt_volt > g.batt_charge_to) ? true : false;
-    
+    if (batt_is_low) { batt_nd_charge = true; }
     // 
     static bool door_nd_close = false;
     golf_is_full = !(rover.check_digital_pin(AUX_GOLF_PIN));
@@ -249,8 +249,6 @@ void Rover::one_hz_loop(void)
 //#endif
 
     // End Josh
-
-    if (batt_is_low) { batt_nd_charge = true; }
 
     //定时启动
     if(g.golf_timing_enable==1)
@@ -416,19 +414,24 @@ void Rover::one_hz_loop(void)
         // 等树莓派控制完成后pi_ctl会设置成false
         if (!pi_ctl)
         {
-            if (batt_nd_charge)
-                golf_work_state = GOLF_LOW_BATT;
-            else
-                golf_work_state = GOLF_HOLD;
+            golf_work_state = GOLF_HOLD;
         }
         else
+        {
             one_hz_times++;
+           // if (batt_nd_charge)
+           //     golf_work_state = GOLF_LOW_BATT;       
+        }
+
         break;
     case GOLF_LOW_BATT:
+        one_hz_times++;
         if (batt_is_full)
         {
             gcs().send_text(MAV_SEVERITY_CRITICAL, "Golf batt is ready");
-            golf_work_state = GOLF_HOLD;
+            //golf_work_state = GOLF_HOLD;
+            golf_work_state = GOLF_PI_CTL;
+             golf_set_sleepflg(0);
         }
         break;
     case GOLF_PI_AVOID:
