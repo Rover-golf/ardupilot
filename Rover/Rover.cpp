@@ -89,8 +89,8 @@ const AP_Scheduler::Task Rover::scheduler_tasks[] = {
     SCHED_TASK_CLASS(AP_Notify,           &rover.notify,           update,         50,  300),
     SCHED_TASK(one_second_loop,         1,   1500),
     SCHED_TASK(one_hz_loop,         1,   500),
-    SCHED_TASK(hundred_hz_loop, 50, 50),
-    SCHED_TASK(sim_pi_ctl, 50, 50),    
+    SCHED_TASK(hundred_hz_loop, 5, 50),//100
+    SCHED_TASK(sim_pi_ctl, 5, 50),    //50
 #if HAL_SPRAYER_ENABLED
     SCHED_TASK_CLASS(AC_Sprayer,          &rover.g2.sprayer,           update,      3,  90),
 #endif

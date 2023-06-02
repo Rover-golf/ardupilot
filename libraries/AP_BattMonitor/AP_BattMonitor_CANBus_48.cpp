@@ -100,13 +100,19 @@ void AP_BattMonitor_48::handle_frame(AP_HAL::CANFrame &frame)
 
     case PacketType::STREAM_INPUT:
         B48_devices.input.voltage = (float)(UINT16_VALUE(frame.data[0], frame.data[1]))*0.01;//10mV -> V
-        B48_devices.input.current = (float)(UINT16_VALUE(frame.data[2], frame.data[3]))*0.01;//10mA -> A
+        B48_devices.input.current = (float)((int32_t)(frame.data[2]<<8) | (int32_t)frame.data[3])*0.01; //10mA -> A
         B48_devices.input.power =  (float)(UINT16_VALUE(frame.data[4], frame.data[5]))*0.01; // 10mAh -> Ah
         break;
     case PacketType::STREAM_OUTPUT:
         B48_devices.output.voltage = (float)(UINT16_VALUE(frame.data[0], frame.data[1]))*0.01;//10mV -> V
-        B48_devices.output.current = (float)(UINT16_VALUE(frame.data[2], frame.data[3]))*0.01;//10mA -> A
+        if(frame.data[2]>>7 > 0)//negative
+            B48_devices.output.current = ((float)(UINT16_VALUE(frame.data[2], frame.data[3]))-0xffff-1)*0.01; //10mA -> A
+        else
+            B48_devices.output.current = (float)(UINT16_VALUE(frame.data[2], frame.data[3]))*0.01; // 10mA -> A
+
+            
         B48_devices.output.power = (float)(UINT16_VALUE(frame.data[4], frame.data[5]))*0.01; // 10mAh -> Ah
+        //GCS_SEND_TEXT(MAV_SEVERITY_INFO, "D2:%02X D3:%02X D4:%02X D5:%02X", frame.data[2],frame.data[3],frame.data[4],frame.data[5]); 
         //GCS_SEND_TEXT(MAV_SEVERITY_INFO, "V: %f cur: %f pow:%f", B48_devices.output.voltage, B48_devices.output.current,B48_devices.output.power); 
         break;
 

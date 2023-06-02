@@ -500,6 +500,7 @@ public:
     int pie_ctl_times = 0; //add times when gps or uwb contral
     float old_yaw = 0;
     float old_dis = 0;
+    int get_distance(int idx = 0);
 };
 
 extern Rover rover;

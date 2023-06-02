@@ -795,7 +795,7 @@ MAV_RESULT GCS_MAVLINK_Rover::handle_command_long_packet(const mavlink_command_l
     //     rover.pi_ctl = false;
     //     return MAV_RESULT_ACCEPTED;
     case 8037://end mission to mannual
-        gcs().send_text(MAV_SEVERITY_CRITICAL, "run end_mission to clear state for mannual.");
+        gcs().send_text(MAV_SEVERITY_CRITICAL, "gobatt: end_mission to clear state for mannual.");
         rover.golf_end_mission();
         return MAV_RESULT_ACCEPTED;   
     default:
