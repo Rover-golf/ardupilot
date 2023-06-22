@@ -97,7 +97,9 @@ void Rover::one_hz_loop(void)
 
     float batt_volt = battery.voltage();
     //gcs().send_text(MAV_SEVERITY_INFO, "batt_volt %.2f", batt_volt);
-
+    //TEST DOOR
+    //motor_push();
+    //gcs().send_text(MAV_SEVERITY_INFO, "motor_push");
     if (imode == 0) // manual
         return;
     // if (work_enable && (AP_HAL::millis() - rover_golf_start > 5 * 3600 * 1000) && rover_golf_start!=0)
@@ -631,7 +633,7 @@ void Rover::sim_pi_ctl(void)
             case 4: // forward5
                 {
                     //rover.mode_gobatt.set_para(g.golf_throttle); // 50
-                    int dis = get_distance();
+                    int dis = get_distance(-1);
                     if (dis < g.press_low || one_hz_times > g.golf_time_forward) 
                     {
                         rover_reached_stick = false;
@@ -639,6 +641,7 @@ void Rover::sim_pi_ctl(void)
                         one_hz_times = 0;
                         pie_ctl_times = 0;
                         pi_ctl_step++;
+                        rover.mode_gobatt.set_para();//stop
                     }  
                     else
                     {
@@ -657,8 +660,8 @@ void Rover::sim_pi_ctl(void)
                 break;
             case 5:
                 {   // open door and continue forward
-                    int dis = get_distance();
-                    if(dis > 90)
+                    int dis = get_distance(-1);
+                    if(dis > g.press_up)//60
                     {
                         if (fabsf(old_dis - dis) < 20) // cm
                             pie_ctl_times++;
@@ -667,12 +670,12 @@ void Rover::sim_pi_ctl(void)
                             old_dis = dis;
                             pie_ctl_times = pie_ctl_times / 2;//0
                         }
-                        float f = g.golf_throttle + pie_ctl_times;
+                        float f = g.golf_throttle*0.6 + pie_ctl_times;
                         rover.mode_gobatt.set_para(f, 0);
                         gcs().send_text(MAV_SEVERITY_INFO, "times= %d, dis= %d, forward= %.0f", pie_ctl_times, dis, f);
                     }
                     else
-                        rover.mode_gobatt.set_para(g.golf_throttle*0.7);
+                        rover.mode_gobatt.set_para();
                     motor_push();
                     // if (AP_HAL::millis() - pi_ctl_start > g.golf_time_closedoor)//3000
                     if (one_hz_times > g.golf_time_opendoor) // 5
@@ -714,7 +717,7 @@ void Rover::sim_pi_ctl(void)
                 // backward
                 {
                     //rover.mode_gobatt.set_para(-g.golf_throttleR); //-50
-                    //int dis = get_distance(); //lidar
+                    //int dis = get_distance(-1); //lidar
                     float dis = 0.0f,angle = 0.f;
                     g2.beacon.get_data(dis, angle);
                     dis = dis * 100; // m->cm
@@ -791,7 +794,7 @@ void Rover::sim_pi_guide(void)
                 // uwb_admire = calc_triangle_angleC(dis,sidelen,g.golf_near_distence);
                 // if(angle > 0)
                 //     uwb_admire = -uwb_admire;
-                uwb_admire = g.press_up;//uwb offset angle 0
+                uwb_admire = g.uwb_offset;//uwb offset angle 0
                 pi_ctl_start = AP_HAL::millis();
                 sim_pi_guide_state++;
                 pie_ctl_times = 0;

@@ -21,6 +21,7 @@
 
 #include <AP_Scheduler/AP_Scheduler.h>
 #include "AP_CANSensor.h"
+#include <GCS_MAVLink/GCS.h>
 
 extern const AP_HAL::HAL& hal;
 
@@ -206,6 +207,8 @@ void CANSensor::loop()
        if(brt){
             handle_frame(frame);
         }
+        //else  //TEST BATT
+         //   GCS_SEND_TEXT(MAV_SEVERITY_INFO, "CAN read_frame error.");
         //check connect otherwise send restart command
         Check_SendData();
 

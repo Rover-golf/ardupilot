@@ -391,14 +391,14 @@ const AP_Param::Info Rover::var_info[] = {
     // @Path: ../libraries/AP_Vehicle/AP_Vehicle.cpp
     { AP_PARAM_GROUP, "", Parameters::k_param_vehicle, (const void *)&rover, {group_info : AP_Vehicle::var_info} },
 
-    GSCALAR(press_up, "GF_PUP", 0),
-    GSCALAR(press_low, "GF_PLOW", 0),
+    GSCALAR(press_up, "GF_PUP", 60),
+    GSCALAR(press_low, "GF_PLOW", 220),
 
     GSCALAR(batt_nd_rtl, "GF_BAT_ND_RTL", 0),
     GSCALAR(batt_charge_to, "GF_BAT_CHARGE", 12),
     GSCALAR(unload_sec, "GF_UNLOAD_SEC", 30),
     GSCALAR(test_full_sec, "GF_RTL_SEC", 1800),
-    GSCALAR(pwm_unload, "GF_PWM_UNLOAD", 1000),
+    GSCALAR(uwb_offset, "GF_UWB_OFFSET", 0),
     GSCALAR(pwm_normal, "GF_PWM_NORMAL", 2000),
     GSCALAR(steer_rate_use, "GF_STEER_RATE", 4500),
     GSCALAR(steer_yaw_min, "GF_STEER_MIN", 700),

@@ -74,11 +74,15 @@ void AP_BattMonitor_48::perform_logging() const
 void AP_BattMonitor_48::Check_SendData()
 {
     send_command(PacketType::STREAM_OUTPUT);
+    //TEST BATT
+    //GCS_SEND_TEXT(MAV_SEVERITY_INFO, "BattMonitor::Check_SendData(0X5A)");
+    
 }
 // parse inbound frames
 void AP_BattMonitor_48::handle_frame(AP_HAL::CANFrame &frame)
 {
     const uint16_t canid = frame.id & 0x0000FFFF;
+    //TEST BATT
     //GCS_SEND_TEXT(MAV_SEVERITY_INFO, "PDCAN: %u NACK 0x%2X", canid, (unsigned)packet_sent_prev);
     if (canid == 0) {
         // This is for broadcast and I don't think we should allow this inbound.
@@ -89,6 +93,7 @@ void AP_BattMonitor_48::handle_frame(AP_HAL::CANFrame &frame)
     uint16_t chknum = Check_CRC16(frame.data,6);
     if(chknum != UINT16_VALUE(frame.data[6],frame.data[7]))
         return;
+    //TEST BATT
     //GCS_SEND_TEXT(MAV_SEVERITY_INFO, "PDCAN: %u checknum 0x%u", canid, chknum); 
     WITH_SEMAPHORE(_sem_static);
 
@@ -112,7 +117,8 @@ void AP_BattMonitor_48::handle_frame(AP_HAL::CANFrame &frame)
 
             
         B48_devices.output.power = (float)(UINT16_VALUE(frame.data[4], frame.data[5]))*0.01; // 10mAh -> Ah
-        //GCS_SEND_TEXT(MAV_SEVERITY_INFO, "D2:%02X D3:%02X D4:%02X D5:%02X", frame.data[2],frame.data[3],frame.data[4],frame.data[5]); 
+        //TEST BATT
+        //GCS_SEND_TEXT(MAV_SEVERITY_INFO, "D0:%02X D1:%02X D2:%02X D3:%02X", frame.data[0],frame.data[1],frame.data[2],frame.data[3]); 
         //GCS_SEND_TEXT(MAV_SEVERITY_INFO, "V: %f cur: %f pow:%f", B48_devices.output.voltage, B48_devices.output.current,B48_devices.output.power); 
         break;
 
@@ -197,7 +203,12 @@ void AP_BattMonitor_48::send_command(const PacketType type, const float data)
     if (write_frame(txFrame, 50000)) {
         // keep track of what we sent last in case we get an ACK/NACK
         packet_sent_prev = type;
+        //TEST BATT
+        //GCS_SEND_TEXT(MAV_SEVERITY_INFO, "writeframe data0 0x%2X",txFrame.data[0]);
     }
+    //TEST BATT
+    //else
+    //    GCS_SEND_TEXT(MAV_SEVERITY_INFO, "writeframe error.");
 }
 
 // return fault code as string

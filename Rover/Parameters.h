@@ -64,7 +64,7 @@ public:
         k_param_batt_charge_to,
         k_param_unload_sec,
         k_param_test_full_sec,
-        k_param_pwm_unload,
+        k_param_uwb_offset,
         k_param_pwm_normal,
         k_param_steer_rate_use,
         k_param_steer_yaw_min,
@@ -299,7 +299,7 @@ public:
     AP_Float batt_charge_to;
     AP_Int16 unload_sec;
     AP_Int16 test_full_sec;
-    AP_Int16 pwm_unload;
+    AP_Int16 uwb_offset;
     AP_Int16 pwm_normal;
     AP_Float steer_rate_use;
     AP_Float steer_yaw_min;
