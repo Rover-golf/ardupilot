@@ -815,6 +815,7 @@ void Rover::sim_pi_guide(void)
                     pie_ctl_times++;
                 else
                 {
+                    old_dis = dis;
                     old_yaw = angle;
                     pie_ctl_times = pie_ctl_times / 2;//0
                 }
@@ -835,8 +836,11 @@ void Rover::sim_pi_guide(void)
                 float throttle = 0;
                 if( fabsf(turn) > g.golf_max_turn * 0.9 && pie_ctl_times > 30)//4050 move and rotate
                 {
-                    throttle = g.golf_forward + pie_ctl_times;
-                    rover.mode_gobatt.set_para(throttle, 0);
+                    if (fabsf(old_dis - dis) < 20) // cm
+                        throttle = g.golf_forward + pie_ctl_times;
+                    else
+                        old_dis = dis;
+                    rover.mode_gobatt.set_para(throttle, turn);//0
                 }
                 else             
                     rover.mode_gobatt.set_para(0, turn);
@@ -864,7 +868,6 @@ void Rover::sim_pi_guide(void)
                     pie_ctl_times = pie_ctl_times / 2;//0
                 }
                 float f = g.golf_forward + pie_ctl_times;
-                rover.mode_gobatt.set_para(f, 0);
                 gcs().send_text(MAV_SEVERITY_INFO, "times= %d, dis= %.0f, forward= %.0f", pie_ctl_times, dis, f);
             }
             else
