@@ -203,7 +203,7 @@ AP_BattMonitor::init()
                 break;
 #endif // HAL_MPPT_PACKETDIGITAL_CAN_ENABLE
 #if HAL_48_CAN_ENABLE
-        gcs().send_text(MAV_SEVERITY_INFO, "new AP_BattMonitor_48");
+        //gcs().send_text(MAV_SEVERITY_INFO, "new AP_BattMonitor_48");
             case Type::B48:
                 drivers[instance] = new AP_BattMonitor_48(*this, state[instance], _params[instance]);
                 break;
