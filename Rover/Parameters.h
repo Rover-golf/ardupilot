@@ -80,9 +80,14 @@ public:
         k_param_golf_time_forward,
         k_param_golf_time_opendoor,
         k_param_golf_time_backward,
+
         k_param_golf_time_closedoor,
         k_param_golf_near_distence,
         k_param_golf_timing_enable,
+        k_param_golf_gps_dis,
+        k_param_uwb_angleL,
+        k_param_uwb_angleR,
+        k_param_gps_yaw_center,
         // 97: RSSI
         k_param_rssi = 97,
         k_param_rpm_sensor,     // rpm sensor 98
@@ -320,6 +325,10 @@ public:
     AP_Int32 golf_time_closedoor;
     //timing work mode
     AP_Int8 golf_timing_enable;
+    AP_Int32 golf_gps_dis;
+    AP_Int16 uwb_angleL;
+    AP_Int16 uwb_angleR;
+    AP_Int16 gps_yaw_center;
 
     Parameters() {}
 };

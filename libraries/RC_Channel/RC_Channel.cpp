@@ -713,6 +713,7 @@ void RC_Channel::do_aux_function_avoid_proximity(const AuxSwitchPos ch_flag)
 
 void RC_Channel::do_aux_function_camera_trigger(const AuxSwitchPos ch_flag)
 {
+    gcs().send_text(MAV_SEVERITY_INFO, "Golf Open/Close door.");
     AP_Camera *camera = AP::camera();
     if (camera == nullptr) {
         return;
@@ -767,6 +768,7 @@ void RC_Channel::do_aux_function_runcam_osd_control(const AuxSwitchPos ch_flag)
 // enable or disable the fence
 void RC_Channel::do_aux_function_fence(const AuxSwitchPos ch_flag)
 {
+    gcs().send_text(MAV_SEVERITY_INFO, "Golf fence enable.");
     AC_Fence *fence = AP::fence();
     if (fence == nullptr) {
         return;

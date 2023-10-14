@@ -38,7 +38,7 @@ void ModeManual::update()
     g2.motors.set_roll(desired_roll);
     g2.motors.set_pitch(desired_pitch);
     g2.motors.set_walking_height(desired_walking_height);
-
+   // gcs().send_text(MAV_SEVERITY_INFO, "Manual: roll= %f, pitch= %f, height= %f",desired_roll,desired_pitch,desired_walking_height);   
     // set sailboat sails
     float desired_mainsail;
     float desired_wingsail;
@@ -47,9 +47,10 @@ void ModeManual::update()
     g2.motors.set_mainsail(desired_mainsail);
     g2.motors.set_wingsail(desired_wingsail);
     g2.motors.set_mast_rotation(desired_wingsail);
-
+    //gcs().send_text(MAV_SEVERITY_INFO, "Manual: mainsai= %f, wingsail= %f, mast_rotation= %f",desired_mainsail,desired_wingsail,desired_wingsail);   
     // copy RC scaled inputs to outputs
     g2.motors.set_throttle(desired_throttle);
     g2.motors.set_steering(desired_steering, false);
     g2.motors.set_lateral(desired_lateral);
+    //gcs().send_text(MAV_SEVERITY_INFO, "Manual:throt= %.1f, steer= %.1f, lateral= %.1f",desired_throttle,desired_steering,desired_lateral);   
 }

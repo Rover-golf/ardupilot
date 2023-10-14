@@ -467,6 +467,11 @@ public:
     bool work_enable = false;
     bool isSleep = true; // Josh
     bool work_golf_back = false;    // Josh
+    int old_imode=-1;
+    bool old_isSleep = false;
+    bool needsleep = false; //for back
+    bool isperiod = false;
+    uint8_t triggerhour = 0, triggermin = 0;
 
     bool start_auto = true;
     uint32_t rover_golf_start = 0;
@@ -492,7 +497,7 @@ public:
     float target_deg = 0.0f;
 
     bool nd_backward = false;
-    void golf_backward(int second = 10);  
+    void golf_backward(bool sleepflg);  
     bool golf_is_athome();  
     void golf_set_sleepflg(float sleepflg = 1.0f);
     float unload_flg = 1.0;
@@ -501,6 +506,11 @@ public:
     float old_yaw = 0;
     float old_dis = 0;
     int get_distance(int idx = 0);
+    float old_gpsdis = 0;
+    int directionflg = 1;
+    bool closetohome(float dis = 1.0f);
+    bool lidarvaildflg = false;
+    uint16_t test_work_s = 0;
 };
 
 extern Rover rover;

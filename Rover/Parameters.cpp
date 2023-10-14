@@ -417,7 +417,12 @@ const AP_Param::Info Rover::var_info[] = {
     GSCALAR(golf_time_backward, "GF_TM_BACKWARD", 8),
     GSCALAR(golf_time_closedoor, "GF_TM_CLOSEDOOR", 10),
     GSCALAR(golf_near_distence, "GF_NEAR_DIS", 450),
-    GSCALAR(golf_timing_enable,"GF_TIMING_ENABLE",0),     
+    GSCALAR(golf_timing_enable,"GF_TIMING_ENABLE",0),
+    GSCALAR(golf_gps_dis, "GF_GPS_DIS", 290), 
+    GSCALAR(uwb_angleL, "GF_UWB_ANGLEL", 15),
+    GSCALAR(uwb_angleR, "GF_UWB_ANGLER", -10),
+    GSCALAR(gps_yaw_center, "GF_GPS_YAWCENTER", 76),
+
     AP_VAREND
 };
 

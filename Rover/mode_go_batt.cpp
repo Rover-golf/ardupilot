@@ -42,11 +42,11 @@ bool ModeGoBatt::set_yaw(float yaw)
 void ModeGoBatt::update()
 {
 
-    if ((AP_HAL::millis() - _last_time_ms) > 2000)
+    if ((AP_HAL::millis() - _last_time_ms) > 1000)
     {
         // gcs().send_text(MAV_SEVERITY_WARNING, "target not received last 1secs, stopping");
- //       _steering = 0;
- //       _throttle = 0;
+        _steering = 0;
+        _throttle = 0;
         _lateral = 0;
         _mainsail = 0;
     }
@@ -61,13 +61,13 @@ void ModeGoBatt::update()
     float desired_mainsail = _mainsail;
  
     g2.motors.set_mainsail(desired_mainsail);
-
+    //gcs().send_text(MAV_SEVERITY_INFO, "Manual: mainsai= %f",desired_mainsail);   
     // copy RC scaled inputs to outputs
     g2.motors.set_throttle(desired_throttle);
     g2.motors.set_steering(desired_steering, false);
     g2.motors.set_lateral(desired_lateral);
    
-    //gcs().send_text(MAV_SEVERITY_INFO, "gobattmode: throttle= %f, steering= %f, lateral= %f",desired_throttle,desired_steering,desired_lateral);   
+    //gcs().send_text(MAV_SEVERITY_INFO, "Gobatt:throt= %.1f,steer= %.1f,lateral= %.1f",desired_throttle,desired_steering,desired_lateral);   
     // gcs().send_text(MAV_SEVERITY_CONTINUE, "%f/%f/%f/%f",
     //                 desired_mainsail, desired_throttle, desired_steering, desired_lateral);
 }

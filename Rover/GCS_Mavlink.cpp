@@ -768,12 +768,15 @@ MAV_RESULT GCS_MAVLINK_Rover::handle_command_long_packet(const mavlink_command_l
     
     case 8020:
          rover.motor_pull();
+         gcs().send_text(MAV_SEVERITY_INFO, "pull door.");
          return MAV_RESULT_ACCEPTED;
     case 8021:
          rover.motor_push();
+         gcs().send_text(MAV_SEVERITY_INFO, "push door.");
          return MAV_RESULT_ACCEPTED;
     case 8022:
          rover.motor_stop();
+         gcs().send_text(MAV_SEVERITY_INFO, "stop door.");
          return MAV_RESULT_ACCEPTED;
 
     case 8030:

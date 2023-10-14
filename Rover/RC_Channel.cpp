@@ -248,11 +248,31 @@ bool RC_Channel_Rover::do_aux_function(const aux_func_t ch_option, const AuxSwit
     case AUX_FUNC::WALKING_HEIGHT:
     case AUX_FUNC::WIND_VANE_DIR_OFSSET:
         break;
-
+    case AUX_FUNC::CAMERA_TRIGGER:// golf door open/close
+        do_aux_function_door_control(ch_flag);
+        break;
     default:
         return RC_Channel::do_aux_function(ch_option, ch_flag);
 
     }
 
     return true;
+}
+//golf door open/close
+void RC_Channel_Rover::do_aux_function_door_control(const AuxSwitchPos ch_flag)
+{
+    switch (ch_flag) {
+        case AuxSwitchPos::HIGH://open
+            rover.motor_push();
+            gcs().send_text(MAV_SEVERITY_INFO, "Golf RC: Door open.");
+            break;
+        case AuxSwitchPos::MIDDLE:
+            rover.motor_stop();
+            gcs().send_text(MAV_SEVERITY_INFO, "Golf RC: Door stop.");
+            break;
+        case AuxSwitchPos::LOW://close
+            rover.motor_pull();
+            gcs().send_text(MAV_SEVERITY_INFO, "Golf RC: Door close.");
+            break;
+    }
 }
