@@ -129,7 +129,7 @@ void AP_BattMonitor_48::handle_frame(AP_HAL::CANFrame &frame)
         const uint8_t prev_faults = (uint8_t)B48_devices.faults;
         const uint8_t new_single_fault = (~prev_faults & all_current_faults);
         if (new_single_fault != 0) {
-            GCS_SEND_TEXT(MAV_SEVERITY_DEBUG, "PDCAN: New Fault! %d: %s", (int)new_single_fault, get_fault_code_string((FaultFlags)new_single_fault));
+        //    GCS_SEND_TEXT(MAV_SEVERITY_DEBUG, "PDCAN: New Fault! %d: %s", (int)new_single_fault, get_fault_code_string((FaultFlags)new_single_fault));
         }
         B48_devices.faults = (FaultFlags)frame.data[2];
         }
@@ -165,6 +165,11 @@ void AP_BattMonitor_48::handle_frame(AP_HAL::CANFrame &frame)
 
 void AP_BattMonitor_48::send_command(const PacketType type, const float data)
 {
+    //1 second send once.
+    if(AP_HAL::millis() - presendcmd_ms < 600)
+        return;
+    presendcmd_ms = AP_HAL::millis(); 
+
     AP_HAL::CANFrame txFrame;
 
     switch (type) {

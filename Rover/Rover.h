@@ -490,6 +490,7 @@ public:
     uint16_t pi_ctl_id = 0;
     uint8_t pi_ctl_step = 0;
     uint32_t pi_ctl_start = 0;
+    uint8_t oldpi_ctl_step = 100;
 
     uint8_t golf_is_full = 0xff;
     uint8_t nd_collision = 0xff;
@@ -497,7 +498,7 @@ public:
     float target_deg = 0.0f;
 
     bool nd_backward = false;
-    void golf_backward(bool sleepflg);  
+    void golf_backward(int sleepflg = -1);  
     bool golf_is_athome();  
     void golf_set_sleepflg(float sleepflg = 1.0f);
     float unload_flg = 1.0;
@@ -511,6 +512,15 @@ public:
     bool closetohome(float dis = 1.0f);
     bool lidarvaildflg = false;
     uint16_t test_work_s = 0;
+    //guide to stage
+    bool fly_to_here(Location target_loc);
+    //calculate the desired location by angle and distance from home or current
+    //uint_8 frame:0-home,1-current; float  angle; float  distance
+    Location calc_desired_location(float distance = 1, float angle = 0, uint8_t frame = 0);
+    //disable rangefinder when guide to stage
+    void enable_rangefinder(int idx = -1, bool enableflg = true);
+    bool reached_stageup = false;//up
+    bool reached_guided = false;//guided to stage
 };
 
 extern Rover rover;

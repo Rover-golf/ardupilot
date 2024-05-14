@@ -15,6 +15,7 @@
 #include "AP_BattMonitor_Generator.h"
 #include "AP_BattMonitor_MPPT_PacketDigital.h"
 #include "AP_BattMonitor_CANBus_48.h"
+#include "AP_BattMonitor_CANBus_229.h"
 
 #include <AP_HAL/AP_HAL.h>
 
@@ -208,7 +209,12 @@ AP_BattMonitor::init()
                 drivers[instance] = new AP_BattMonitor_48(*this, state[instance], _params[instance]);
                 break;
 #endif // HAL_48_CAN_ENABLE
-
+#if HAL_229_CAN_ENABLE
+        //gcs().send_text(MAV_SEVERITY_INFO, "new AP_BattMonitor_229");
+            case Type::MK229:
+                drivers[instance] = new AP_BattMonitor_229(*this, state[instance], _params[instance]);
+                break;
+#endif // HAL_229_CAN_ENABLE
             case Type::NONE:
             default:
                 break;

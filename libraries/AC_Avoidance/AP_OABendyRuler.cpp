@@ -421,12 +421,13 @@ float AP_OABendyRuler::calc_avoidance_margin(const Location &start, const Locati
     if (calc_margin_from_object_database(start, end, latest_margin)) {
         margin_min = MIN(margin_min, latest_margin);
     }
-    
-    if (proximity_only) {
+    //golf OATYPE3 exclusion_circles use bendyruler proximity_only->true 
+    //if (proximity_only) {
         // only need margin from proximity data
-        return margin_min;
-    }
-    
+    //    return margin_min;
+    //}
+    //golf OATYPE3 exclusion_circles use bendyruler proximity_only->true 
+    if (!proximity_only)
     if (calc_margin_from_circular_fence(start, end, latest_margin)) {
         margin_min = MIN(margin_min, latest_margin);
     }
@@ -439,13 +440,15 @@ float AP_OABendyRuler::calc_avoidance_margin(const Location &start, const Locati
         }
     }
     #endif
-
+    //golf OATYPE3 exclusion_circles use bendyruler proximity_only->true 
+    if (!proximity_only)
     if (calc_margin_from_inclusion_and_exclusion_polygons(start, end, latest_margin)) {
         margin_min = MIN(margin_min, latest_margin);
     }
 
     if (calc_margin_from_inclusion_and_exclusion_circles(start, end, latest_margin)) {
         margin_min = MIN(margin_min, latest_margin);
+        //gcs().send_text(MAV_SEVERITY_INFO, "Circles with bendyruler.");
     }
 
     // return smallest margin from any obstacle

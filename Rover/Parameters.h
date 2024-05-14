@@ -88,6 +88,10 @@ public:
         k_param_uwb_angleL,
         k_param_uwb_angleR,
         k_param_gps_yaw_center,
+        k_param_stage_lat,
+        k_param_stage_long,
+        k_param_stage_latdb,
+        k_param_stage_longdb,
         // 97: RSSI
         k_param_rssi = 97,
         k_param_rpm_sensor,     // rpm sensor 98
@@ -329,6 +333,10 @@ public:
     AP_Int16 uwb_angleL;
     AP_Int16 uwb_angleR;
     AP_Int16 gps_yaw_center;
+    AP_Int32 stage_lat;
+    AP_Int32 stage_long;
+    AP_Int32 stage_latdb;
+    AP_Int32 stage_longdb;
 
     Parameters() {}
 };

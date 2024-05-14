@@ -92,6 +92,7 @@ public:
         Rotoye                     = 19,
         MPPT_PacketDigital         = 20,
         B48                        = 25,
+        MK229                      = 26,
     };
 
     FUNCTOR_TYPEDEF(battery_failsafe_handler_fn_t, void, const char *, const int8_t);

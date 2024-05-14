@@ -422,7 +422,10 @@ const AP_Param::Info Rover::var_info[] = {
     GSCALAR(uwb_angleL, "GF_UWB_ANGLEL", 15),
     GSCALAR(uwb_angleR, "GF_UWB_ANGLER", -10),
     GSCALAR(gps_yaw_center, "GF_GPS_YAWCENTER", 76),
-
+    GSCALAR(stage_lat, "GF_STAGE_LAT", 49),//492253836
+    GSCALAR(stage_long, "GF_STAGE_LONG", -122),//-1226664934
+    GSCALAR(stage_latdb, "GF_STAGE_LATDB", 2253836),//492253836
+    GSCALAR(stage_longdb, "GF_STAGE_LONGDB", -6664934),//-1226664934
     AP_VAREND
 };
 

@@ -23,26 +23,32 @@
 #include "AP_CANSensor.h"
 #include <GCS_MAVLink/GCS.h>
 
-extern const AP_HAL::HAL& hal;
+extern const AP_HAL::HAL &hal;
 
 #if HAL_CANMANAGER_ENABLED
-#define debug_can(level_debug, fmt, args...) do { AP::can().log_text(level_debug, _driver_name, fmt, ##args); } while (0)
+#define debug_can(level_debug, fmt, args...)                        \
+    do                                                              \
+    {                                                               \
+        AP::can().log_text(level_debug, _driver_name, fmt, ##args); \
+    } while (0)
 #else
 #define debug_can(level_debug, fmt, args...)
 #endif
 
-CANSensor::CANSensor(const char *driver_name, uint16_t stack_size) :
-    _driver_name(driver_name),
-    _stack_size(stack_size)
-{}
-
+CANSensor::CANSensor(const char *driver_name, uint16_t stack_size) : _driver_name(driver_name),
+                                                                     _stack_size(stack_size)
+{
+}
 
 void CANSensor::register_driver(AP_CANManager::Driver_Type dtype)
 {
 #if HAL_CANMANAGER_ENABLED
-    if (!AP::can().register_driver(dtype, this)) {
+    if (!AP::can().register_driver(dtype, this))
+    {
         debug_can(AP_CANManager::LOG_ERROR, "Failed to register CANSensor %s", _driver_name);
-    } else {
+    }
+    else
+    {
         debug_can(AP_CANManager::LOG_INFO, "%s: constructed", _driver_name);
     }
 #elif defined(HAL_BUILD_AP_PERIPH)
@@ -50,18 +56,20 @@ void CANSensor::register_driver(AP_CANManager::Driver_Type dtype)
 #endif
 }
 
-
 #ifdef HAL_BUILD_AP_PERIPH
 CANSensor::CANSensor_Periph CANSensor::_periph[HAL_NUM_CAN_IFACES];
 
 void CANSensor::register_driver_periph(const AP_CANManager::Driver_Type dtype)
 {
-    for (uint8_t i = 0; i < HAL_NUM_CAN_IFACES; i++) {
-        if (_periph[i].protocol != dtype) {
+    for (uint8_t i = 0; i < HAL_NUM_CAN_IFACES; i++)
+    {
+        if (_periph[i].protocol != dtype)
+        {
             continue;
         }
 
-        if (!add_interface(_periph[i].iface)) {
+        if (!add_interface(_periph[i].iface))
+        {
             continue;
         }
 
@@ -77,7 +85,8 @@ void CANSensor::init(uint8_t driver_index, bool enable_filters)
 
     debug_can(AP_CANManager::LOG_INFO, "starting init");
 
-    if (_initialized) {
+    if (_initialized)
+    {
         debug_can(AP_CANManager::LOG_ERROR, "already initialized");
         return;
     }
@@ -86,14 +95,16 @@ void CANSensor::init(uint8_t driver_index, bool enable_filters)
     // get CAN manager instance
     _can_driver = AP::can().get_driver(driver_index);
 
-    if (_can_driver == nullptr) {
+    if (_can_driver == nullptr)
+    {
         debug_can(AP_CANManager::LOG_ERROR, "no CAN driver");
         return;
     }
 #endif
 
     // start thread for receiving and sending CAN frames
-    if (!hal.scheduler->thread_create(FUNCTOR_BIND_MEMBER(&CANSensor::loop, void), _driver_name, _stack_size, AP_HAL::Scheduler::PRIORITY_CAN, 0)) {
+    if (!hal.scheduler->thread_create(FUNCTOR_BIND_MEMBER(&CANSensor::loop, void), _driver_name, _stack_size, AP_HAL::Scheduler::PRIORITY_CAN, 0))
+    {
         debug_can(AP_CANManager::LOG_ERROR, "couldn't create thread");
         return;
     }
@@ -103,26 +114,30 @@ void CANSensor::init(uint8_t driver_index, bool enable_filters)
     debug_can(AP_CANManager::LOG_INFO, "init done");
 }
 
-bool CANSensor::add_interface(AP_HAL::CANIface* can_iface)
+bool CANSensor::add_interface(AP_HAL::CANIface *can_iface)
 {
-    if (_can_iface != nullptr) {
+    if (_can_iface != nullptr)
+    {
         debug_can(AP_CANManager::LOG_ERROR, "Multiple Interface not supported");
         return false;
     }
 
     _can_iface = can_iface;
 
-    if (_can_iface == nullptr) {
+    if (_can_iface == nullptr)
+    {
         debug_can(AP_CANManager::LOG_ERROR, "CAN driver not found");
         return false;
     }
 
-    if (!_can_iface->is_initialized()) {
+    if (!_can_iface->is_initialized())
+    {
         debug_can(AP_CANManager::LOG_ERROR, "Driver not initialized");
         return false;
     }
 
-    if (!_can_iface->set_event_handle(&_event_handle)) {
+    if (!_can_iface->set_event_handle(&_event_handle))
+    {
         debug_can(AP_CANManager::LOG_ERROR, "Cannot add event handle");
         return false;
     }
@@ -131,7 +146,8 @@ bool CANSensor::add_interface(AP_HAL::CANIface* can_iface)
 
 bool CANSensor::write_frame(AP_HAL::CANFrame &out_frame, const uint64_t timeout_us)
 {
-    if (!_initialized) {
+    if (!_initialized)
+    {
         debug_can(AP_CANManager::LOG_ERROR, "Driver not initialized for write_frame");
         return false;
     }
@@ -139,7 +155,8 @@ bool CANSensor::write_frame(AP_HAL::CANFrame &out_frame, const uint64_t timeout_
     bool read_select = false;
     bool write_select = true;
     bool ret = _can_iface->select(read_select, write_select, &out_frame, AP_HAL::native_micros64() + timeout_us);
-    if (!ret || !write_select) {
+    if (!ret || !write_select)
+    {
         return false;
     }
 
@@ -149,7 +166,8 @@ bool CANSensor::write_frame(AP_HAL::CANFrame &out_frame, const uint64_t timeout_
 
 bool CANSensor::read_frame(AP_HAL::CANFrame &in_frame, const uint64_t timeout_us)
 {
-    if (!_initialized) {
+    if (!_initialized)
+    {
         debug_can(AP_CANManager::LOG_ERROR, "Driver not initialized for read_frame");
         return false;
     }
@@ -158,13 +176,14 @@ bool CANSensor::read_frame(AP_HAL::CANFrame &in_frame, const uint64_t timeout_us
     bool read_select = true;
     bool write_select = false;
     bool ret = _can_iface->select(read_select, write_select, nullptr, timeout_us);
-    if (ret && read_select) {
+    if (ret && read_select)
+    {
         uint64_t time;
-        AP_HAL::CANIface::CanIOFlags flags {};
-        
-       // AP_HAL::CANFrame frame;
+        AP_HAL::CANIface::CanIOFlags flags{};
+
+        // AP_HAL::CANFrame frame;
         int16_t res = _can_iface->receive(in_frame, time, flags);
-        if(res==1)
+        if (res == 1)
             return true;
     }
     return false;
@@ -172,7 +191,8 @@ bool CANSensor::read_frame(AP_HAL::CANFrame &in_frame, const uint64_t timeout_us
 
 void CANSensor::loop()
 {
-    while (!hal.scheduler->is_system_initialized()) {
+    while (!hal.scheduler->is_system_initialized())
+    {
         // don't process packets till startup complete
         hal.scheduler->delay(1);
     }
@@ -183,37 +203,37 @@ void CANSensor::loop()
     const uint32_t LOOP_INTERVAL_US = AP::scheduler().get_loop_period_us();
 #endif
 
-    while (true) {
+    while (true)
+    {
         uint64_t timeout = AP_HAL::micros64() + LOOP_INTERVAL_US;
-/*
-        // wait to receive frame
-        bool read_select = true;
-        bool write_select = false;
-        bool ret = _can_iface->select(read_select, write_select, nullptr, timeout);
-        if (ret && read_select) {
-            uint64_t time;
-            AP_HAL::CANIface::CanIOFlags flags {};
+        /*
+                // wait to receive frame
+                bool read_select = true;
+                bool write_select = false;
+                bool ret = _can_iface->select(read_select, write_select, nullptr, timeout);
+                if (ret && read_select) {
+                    uint64_t time;
+                    AP_HAL::CANIface::CanIOFlags flags {};
 
-            AP_HAL::CANFrame frame;
-            int16_t res = _can_iface->receive(frame, time, flags);
+                    AP_HAL::CANFrame frame;
+                    int16_t res = _can_iface->receive(frame, time, flags);
 
-            if (res == 1) {
-                handle_frame(frame);
-            }
-        }
-        */
-       AP_HAL::CANFrame frame;
-       bool brt = read_frame(frame,timeout);
-       if(brt){
+                    if (res == 1) {
+                        handle_frame(frame);
+                    }
+                }
+                */
+        AP_HAL::CANFrame frame;
+        bool brt = read_frame(frame, timeout);
+        if (brt)
+        {
             handle_frame(frame);
         }
-        //else  //TEST BATT
-         //   GCS_SEND_TEXT(MAV_SEVERITY_INFO, "CAN read_frame error.");
-        //check connect otherwise send restart command
+        // else  //TEST BATT
+        //    GCS_SEND_TEXT(MAV_SEVERITY_INFO, "CAN read_frame error.");
+        // check connect otherwise send restart command
         Check_SendData();
-
     }
 }
 
 #endif // HAL_MAX_CAN_PROTOCOL_DRIVERS
-

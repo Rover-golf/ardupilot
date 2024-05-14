@@ -157,11 +157,11 @@ bool AP_RangeFinder_USD1_CAN::CH30_Analysis(AP_HAL::CANFrame &frame,float& fdist
 
 bool AP_RangeFinder_USD1_CAN::SR73_Analysis(AP_HAL::CANFrame &frame,float& fdist, float& fdeg)
 {
-    if(frame.id == OBJECT_STATUS + _Address * 0x10)
+    if(frame.id == (u_int32_t)(OBJECT_STATUS + _Address * 0x10))
     {
         new_information = true;
     }
-    else if( frame.id == OBJECT_INFORMATION + _Address * 0x10 && new_information)
+    else if(frame.id == (uint32_t)(OBJECT_INFORMATION + _Address * 0x10) && new_information)
     {
         
         //Object ID

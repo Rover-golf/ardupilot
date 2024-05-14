@@ -10,7 +10,8 @@ enum PacketCheckList PCL = Header1;	//Packet Check List
 
 void Payload_Parsing(uint8_t *buff, int size, Payload *pl);
 
-inline void Init_Packt(uint8_t data)
+void Init_Packt(uint8_t data)
+// inline void Init_Packt(uint8_t data)
 {
 	if (data == NORMAL_MODE)
 	{

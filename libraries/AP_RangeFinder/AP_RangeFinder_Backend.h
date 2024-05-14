@@ -63,6 +63,10 @@ public:
 
     // get temperature reading in C.  returns true on success and populates temp argument
     virtual bool get_temp(float &temp) { return false; }
+    
+    //for gauide mode upstair stage disable laider
+    bool enableflg = true;
+    void enable(bool flg = true) {enableflg = flg; }
 
 protected:
 

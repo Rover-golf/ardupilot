@@ -55,8 +55,10 @@ bool AP_RangeFinder_Backend::has_data() const {
 // update status based on distance measurement
 void AP_RangeFinder_Backend::update_status()
 {
+    if(!enableflg)//for gauide mode upstair stage disable laider
+        set_status(RangeFinder::Status::NoData);
     // check distance
-    if ((int16_t)state.distance_cm > max_distance_cm()) {
+    else if ((int16_t)state.distance_cm > max_distance_cm()) {
         set_status(RangeFinder::Status::OutOfRangeHigh);
     } else if ((int16_t)state.distance_cm < min_distance_cm()) {
         set_status(RangeFinder::Status::OutOfRangeLow);
