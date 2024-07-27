@@ -64,7 +64,7 @@ public:
         k_param_batt_charge_to,
         k_param_unload_sec,
         k_param_test_full_sec,
-        k_param_uwb_offset,
+        k_param_home_offset,
         k_param_pwm_normal,
         k_param_steer_rate_use,
         k_param_steer_yaw_min,
@@ -88,10 +88,14 @@ public:
         k_param_uwb_angleL,
         k_param_uwb_angleR,
         k_param_gps_yaw_center,
-        k_param_stage_lat,
-        k_param_stage_long,
-        k_param_stage_latdb,
-        k_param_stage_longdb,
+        k_param_stage_down,
+        k_param_stage_up,
+        k_param_guide_speed,
+        k_param_start_4_hour,
+        k_param_start_4_min,
+        k_param_end_4_hour,
+        k_param_end_4_min,
+
         // 97: RSSI
         k_param_rssi = 97,
         k_param_rpm_sensor,     // rpm sensor 98
@@ -308,7 +312,7 @@ public:
     AP_Float batt_charge_to;
     AP_Int16 unload_sec;
     AP_Int16 test_full_sec;
-    AP_Int16 uwb_offset;
+    AP_Int16 home_offset;
     AP_Int16 pwm_normal;
     AP_Float steer_rate_use;
     AP_Float steer_yaw_min;
@@ -333,10 +337,14 @@ public:
     AP_Int16 uwb_angleL;
     AP_Int16 uwb_angleR;
     AP_Int16 gps_yaw_center;
-    AP_Int32 stage_lat;
-    AP_Int32 stage_long;
-    AP_Int32 stage_latdb;
-    AP_Int32 stage_longdb;
+    AP_Int32 stage_down;
+    AP_Int32 stage_up;
+    AP_Float guide_speed;
+
+    AP_Int8 start_4_hour;
+    AP_Int8 start_4_min;
+    AP_Int8 end_4_hour;
+    AP_Int8 end_4_min;  
 
     Parameters() {}
 };
@@ -491,6 +499,7 @@ public:
     AP_Int8 start_3_min;
     AP_Int8 end_3_hour;
     AP_Int8 end_3_min;    
+
 };
 
 extern const AP_Param::Info var_info[];

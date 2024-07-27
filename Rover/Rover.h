@@ -468,6 +468,7 @@ public:
     bool isSleep = true; // Josh
     bool work_golf_back = false;    // Josh
     int old_imode=-1;
+    uint8_t pre_imode = 0; //for ekf hold to restore
     bool old_isSleep = false;
     bool needsleep = false; //for back
     bool isperiod = false;
@@ -483,6 +484,7 @@ public:
     bool yaw_complete = false;
     bool uwb_complete = false;
     float uwb_admire = 0.0f;
+    uint16_t uwb_delay = 0;
 
     uint8_t sim_pi_guide_state = 0;
     bool pi_ctl = false;

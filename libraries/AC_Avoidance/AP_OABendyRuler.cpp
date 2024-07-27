@@ -448,7 +448,7 @@ float AP_OABendyRuler::calc_avoidance_margin(const Location &start, const Locati
 
     if (calc_margin_from_inclusion_and_exclusion_circles(start, end, latest_margin)) {
         margin_min = MIN(margin_min, latest_margin);
-        //gcs().send_text(MAV_SEVERITY_INFO, "Circles with bendyruler.");
+        //gcs().send_text(MAV_SEVERITY_INFO, "Circles with bendyruler,margin_min:%f.",margin_min);
     }
 
     // return smallest margin from any obstacle

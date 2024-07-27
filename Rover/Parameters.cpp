@@ -394,11 +394,11 @@ const AP_Param::Info Rover::var_info[] = {
     GSCALAR(press_up, "GF_PUP", 60),
     GSCALAR(press_low, "GF_PLOW", 220),
 
-    GSCALAR(batt_nd_rtl, "GF_BAT_ND_RTL", 0),
-    GSCALAR(batt_charge_to, "GF_BAT_CHARGE", 12),
+    GSCALAR(batt_nd_rtl, "GF_BAT_ND_RTL", 50),
+    GSCALAR(batt_charge_to, "GF_BAT_CHARGE", 57),
     GSCALAR(unload_sec, "GF_UNLOAD_SEC", 30),
     GSCALAR(test_full_sec, "GF_RTL_SEC", 1800),
-    GSCALAR(uwb_offset, "GF_UWB_OFFSET", 0),
+    GSCALAR(home_offset, "GF_HOME_OFFSET", 50),
     GSCALAR(pwm_normal, "GF_PWM_NORMAL", 2000),
     GSCALAR(steer_rate_use, "GF_STEER_RATE", 4500),
     GSCALAR(steer_yaw_min, "GF_STEER_MIN", 700),
@@ -422,10 +422,14 @@ const AP_Param::Info Rover::var_info[] = {
     GSCALAR(uwb_angleL, "GF_UWB_ANGLEL", 15),
     GSCALAR(uwb_angleR, "GF_UWB_ANGLER", -10),
     GSCALAR(gps_yaw_center, "GF_GPS_YAWCENTER", 76),
-    GSCALAR(stage_lat, "GF_STAGE_LAT", 49),//492253836
-    GSCALAR(stage_long, "GF_STAGE_LONG", -122),//-1226664934
-    GSCALAR(stage_latdb, "GF_STAGE_LATDB", 2253836),//492253836
-    GSCALAR(stage_longdb, "GF_STAGE_LONGDB", -6664934),//-1226664934
+    GSCALAR(stage_down, "GF_STAGE_DOWN", 500),
+    GSCALAR(stage_up, "GF_STAGE_UP", 900),
+    GSCALAR(guide_speed, "GF_GUIDE_SPEED",1.0),
+    GSCALAR(start_4_hour, "GOLF4_START_HOUR", 0),
+    GSCALAR(start_4_min, "GOLF4_START_MIN", 0),
+    GSCALAR(end_4_hour, "GOLF4_END_HOUR", 0),
+    GSCALAR(end_4_min, "GOLF4_END_MIN", 0),
+
     AP_VAREND
 };
 
@@ -697,8 +701,9 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     AP_GROUPINFO("GOLF2_END_MIN", 58, ParametersG2, end_2_min, 0),
     AP_GROUPINFO("GOLF3_END_HOUR", 59, ParametersG2, end_3_hour, 0),
     AP_GROUPINFO("GOLF3_END_MIN", 60, ParametersG2, end_3_min, 0),
-    
-
+  //  AP_GROUPINFO("GOLF4_START_MIN", 62, ParametersG2, start_4_min, 0),
+  //  AP_GROUPINFO("GOLF4_END_HOUR", 63, ParametersG2, end_4_hour, 0),
+  //  AP_GROUPINFO("GOLF4_END_MIN", 64, ParametersG2, end_4_min, 0),
     AP_GROUPEND
 };
 

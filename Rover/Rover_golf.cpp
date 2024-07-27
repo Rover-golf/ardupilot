@@ -21,6 +21,12 @@ void Rover::hundred_hz_loop(void)
     float scale = 0.2f;
     if (yaw_enable)
     {
+
+        if(failsafe.ekf)
+        {
+            gcs().send_text(MAV_SEVERITY_CRITICAL, "EKF failsafe.Gps turn is Waiting.");
+            return;
+        }
         //float yaw_get = degrees(ahrs.yaw);
         float yaw_get,accuracy_deg;
         uint32_t time_ms;
@@ -112,13 +118,19 @@ void Rover::one_hz_loop(void)
         enable_rangefinder(-1, true);
             
     }
-
-    if(old_imode != imode || old_isSleep != isSleep)
+    bool changedflg = false;
+    if(old_imode != imode)
     {
         old_imode = imode;
-        old_isSleep = isSleep;
-        gcs().send_text(MAV_SEVERITY_INFO, "Mode= %d, work_enable= %d, isSleep=%d", imode, work_enable, isSleep);
+        changedflg = true;
     }
+    if(old_isSleep != isSleep)
+    {  
+        old_isSleep = isSleep;
+        changedflg = true;
+    }
+    if(changedflg)
+        gcs().send_text(MAV_SEVERITY_INFO, "Mode= %d, work_enable= %d, isSleep=%d", imode, work_enable, isSleep);
     // gcs().send_text(MAV_SEVERITY_INFO, "golf_work_state = %d ", golf_work_state);
     if (pi_ctl && oldpi_ctl_step != pi_ctl_step)
     {
@@ -137,13 +149,35 @@ void Rover::one_hz_loop(void)
 
     float batt_volt = battery.voltage();
     //gcs().send_text(MAV_SEVERITY_INFO, "batt_volt %.2f", batt_volt);
-    
+    //use batt limit to test: 1:uwb 2:gps 3:lidar 4:open door 5:close door
+    //4 TEST DOOR
+    if(g.batt_nd_rtl > 3.5f && g.batt_nd_rtl < 4.5f)//4 open
+    {
+        motor_push();
+        gcs().send_text(MAV_SEVERITY_INFO, "motor_push: open door.");
+    }
+    else if(g.batt_nd_rtl > 4.5f && g.batt_nd_rtl < 5.5f)//5 close
+    {
+        motor_pull();
+        gcs().send_text(MAV_SEVERITY_INFO, "motor_pull: close door.");
+    }
+
+
+    //1 test UWB
+    if(g.batt_nd_rtl > 0.f && g.batt_nd_rtl < 1.5f)
+    {
+        float dis = 0.0f, angle = 0.0f;
+        g2.beacon.get_data(dis, angle);
+        dis = dis * 100;//m->cm
+        gcs().send_text(MAV_SEVERITY_INFO, "uwb dis=%.2f angle=%.2f ",dis, angle);
+    }
+    //2 test GPS
     if(g.batt_nd_rtl > 1.5f && g.batt_nd_rtl < 2.5f)
     {
         float pitch_get = degrees(ahrs.get_pitch());
     //test the distance to home   
         float  distance1 = rover.current_loc.get_distance(ahrs.get_home())*100;
-        gcs().send_text(MAV_SEVERITY_INFO, "Golf Dis from home=%.0f.",distance1); 
+        gcs().send_text(MAV_SEVERITY_INFO, "GPS Dis from home=%.0f.",distance1); 
     //test GPS yaw
         float yaw_deg,accuracy_deg;
         uint32_t time_ms;
@@ -151,33 +185,13 @@ void Rover::one_hz_loop(void)
         gcs().send_text(MAV_SEVERITY_INFO, "GPS_yaw=%.0f,pitch=%.0f.",yaw_deg,pitch_get); 
     //status().gps_yaw;
     }
-    //TEST DOOR
-    //motor_push();
-    //gcs().send_text(MAV_SEVERITY_INFO, "motor_push");
-
-    // if (work_enable && (AP_HAL::millis() - rover_golf_start > 5 * 3600 * 1000) && rover_golf_start!=0)
-    //{
-    //     rover.golf_end_mission();
-    // }
-
-    // float test_distance_cm;
-    // test_distance_cm = rangefinder.get_data((uint8_t)0);
-    // gcs().send_text(MAV_SEVERITY_INFO, "0 %f", test_distance_cm);
-    // test_distance_cm = rangefinder.get_data((uint8_t)1);
-    // gcs().send_text(MAV_SEVERITY_INFO, "1 %f", test_distance_cm);
-
-    //test UWB
-    if(g.batt_nd_rtl > 0.f && g.batt_nd_rtl < 1.5f)
+    //3 TEST lidar
+    if(g.batt_nd_rtl > 2.5f && g.batt_nd_rtl < 3.5f)
     {
-        float dis = 0.0f, angle = 0.0f;
-        g2.beacon.get_data(dis, angle);
-        dis = dis * 100;//m->cm
-        gcs().send_text(MAV_SEVERITY_NOTICE, "uwb dis=%.2f angle=%.2f ",dis, angle);
+        int disLidar = get_distance(-1);
+        gcs().send_text(MAV_SEVERITY_INFO, "Lidar: %d.",disLidar);
     }
-    if (imode == 0 || golf_work_state == GOLF_NOWORK) // manual
-        return;
 
-    // sr73f_can.update();
     // golf: regular start&retur
     uint8_t hour, min, sec;
     uint16_t ms;
@@ -320,25 +334,24 @@ void Rover::one_hz_loop(void)
     {
         bool time1_avaiable = !((g2.start_1_hour == 0) && (g2.start_1_min == 0) && (g2.end_1_hour == 0) && (g2.end_1_min == 0));
         bool time1_to_start = ((hour == (uint8_t)g2.start_1_hour) && (min == (uint8_t)g2.start_1_min) && (sec < 4));
-        //    bool time1_to_start = ((hour*24+min >= (uint8_t)g2.start_1_hour*24+(uint8_t)g2.start_1_min)
-        //                        && (hour*24+min < (uint8_t)g2.end_1_hour*24 +(uint8_t)g2.end_1_min) && (sec < 4));
         bool time1_to_end = ((hour == (uint8_t)g2.end_1_hour) && (min == (uint8_t)g2.end_1_min) && (sec < 4));
+        
         bool time2_avaiable = !((g2.start_2_hour == 0) && (g2.start_2_min == 0) && (g2.end_2_hour == 0) && (g2.end_2_min == 0));
         bool time2_to_start = ((hour == (uint8_t)g2.start_2_hour) && (min == (uint8_t)g2.start_2_min) && (sec < 4));
-        //    bool time2_to_start = ((hour*24+min >= (uint8_t)g2.start_2_hour*24+(uint8_t)g2.start_2_min)
-        //                        && (hour*24+min < (uint8_t)g2.end_2_hour*24 +(uint8_t)g2.end_2_min) && (sec < 4));
         bool time2_to_end = ((hour == (uint8_t)g2.end_2_hour) && (min == (uint8_t)g2.end_2_min) && (sec < 4));
+        
         bool time3_avaiable = !((g2.start_3_hour == 0) && (g2.start_3_min == 0) && (g2.end_3_hour == 0) && (g2.end_3_min == 0));
         bool time3_to_start = ((hour == (uint8_t)g2.start_3_hour) && (min == (uint8_t)g2.start_3_min) && (sec < 4));
-        //    bool time3_to_start = ((hour*24+min >= (uint8_t)g2.start_3_hour*24+(uint8_t)g2.start_3_min)
-        //                        && (hour*24+min < (uint8_t)g2.end_3_hour*24 +(uint8_t)g2.end_3_min) && (sec < 4));
         bool time3_to_end = ((hour == (uint8_t)g2.end_3_hour) && (min == (uint8_t)g2.end_3_min) && (sec < 4));
 
-        //        gcs().send_text(MAV_SEVERITY_INFO, "t1s=%i t1e=%i, slp=%i", time1_to_start, time1_to_end, isSleep);
+        bool time4_avaiable = !((g.start_4_hour == 0) && (g.start_4_min == 0) && (g.end_4_hour == 0) && (g.end_4_min == 0));
+        bool time4_to_start = ((hour == (uint8_t)g.start_4_hour) && (min == (uint8_t)g.start_4_min) && (sec < 4));
+        bool time4_to_end = ((hour == (uint8_t)g.end_4_hour) && (min == (uint8_t)g.end_4_min) && (sec < 4));
 
         if ((time1_to_start && time1_avaiable) ||
             (time2_to_start && time2_avaiable) ||
-            (time3_to_start && time3_avaiable))
+            (time3_to_start && time3_avaiable) ||
+            (time4_to_start && time4_avaiable))
         {
             isperiod = true;
             triggerhour = hour+1;
@@ -353,9 +366,8 @@ void Rover::one_hz_loop(void)
 
         if ((time1_to_end && time1_avaiable) ||
             (time2_to_end && time2_avaiable) ||
-            (time3_to_end && time3_avaiable)
-
-        )
+            (time3_to_end && time3_avaiable) ||
+            (time4_to_end && time4_avaiable))
         {
             isperiod = false;
             triggerhour = 0;
@@ -408,8 +420,16 @@ void Rover::one_hz_loop(void)
             }
         }
     }
-    // 状态机
-    //    gcs().send_text(MAV_SEVERITY_DEBUG, "golf_work_state = %d ", golf_work_state);
+    // do nothing when manual or golf_end_mission (hold by error)
+    if (imode == 0 || golf_work_state == GOLF_NOWORK) // manual
+        return;
+    //when ekf is failsafe,don't continue especially change mode and just wait  
+    if(failsafe.ekf && golf_work_state != GOLF_PI_CTL)
+    {
+        gcs().send_text(MAV_SEVERITY_CRITICAL, "EKF failsafe. OneHz is Waiting.");
+        return;
+    }
+       
 
     switch (golf_work_state)
     {
@@ -440,6 +460,12 @@ void Rover::one_hz_loop(void)
     case GOLF_HOLD:
         if (work_enable)
         {
+            if(failsafe.ekf)
+            {
+                gcs().send_text(MAV_SEVERITY_CRITICAL, "EKF failsafe. Auto is Waiting...");
+                break;
+            }
+
              AP_GPS::GPS_Status gpsst = gps.status();
                 
             if (gpsst == AP_GPS::GPS_OK_FIX_3D_RTK_FIXED  || gpsst == AP_GPS::GPS_OK_FIX_3D_RTK_FLOAT) // wait for gps rtk
@@ -452,7 +478,7 @@ void Rover::one_hz_loop(void)
             }
             else
                 gcs().send_text(MAV_SEVERITY_INFO, "Waiting for GPS RTK Fixed.");
-
+            
         }
         break;
     case GOLF_WORK:
@@ -493,7 +519,7 @@ void Rover::one_hz_loop(void)
             //            golf_send_cmd(pi_ctl_id, rover.ahrs.yaw_sensor, target_deg); // Josh added parameters
             pi_ctl = true;
         }
-
+ 
         if (g2.wp_nav.reached_destination())
         {
             //   gcs().send_text(MAV_SEVERITY_CRITICAL, "after dest");
@@ -722,7 +748,7 @@ void Rover::sim_pi_ctl(void)
             {
             case 0:// after return home, check and move rover to home
                 //rover.mode_gobatt.stop_rover(); // stop
-                if(closetohome(g.uwb_offset))
+                if(closetohome(g.home_offset))
                 {
                     pi_ctl_step++;
                     pi_ctl_start = AP_HAL::millis();
@@ -746,6 +772,11 @@ void Rover::sim_pi_ctl(void)
                 break;    
             case 2:                           // start GPS turn to face dock
                 rover.mode_gobatt.set_para(); // stop
+                if(failsafe.ekf)
+                {
+                    gcs().send_text(MAV_SEVERITY_CRITICAL, "EKF failsafe.Gps turn is Waiting.");
+                    break;
+                }
                 // adjust direction
                 yaw_desire = g.golf_yaw;
                 yaw_enable = true;
@@ -765,6 +796,7 @@ void Rover::sim_pi_ctl(void)
                     pi_ctl_start = AP_HAL::millis();
                     one_hz_times = 0;
                     pie_ctl_times = 0;
+                    uwb_delay = 0;
                 }
                 break;
             case 4: // do uwb
@@ -800,6 +832,7 @@ void Rover::sim_pi_ctl(void)
                     dis = dis * 100;//m->cm
 
                     gcs().send_text(MAV_SEVERITY_INFO, "uwb dis=%.2f angle=%.2f ",dis, angle);
+                    
                     if(angle > g.uwb_angleL || angle < g.uwb_angleR)//check uwb angle and dis 15,-10 
                     {
                         gcs().send_text(MAV_SEVERITY_NOTICE, "UWB angle is outside, Set rover to backward.");
@@ -824,13 +857,13 @@ void Rover::sim_pi_ctl(void)
             case 7: // forward5
                 if (true)
                 { 
-                    //guide mode to forward
-                    //int32_t latitude = g.stage_lat *10000000 + g.stage_latdb;
-                    //int32_t longitude = g.stage_long * 10000000 + g.stage_longdb;
-                    //gcs().send_text(MAV_SEVERITY_INFO, "fly: lat= %d,long=%d. ",(int)latitude,(int)longitude);
-                    //Location target_loc( latitude, longitude,0,Location::AltFrame::ABOVE_HOME);//492253836, -1226664934
+                    if(failsafe.ekf)
+                    {
+                        gcs().send_text(MAV_SEVERITY_CRITICAL, "EKF failsafe.Guide is Waiting.");
+                        break;
+                    }
                     //calculate the desired location
-                    float distance = g.press_up / 100.0f; //cm -> m
+                    float distance = g.stage_up / 100.0f; //cm -> m
                     float angle = g.golf_yaw; //degree (0-360)
                     gcs().send_text(MAV_SEVERITY_INFO, "fly: dis= %.2f,angle=%.0f. ",distance,angle);
                     Location target_loc = calc_desired_location(distance, angle);
@@ -895,11 +928,15 @@ void Rover::sim_pi_ctl(void)
                     if(!reached_guided)
                         break;
                     // open door and continue forward
-                    //int disLidar = get_distance(-1);
+                    //get lidar data
+                    int disLidar = get_distance(-1);
+                    if(disLidar<=0)
+                        disLidar = 200;//2m if lidar doesn't have data, then let rover move forward
+                    //get GPS data    
                     float  dis = rover.current_loc.get_distance(ahrs.get_home())*100;
-                    gcs().send_text(MAV_SEVERITY_CRITICAL, "GPS from home: %.0f.",dis);
-                    //if(dis < g.press_up && !reached_stageup)//g.golf_time_forward
-                    if((dis < g.press_up && one_hz_times < g.golf_time_forward )&& !reached_stageup)//go forward
+                    gcs().send_text(MAV_SEVERITY_INFO, "GPS:%.0f,Lidar: %d.",dis,disLidar);
+                    //if((dis < g.press_up && one_hz_times < g.golf_time_forward )&& !reached_stageup)//GPS go forward
+                    if((disLidar > g.press_up && one_hz_times < g.golf_time_forward )&& !reached_stageup)//Lidar go forward
                     {
                         if (fabsf(old_dis - dis) < 20) // cm
                             pie_ctl_times++;
@@ -913,15 +950,15 @@ void Rover::sim_pi_ctl(void)
                         gcs().send_text(MAV_SEVERITY_INFO, "times= %d, dis= %.1f, forward= %.0f", pie_ctl_times, dis, f);
                         //one_hz_times = 0;
                     }
-                    //else if(dis > g.press_up && !reached_stageup)//
-                    else if((dis > g.press_up || one_hz_times >= g.golf_time_forward)  && !reached_stageup)//stop
+                    //else if((dis > g.press_up || one_hz_times >= g.golf_time_forward)  && !reached_stageup)//stop
+                    else if((disLidar < g.press_up || one_hz_times >= g.golf_time_forward)  && !reached_stageup)//stop
                     {
                        // old_dis = dis;
                         pie_ctl_times = 0;
                         if(one_hz_times>g.golf_time_forward+1)//stop 2s and then back
                             reached_stageup = true;
                         rover.mode_gobatt.set_para();  
-                        gcs().send_text(MAV_SEVERITY_INFO, "start back times= %d.", pie_ctl_times); 
+                        gcs().send_text(MAV_SEVERITY_INFO, "Forward end, start back times= %d.", pie_ctl_times); 
                     }
                     else if(pie_ctl_times < g.press_low)//back for stage up
                     {
@@ -1044,7 +1081,7 @@ void Rover::sim_pi_ctl(void)
                     float  gpsdis = 0;
                     gpsdis = rover.current_loc.get_distance(ahrs.get_home())*100;
                     gcs().send_text(MAV_SEVERITY_INFO, "Golf gpsDis from home=%.0f.",gpsdis); 
-                    if( gpsdis > g.press_up + 300 )
+                    if( gpsdis > g.stage_up + 400 )//in outside don't backward and ran auto directly
                     {
                         rover.mode_gobatt.set_para(); // complate
                         pi_ctl_step = 0;
@@ -1054,7 +1091,8 @@ void Rover::sim_pi_ctl(void)
                         nd_backward = pi_ctl;
                         pie_ctl_times = 0;
                     }
-                    else if (gpsdis < 150 || dis > g.golf_near_distence + 500|| one_hz_times > g.golf_time_backward) // 12
+                    //else if (gpsdis < 150 || dis > g.golf_near_distence + 500|| one_hz_times > g.golf_time_backward) // 12
+                    else if (gpsdis < 150 || (dis > g.golf_near_distence + 500 && dis > 10 && dis < 3000))//uwb data in correct range10-2000cm
                     {
                         //
                         rover_reached_stick = false;
@@ -1063,6 +1101,13 @@ void Rover::sim_pi_ctl(void)
                         pie_ctl_times = 0;
                         pi_ctl_step++;
                         rover.mode_gobatt.set_para();//stop    
+                    }
+                    else if(one_hz_times > g.golf_time_backward)
+                    {
+                        gcs().send_text(MAV_SEVERITY_NOTICE, "Rover didn't back out stage, and Set hold.");
+                        rover.set_mode(rover.mode_hold, ModeReason::EVERYDAY_END);
+                        golf_end_mission();
+                        return;
                     }
                     else
                     {
@@ -1083,6 +1128,13 @@ void Rover::sim_pi_ctl(void)
             case 13:// gps again to face center
             {
                 rover.mode_gobatt.set_para(); // stop
+
+                if(failsafe.ekf)
+                {
+                    gcs().send_text(MAV_SEVERITY_CRITICAL, "EKF failsafe.GPS turn is Waiting...");
+                    break;
+                }
+
                 AP_GPS::GPS_Status gpsst = gps.status();
                 
                 if ((gpsst == AP_GPS::GPS_OK_FIX_3D_RTK_FIXED || gpsst == AP_GPS::GPS_OK_FIX_3D_RTK_FLOAT) && one_hz_times > 5 ) // wait for gps
@@ -1105,7 +1157,7 @@ void Rover::sim_pi_ctl(void)
                     //int disLidar = get_distance(-1);
                     float  dis = rover.current_loc.get_distance(ahrs.get_home())*100;
                     gcs().send_text(MAV_SEVERITY_CRITICAL, "GPS from home: %.0f.",dis);
-                    if (dis > g.press_up|| one_hz_times > g.golf_time_closedoor) 
+                    if (dis > g.stage_up|| one_hz_times > g.golf_time_closedoor) 
                     {
                         //finish
                         rover.mode_gobatt.set_para(); // stop
@@ -1171,6 +1223,7 @@ void Rover::sim_pi_guide(void)
     dis = dis * 100; // m->cm
     delt = uwb_admire - angle;
     gcs().send_text(MAV_SEVERITY_INFO, "UWB dis:%.0f,ang:%.0f,delt:%.0f.",dis,angle,delt); 
+
     // output raw angle and dis
     // float rawdis, rawangle;
     // g2.beacon.get_data_raw(rawdis,rawangle);
@@ -1180,17 +1233,25 @@ void Rover::sim_pi_guide(void)
     // output end
     //    gcs().send_text(MAV_SEVERITY_NOTICE, "pi_gd_state=%d dis=%.2f angle=%.2f uwb_admire=%.2f",
     //                                                    sim_pi_guide_state,dis, angle, uwb_admire);
-    //no uwb to hold
-    if(dis <= 0.0f)
+
+    if(uwb_delay > 100)//2 sec
     {
-        gcs().send_text(MAV_SEVERITY_NOTICE, "No UWB, Set rover to hold.");
+        gcs().send_text(MAV_SEVERITY_NOTICE, "UWB error, Set rover to hold.");
         rover.set_mode(rover.mode_hold, ModeReason::EVERYDAY_END);
         golf_end_mission();
         return;
-
-
     }
-    if (true) // if(!nd_collision)
+    //no uwb to hold
+    else if(dis <= 0.0f || dis > 3000)//if uwb distance is over 30m, the data is wrong.
+    {
+        uwb_delay++;
+        rover.mode_gobatt.set_para(0, 0);
+        return;
+    }
+    else
+        uwb_delay = 0;
+
+    if (true)
     {
         switch (sim_pi_guide_state)
         {
@@ -1674,8 +1735,8 @@ bool Rover::fly_to_here(Location target_loc)
     }
     float gspeed= 0.8;//m/s
         // initialise waypoint speed
-    if (is_positive(g2.rtl_speed)) {
-        gspeed = g2.rtl_speed;
+    if (is_positive(g.guide_speed)) {
+        gspeed = g.guide_speed;
     }
     bool rt = control_mode->set_desired_speed(gspeed);
     gcs().send_text(MAV_SEVERITY_INFO, "Set Guided speed: %f,rt:%d.",gspeed,(int)rt);

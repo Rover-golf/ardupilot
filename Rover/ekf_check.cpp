@@ -108,7 +108,7 @@ bool Rover::ekf_over_threshold()
         over_thresh_count++;
     }
 
-    if (over_thresh_count >= 2) {
+    if (over_thresh_count >= 1) {//2 just one over the threshold return true. compass
         return true;
     }
 
@@ -163,7 +163,9 @@ void Rover::failsafe_ekf_event()
             break;
         case FS_EKF_HOLD:
         default:
+            pre_imode = control_mode->mode_number();//store the pre mode number to restore
             set_mode(mode_hold, ModeReason::EKF_FAILSAFE);
+            gcs().send_text(MAV_SEVERITY_INFO,"EKF failsafe, change mode%d to Hold.",pre_imode);
             break;
     }
 
@@ -177,8 +179,16 @@ void Rover::failsafe_ekf_off_event(void)
     if (!failsafe.ekf) {
         return;
     }
-
+    
     failsafe.ekf = false;
+    //restore pre mode
+    if(control_mode->mode_number() == Mode::HOLD && get_control_mode_reason() == ModeReason::EKF_FAILSAFE)
+    {
+        set_mode(pre_imode,ModeReason::EVERYDAY_START);
+        gcs().send_text(MAV_SEVERITY_INFO,"EKF failsafe cleared and restore to mode%d.",pre_imode);
+        pre_imode = 0;
+    }
+
     AP::logger().Write_Error(LogErrorSubsystem::FAILSAFE_EKFINAV,
                              LogErrorCode::FAILSAFE_RESOLVED);
     gcs().send_text(MAV_SEVERITY_CRITICAL,"EKF failsafe cleared");

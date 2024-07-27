@@ -323,17 +323,19 @@ void AP_OAPathPlanner::avoidance_thread()
             } 
             _oabendyruler->set_config(_margin_max);
             AP_OABendyRuler::OABendyType bendy_type;
-            //golf OATYPE3 exclusion_circles use bendyruler proximity_only->true 
-            if (_oabendyruler->update(avoidance_request2.current_loc, avoidance_request2.destination, avoidance_request2.ground_speed_vec, origin_new, destination_new, bendy_type, true)) {//proximity_only
+            //golf OATYPE3 exclusion_circles use bendyruler proximity_only->true
+            if (_oabendyruler->update(avoidance_request2.current_loc, avoidance_request2.destination, avoidance_request2.ground_speed_vec, origin_new, destination_new, bendy_type, true)) {//proximity_only only process inclusion_and_exclusion_circles
                 // detected a obstacle by vehicle's proximity sensor. Switch avoidance to BendyRuler till obstacle is out of the way
                 proximity_only = false;
                 res = OA_SUCCESS;
                 path_planner_used = map_bendytype_to_pathplannerused(bendy_type);
+                //gcs().send_text(MAV_SEVERITY_INFO, "OA3: use bendyruler:%d.",res);
                 break;
             } else {
                 // cleared all obstacles, trigger Dijkstra's to calculate path based on current deviated position  
                 if (proximity_only == false) {
                     _oadijkstra->recalculate_path();
+                    //gcs().send_text(MAV_SEVERITY_INFO, "OA3: use dij recalc.");
                 }
                 // only use proximity avoidance now for BendyRuler
                 proximity_only = true;
@@ -351,6 +353,7 @@ void AP_OAPathPlanner::avoidance_thread()
                 res = OA_SUCCESS;
                 break;
             }
+            //gcs().send_text(MAV_SEVERITY_INFO, "OA3: use dijstate:%d.",res);
             path_planner_used = OAPathPlannerUsed::Dijkstras;
             break;
         }
