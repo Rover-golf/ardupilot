@@ -508,7 +508,7 @@ public:
     int pie_ctl_times = 0; //add times when gps or uwb contral
     float old_yaw = 0;
     float old_dis = 0;
-    int get_distance(int idx = 0);
+    int get_distance(int idx = 0, bool msgflg = false);
     float old_gpsdis = 0;
     int directionflg = 1;
     bool closetohome(float dis = 1.0f);

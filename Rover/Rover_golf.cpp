@@ -188,8 +188,9 @@ void Rover::one_hz_loop(void)
     //3 TEST lidar
     if(g.batt_nd_rtl > 2.5f && g.batt_nd_rtl < 3.5f)
     {
-        int disLidar = get_distance(-1);
-        gcs().send_text(MAV_SEVERITY_INFO, "Lidar: %d.",disLidar);
+        get_distance(-1,true);
+        //int disLidar = get_distance(-1);
+        //gcs().send_text(MAV_SEVERITY_INFO, "Lidar: %d.",disLidar);
     }
 
     // golf: regular start&retur
@@ -197,7 +198,8 @@ void Rover::one_hz_loop(void)
     uint16_t ms;
     // 获取现在的UTC时间 时 分 秒
     if (!AP::rtc().get_local_time(hour, min, sec, ms))
-        gcs().send_text(MAV_SEVERITY_DEBUG, "UTC get time faild!");
+        hour = 0;
+    //    gcs().send_text(MAV_SEVERITY_DEBUG, "UTC get time faild!");
     // else
     //     gcs().send_text(MAV_SEVERITY_CRITICAL, "H:M:S %d:%d:%d", hour, min, sec);
     batt_nd_charge = false;
@@ -581,7 +583,7 @@ void Rover::one_hz_loop(void)
             float  gpsdis = 0;
             gpsdis = rover.current_loc.get_distance(ahrs.get_home())*100;
             gcs().send_text(MAV_SEVERITY_INFO, "Golf Dis from home=%.0f.",gpsdis); 
-            if(/*gpsdis < g.golf_gps_dis &&*/ one_hz_times > 3)
+            if(/*gpsdis < g.stage_down &&*/ one_hz_times > 3)
             {
                 golf_work_state = GOLF_HOLD;
                 one_hz_times = 0;
@@ -789,14 +791,23 @@ void Rover::sim_pi_ctl(void)
             case 3: // start uwb
                 if (yaw_complete)
                 {
-                    rover.mode_gobatt.set_para(); // stop
-                    uwb_complete = false;
+                    rover.mode_gobatt.set_para(); // stop 
                     sim_pi_guide_state = 0;
-                    pi_ctl_step++;
                     pi_ctl_start = AP_HAL::millis();
                     one_hz_times = 0;
                     pie_ctl_times = 0;
                     uwb_delay = 0;
+                    if(g.uwb_enable == 0)//no uwb
+                    {
+                        uwb_complete = true;
+                        pi_ctl_step = 7;
+                    }
+                    else
+                    {
+                        uwb_complete = false;
+                        pi_ctl_step++;
+                    }
+
                 }
                 break;
             case 4: // do uwb
@@ -828,7 +839,8 @@ void Rover::sim_pi_ctl(void)
                 {
                     rover.mode_gobatt.set_para(); // stop
                     float dis = 0.0f, angle = 0.0f;
-                    g2.beacon.get_data(dis, angle);
+                    if(g.uwb_enable == 1)
+                        g2.beacon.get_data(dis, angle);
                     dis = dis * 100;//m->cm
 
                     gcs().send_text(MAV_SEVERITY_INFO, "uwb dis=%.2f angle=%.2f ",dis, angle);
@@ -1076,7 +1088,8 @@ void Rover::sim_pi_ctl(void)
                     //rover.mode_gobatt.set_para(-g.golf_throttleR); //-50
                     //int dis = get_distance(-1); //lidar
                     float dis = 0.0f,angle = 0.f;
-                    g2.beacon.get_data(dis, angle);
+                    if(g.uwb_enable == 1)
+                        g2.beacon.get_data(dis, angle);
                     dis = dis * 100; // m->cm
                     float  gpsdis = 0;
                     gpsdis = rover.current_loc.get_distance(ahrs.get_home())*100;
@@ -1092,7 +1105,7 @@ void Rover::sim_pi_ctl(void)
                         pie_ctl_times = 0;
                     }
                     //else if (gpsdis < 150 || dis > g.golf_near_distence + 500|| one_hz_times > g.golf_time_backward) // 12
-                    else if (gpsdis < 150 || (dis > g.golf_near_distence + 500 && dis > 10 && dis < 3000))//uwb data in correct range10-2000cm
+                    else if (gpsdis < 150 || (dis > g.golf_near_distence + 500 && g.uwb_enable == 1))//usb uwb data
                     {
                         //
                         rover_reached_stick = false;
@@ -1202,8 +1215,16 @@ void Rover::sim_pi_ctl(void)
 
 void Rover::sim_pi_guide(void)
 {
-    if (pi_ctl != true) // 202207uwb
+    if (pi_ctl != true || g.uwb_enable == 0) // 202207uwb
+    {
+        rover.mode_gobatt.set_para(0, 0);
+        pi_ctl_start = AP_HAL::millis();
+        sim_pi_guide_state = 0;
+        uwb_complete = true; // uwb adjust finished.
+        pie_ctl_times = 0;
         return;
+    }
+
 
     // if (pi_ctl != true && pi_ctl_id != 9000 && pi_ctl_step != 1)
     //     return;
@@ -1212,7 +1233,7 @@ void Rover::sim_pi_guide(void)
     float  gpsdis = 0;
     gpsdis = rover.current_loc.get_distance(ahrs.get_home())*100;
     gcs().send_text(MAV_SEVERITY_INFO, "Gps Dis from home=%.0f.",gpsdis); 
-    if(gpsdis > g.golf_gps_dis)
+    if(gpsdis > g.stage_down)
         sim_pi_guide_state = 3;
 
     float delt = 0.f;
@@ -1511,7 +1532,7 @@ void Rover::get_proximity_dis(float &distance0, float &distance45, float &distan
     }
 }
 
-int Rover::get_distance(int idx)
+int Rover::get_distance(int idx, bool msgflg)
 {
     int mindis = 10000; // cm
     AP_RangeFinder_Backend *s = nullptr;
@@ -1521,7 +1542,8 @@ int Rover::get_distance(int idx)
         s = rover.rangefinder.get_backend(idx);
         if (s != nullptr)
             mindis = s->distance_cm();
-       // gcs().send_text(MAV_SEVERITY_INFO, "lidar dist #%i =  %d", idx, mindis);
+        if(msgflg)
+            gcs().send_text(MAV_SEVERITY_INFO, "lidar%i dist =  %d", idx, mindis);
         return mindis;
     }
 
@@ -1536,7 +1558,8 @@ int Rover::get_distance(int idx)
         int distance = s->distance_cm();
         if (mindis > distance)
             mindis = distance;
-      //  gcs().send_text(MAV_SEVERITY_INFO, "lidar dist #%i =  %d", i, distance);
+        if(msgflg)
+            gcs().send_text(MAV_SEVERITY_INFO, "lidar%i dist =  %d", i, distance);
     }
 
     return mindis;

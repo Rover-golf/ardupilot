@@ -47,8 +47,8 @@ private:
 
     bool init();
     void timer();
-
-    void process_raw_measure(le16_t distance_raw, le16_t strength_raw,
+    void GetLidarData();
+    bool process_raw_measure(le16_t distance_raw, le16_t strength_raw,
                              uint16_t &output_distance_cm);
 
     bool check_checksum(uint8_t *arr, int pkt_len);
