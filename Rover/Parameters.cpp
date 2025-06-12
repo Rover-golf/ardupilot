@@ -429,6 +429,8 @@ const AP_Param::Info Rover::var_info[] = {
     GSCALAR(start_4_min, "GOLF4_START_MIN", 0),
     GSCALAR(end_4_hour, "GOLF4_END_HOUR", 0),
     GSCALAR(end_4_min, "GOLF4_END_MIN", 0),
+    GSCALAR(wp_index_back, "GF_WP_BACK", 0),
+    GSCALAR(wp_index_go, "GF_WP_GO", 0),
 
     AP_VAREND
 };

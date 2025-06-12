@@ -523,6 +523,17 @@ public:
     void enable_rangefinder(int idx = -1, bool enableflg = true);
     bool reached_stageup = false;//up
     bool reached_guided = false;//guided to stage
+    //wp
+    uint16_t getWPCurIdx();
+    bool setWPCurrent(uint32_t index = 0);
+    void golf_gohome(uint8_t flg = 0);
+    bool golf_jumpLastWP();
+    uint16_t wp_index_last = 0;
+    uint16_t wp_index_go = 0;
+    bool GPS_Check();
+    uint16_t lastmode = 0;
+    void closeRngfnd_neardoor();
+    bool rngfndflg = true;
 };
 
 extern Rover rover;

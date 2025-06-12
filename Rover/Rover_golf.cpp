@@ -131,6 +131,7 @@ void Rover::one_hz_loop(void)
     }
     if(changedflg)
         gcs().send_text(MAV_SEVERITY_INFO, "Mode= %d, work_enable= %d, isSleep=%d", imode, work_enable, isSleep);
+
     // gcs().send_text(MAV_SEVERITY_INFO, "golf_work_state = %d ", golf_work_state);
     if (pi_ctl && oldpi_ctl_step != pi_ctl_step)
     {
@@ -355,11 +356,20 @@ void Rover::one_hz_loop(void)
             (time3_to_start && time3_avaiable) ||
             (time4_to_start && time4_avaiable))
         {
-            isperiod = true;
-            triggerhour = hour+1;
-            triggermin = min;
-            triggerhour = triggerhour % 24;
-            gcs().send_text(MAV_SEVERITY_INFO,"Trig hour:%d,min:%d",triggerhour,triggermin);
+            if(g.batt_nd_rtl < 50 && g.batt_nd_rtl > 48 )//49v to enable exchange work status
+            {
+                isperiod = true;
+                triggerhour = hour+1;
+                triggermin = min;
+                triggerhour = triggerhour % 24;
+                gcs().send_text(MAV_SEVERITY_INFO,"Trig hour:%d,min:%d",triggerhour,triggermin);
+            }
+            else
+            {
+                isperiod = false;
+                triggerhour = 0;
+                triggermin = 0;                
+            }
             test_work_s = 0;
             needsleep = false;
             golf_set_sleepflg(0);
@@ -422,6 +432,9 @@ void Rover::one_hz_loop(void)
             }
         }
     }
+    //
+    if(imode == 10 && (golf_work_state == GOLF_BACK || golf_work_state == GOLF_PREP_WORK))
+        closeRngfnd_neardoor();
     // do nothing when manual or golf_end_mission (hold by error)
     if (imode == 0 || golf_work_state == GOLF_NOWORK) // manual
         return;
@@ -430,6 +443,12 @@ void Rover::one_hz_loop(void)
     {
         gcs().send_text(MAV_SEVERITY_CRITICAL, "EKF failsafe. OneHz is Waiting.");
         return;
+    }
+    //gps check
+    if(!GPS_Check())
+    {
+        gcs().send_text(MAV_SEVERITY_CRITICAL, "GPS isn't rtk fixed. OneHz is Waiting.");
+        return;  
     }
        
 
@@ -459,7 +478,7 @@ void Rover::one_hz_loop(void)
             pi_ctl = true;
         }
         break;
-    case GOLF_HOLD:
+    case GOLF_HOLD://mode to auto
         if (work_enable)
         {
             if(failsafe.ekf)
@@ -474,8 +493,8 @@ void Rover::one_hz_loop(void)
             {
                 rover.set_mode(rover.mode_auto, ModeReason::EVERYDAY_START);
                 arming.arm(AP_Arming::Method::RUDDER);
-                gcs().send_text(MAV_SEVERITY_CRITICAL, "Golf Time Start");
-                golf_work_state = GOLF_WORK;
+                gcs().send_text(MAV_SEVERITY_CRITICAL, "Golf Start auto.");
+                golf_work_state = GOLF_PREP_WORK;//GOLF_WORK
                 work_golf_back = false; // Josh
             }
             else
@@ -483,7 +502,13 @@ void Rover::one_hz_loop(void)
             
         }
         break;
-    case GOLF_WORK:
+    case GOLF_PREP_WORK://auto and go along the path to outside
+        if(golf_jumpLastWP())
+        {
+            gcs().send_text(MAV_SEVERITY_CRITICAL, "Golf Start auto");
+        }
+        break;
+    case GOLF_WORK://in auto
         test_work_s++;
         if (test_work_s >= 5 && door_nd_close)
         {
@@ -492,22 +517,18 @@ void Rover::one_hz_loop(void)
         }
         if ((test_work_s >= g.test_full_sec) || golf_is_full)
         {
-            rover.set_mode(rover.mode_rtl, ModeReason::EVERYDAY_END);
+            golf_gohome(1U);//jump to backidx
             gcs().send_text(MAV_SEVERITY_CRITICAL, "Golf is full");
-            test_work_s = 0;
-            golf_work_state = GOLF_BACK;
-            work_golf_back = true; // Josh
 
         }
+
         if (batt_nd_charge)
         {
-            rover.set_mode(rover.mode_rtl, ModeReason::EVERYDAY_END);
-            gcs().send_text(MAV_SEVERITY_CRITICAL, "Golf batt is low");
-            test_work_s = 0;
-            golf_work_state = GOLF_BACK;
-            work_golf_back = true; // Josh
+            //golf_gohome(1U);//jump to backidx
             golf_set_sleepflg(1.0);
+            gcs().send_text(MAV_SEVERITY_CRITICAL, "Golf batt is low");
         }
+
         if (nd_avd)
         {
             gcs().send_text(MAV_SEVERITY_CRITICAL, "Golf avd now");
@@ -521,20 +542,21 @@ void Rover::one_hz_loop(void)
             //            golf_send_cmd(pi_ctl_id, rover.ahrs.yaw_sensor, target_deg); // Josh added parameters
             pi_ctl = true;
         }
- 
-        if (g2.wp_nav.reached_destination())
+        if (g2.wp_nav.reached_destination())//auto to the end wp
         {
-            //   gcs().send_text(MAV_SEVERITY_CRITICAL, "after dest");
-            golf_work_state = GOLF_BACK;
-            work_golf_back = true; // Josh
-            rover.set_mode(rover.mode_rtl, ModeReason::EVERYDAY_END);
-            gcs().send_text(MAV_SEVERITY_CRITICAL, "after dest, RTL");
-
-            // golf_work_state = GOLF_PREP_PI;
+            golf_gohome(0U);//RTL           
+            gcs().send_text(MAV_SEVERITY_CRITICAL, "End WP, RTL");
         }
         break;
-    case GOLF_BACK:
-        if (g2.wp_nav.reached_destination())
+    case GOLF_BACK: //jump to the backindex and continue auto   
+        if (g2.wp_nav.reached_destination())//auto to the end wp
+        {
+            golf_gohome(0U);//RTL           
+            gcs().send_text(MAV_SEVERITY_CRITICAL, "End WP, RTL");
+        }
+        break;
+    case GOLF_HOME:
+        if (g2.wp_nav.reached_destination())//RTL to the home
         {
             //
             gcs().send_text(MAV_SEVERITY_CRITICAL, "Golf near home");
@@ -605,7 +627,7 @@ void Rover::one_hz_loop(void)
         {
             if (work_golf_back) //  Josh during RTL avoidance, after avoid, keep going RTL
             {
-                golf_work_state = GOLF_BACK;
+                golf_work_state = GOLF_HOME;
                 work_golf_back = true; // Josh
                 rover.set_mode(rover.mode_rtl, ModeReason::EVERYDAY_END);
 
@@ -1466,7 +1488,7 @@ bool Rover::golf_start_mission(void)
     oldpi_ctl_step = 100;
     pi_ctl_step = 0;
     sim_pi_guide_state = 0; // 202207uwb
-    golf_work_state = GOLF_WORK;
+    golf_work_state = GOLF_PREP_WORK;//GOLF_WORK;
     if(needsleep)//
     {
         needsleep = false; //for back
@@ -1493,7 +1515,7 @@ void Rover::golf_end_mission(void)
     pi_ctl_step = 0;
     sim_pi_guide_state = 0; // 202207uwb
     yaw_enable = false; //202310 gps
-    golf_work_state = GOLF_NOWORK;//GOLF_BACK ->manual avoid near distination and gohome
+    golf_work_state = GOLF_NOWORK;//manual avoid near distination and gohome
     work_golf_back = true; // Josh
     isSleep = true;        // Josh
     start_auto = true;
@@ -1567,7 +1589,8 @@ int Rover::get_distance(int idx, bool msgflg)
 
 void Rover::enable_rangefinder(int idx,bool enableflg)
 {
-
+    if(rngfndflg == enableflg)
+        return;
     AP_RangeFinder_Backend *s = nullptr;
 
     if (idx >= 0 && idx < rover.rangefinder.num_sensors())
@@ -1593,6 +1616,7 @@ void Rover::enable_rangefinder(int idx,bool enableflg)
         s->enable(enableflg);
         gcs().send_text(MAV_SEVERITY_INFO, "lidar#%i =  %d", idx, enableflg);
     }
+    rngfndflg = enableflg;
 }
 
 bool Rover::near_target(int distmax, int distmin)
@@ -1663,8 +1687,8 @@ bool Rover::golf_is_athome()
     gcs().send_text(MAV_SEVERITY_DEBUG, "golf_is_athome");
     if (pi_ctl)
         return true;
-    //change state from GOLF_NOWORK(manual and gobatt endmission) to GOLF_BACK
-    golf_work_state = GOLF_BACK;
+    //change state from GOLF_NOWORK(manual and gobatt endmission) to GOLF_HOME
+    golf_work_state = GOLF_HOME;
 
     return false;
 }
@@ -1679,9 +1703,10 @@ void Rover::golf_set_sleepflg(float sleepflg)
         batt_nd_charge = true;
         if (golf_work_state != GOLF_PREP_PI && golf_work_state != GOLF_PI_CTL)
         {
-            golf_work_state = GOLF_BACK;
-            work_golf_back = true; // Josh
-            rover.set_mode(rover.mode_rtl, ModeReason::EVERYDAY_END);
+            //golf_work_state = GOLF_HOME;
+            //work_golf_back = true; // Josh
+            //rover.set_mode(rover.mode_rtl, ModeReason::EVERYDAY_END);
+            golf_gohome(1U);//jump to backidx
         }
     }
     else
@@ -1790,4 +1815,137 @@ Location Rover::calc_desired_location(float distance, float angle, uint8_t frame
     target_loc.offset(ne_x, ne_y);
 
     return target_loc;
+}
+
+// changes the current waypoint
+uint16_t Rover::getWPCurIdx()
+{
+   AP_Mission *mission = AP::mission();
+    if (mission == nullptr) {
+        return 0;
+    }
+    uint16_t idx = mission->get_current_nav_index();
+    return idx;
+}
+
+// changes the current waypoint
+bool Rover::setWPCurrent(uint32_t index)
+{
+   AP_Mission *mission = AP::mission();
+    if (mission == nullptr) {
+        return false;
+    }
+
+    if(index >= mission->num_commands())
+        return false;
+    else if (!mission->set_current_cmd(index)) {
+        return false;
+    }
+
+    return true;
+}
+
+void Rover::golf_gohome(uint8_t flg)
+{
+    test_work_s = 0;//stop timing
+
+    if(flg == 0)//RTL directly
+    {
+        rover.set_mode(rover.mode_rtl, ModeReason::EVERYDAY_END);
+        golf_work_state = GOLF_HOME;
+        work_golf_back = true;
+    }
+    else//goto index wp and continue auto
+    {
+        golf_work_state = GOLF_BACK;
+        wp_index_last = getWPCurIdx();
+        if(wp_index_last>=g.wp_index_back)
+            wp_index_last = 0;
+        else
+            setWPCurrent(g.wp_index_back);
+    }
+
+}
+
+bool Rover::golf_jumpLastWP()
+{
+    if( g.wp_index_go ==0 || g.wp_index_back == 0)
+    {
+        golf_work_state = GOLF_WORK;
+        return true;
+    }
+    else if(getWPCurIdx()>g.wp_index_go + 1 && getWPCurIdx()<g.wp_index_back)//remote change auto
+    {
+        golf_work_state = GOLF_WORK;
+        return true;
+    }
+    else if(g.wp_index_back>0 && getWPCurIdx()>g.wp_index_back)//BACK HOME
+    {
+        golf_work_state = GOLF_BACK;
+        return true;
+    }
+    else if( wp_index_last == 0 &&  g.wp_index_go + 1  == getWPCurIdx())
+    {
+        golf_work_state = GOLF_WORK;
+        return true;
+    }
+    else if( wp_index_last != 0  && g.wp_index_go + 1 == getWPCurIdx())
+    {
+        golf_work_state = GOLF_WORK;
+        setWPCurrent(wp_index_last);
+        return true;
+    }
+    else
+        return false;
+}
+
+bool Rover::GPS_Check()
+{
+    AP_GPS::GPS_Status gpsst = gps.status();
+    int imode = control_mode->mode_number();
+
+    if( imode == 10 || imode == 11 )
+    {
+        if(gpsst < AP_GPS::GPS_OK_FIX_3D_RTK_FIXED)
+        {
+            gcs().send_text(MAV_SEVERITY_CRITICAL, "GPS not rtk fixed and Hold.");
+            rover.set_mode(rover.mode_hold, ModeReason::EVERYDAY_END);
+            lastmode = imode;
+            return false;
+        }
+    } 
+    else if (imode == 4 && (lastmode== 10 || lastmode ==11))
+    {
+        if(gpsst > AP_GPS::GPS_OK_FIX_3D_RTK_FLOAT)
+        {
+            rover.set_mode(lastmode, ModeReason::EVERYDAY_START);
+            arming.arm(AP_Arming::Method::RUDDER);
+            gcs().send_text(MAV_SEVERITY_CRITICAL, "GPS fixed and restore work.");
+            lastmode = 0;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void Rover::closeRngfnd_neardoor()
+{
+    uint16_t wpidx =  getWPCurIdx();
+
+    if( g.wp_index_go - wpidx >= 2 && g.wp_index_go - wpidx < 4)//go out
+    {
+        //disable laider
+        enable_rangefinder(-1, false);
+    }
+    else if( wpidx - g.wp_index_back > 2 && wpidx - g.wp_index_back <= 4)//come back
+    {
+        //disable laider
+        enable_rangefinder(-1, false);
+    }
+    else
+        enable_rangefinder(-1, true);
 }

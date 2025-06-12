@@ -95,6 +95,8 @@ public:
         k_param_start_4_min,
         k_param_end_4_hour,
         k_param_end_4_min,
+        k_param_wp_index_back,
+        k_param_wp_index_go,
 
         // 97: RSSI
         k_param_rssi = 97,
@@ -344,7 +346,9 @@ public:
     AP_Int8 start_4_hour;
     AP_Int8 start_4_min;
     AP_Int8 end_4_hour;
-    AP_Int8 end_4_min;  
+    AP_Int8 end_4_min;
+    AP_Int16 wp_index_back;  
+    AP_Int16 wp_index_go; 
 
     Parameters() {}
 };

@@ -54,7 +54,6 @@ void AP_BattMonitor_229::perform_logging() const
     // @Field: OutV: Output Voltage
     // @Field: OutC: Output Current
     // @Field: OutP: Output Power
-    
     AP::logger().Write("MK229", "TimeUS,F,Temp,InV,InC,InP,OutV,OutC,OutP",
                        "s#--OVAWVAW",
                        "F----------",
@@ -67,7 +66,7 @@ void AP_BattMonitor_229::perform_logging() const
                         (double)MK229_device.input.power,
                         (double)MK229_device.output.voltage,
                         (double)MK229_device.output.current,
-                        (double)MK229_device.output.power);
+                        (double)MK229_device.output.power);                    
 #endif
 }
 // send command

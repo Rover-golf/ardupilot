@@ -105,9 +105,10 @@ enum frame_class {
 enum golf_work_state_t
 {
     GOLF_HOLD = 0,
+    GOLF_PREP_WORK,
     GOLF_WORK,
     GOLF_BACK,
-    GOLF_UNLOAD,
+    GOLF_HOME,
     GOLF_PREP_PI,
     GOLF_PI_CTL,
     GOLF_LOW_BATT,
