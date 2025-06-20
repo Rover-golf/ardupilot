@@ -430,7 +430,8 @@ bool AP_GPS_NMEA::_term_complete()
         // operational status
         //
         case _GPS_SENTENCE_RMC + 2: // validity (RMC)
-            _gps_data_good = _term[0] == 'A';
+            //_gps_data_good = _term[0] == 'A';
+            _gps_data_good = (_term[0] == 'A' || _term[0] == 'D');
             break;
         case _GPS_SENTENCE_GGA + 6: // Fix data (GGA)
             _gps_data_good = _term[0] > '0';

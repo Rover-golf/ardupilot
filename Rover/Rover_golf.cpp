@@ -335,21 +335,30 @@ void Rover::one_hz_loop(void)
     // 定时启动
     if (g.golf_timing_enable == 1)
     {
+        bool gosleeping = false;
         bool time1_avaiable = !((g2.start_1_hour == 0) && (g2.start_1_min == 0) && (g2.end_1_hour == 0) && (g2.end_1_min == 0));
         bool time1_to_start = ((hour == (uint8_t)g2.start_1_hour) && (min == (uint8_t)g2.start_1_min) && (sec < 4));
         bool time1_to_end = ((hour == (uint8_t)g2.end_1_hour) && (min == (uint8_t)g2.end_1_min) && (sec < 4));
-        
+        if(!isSleep && pi_ctl)
+            gosleeping = time_Check(hour, min, (uint8_t)g2.end_1_hour,(uint8_t)g2.end_1_min,5);  
+       
         bool time2_avaiable = !((g2.start_2_hour == 0) && (g2.start_2_min == 0) && (g2.end_2_hour == 0) && (g2.end_2_min == 0));
         bool time2_to_start = ((hour == (uint8_t)g2.start_2_hour) && (min == (uint8_t)g2.start_2_min) && (sec < 4));
         bool time2_to_end = ((hour == (uint8_t)g2.end_2_hour) && (min == (uint8_t)g2.end_2_min) && (sec < 4));
-        
+        if(!isSleep && pi_ctl)
+            gosleeping |= time_Check(hour, min, (uint8_t)g2.end_2_hour,(uint8_t)g2.end_2_min,5);
+
         bool time3_avaiable = !((g2.start_3_hour == 0) && (g2.start_3_min == 0) && (g2.end_3_hour == 0) && (g2.end_3_min == 0));
         bool time3_to_start = ((hour == (uint8_t)g2.start_3_hour) && (min == (uint8_t)g2.start_3_min) && (sec < 4));
         bool time3_to_end = ((hour == (uint8_t)g2.end_3_hour) && (min == (uint8_t)g2.end_3_min) && (sec < 4));
+        if(!isSleep && pi_ctl)
+            gosleeping |= time_Check(hour, min, (uint8_t)g2.end_3_hour,(uint8_t)g2.end_3_min,5);
 
         bool time4_avaiable = !((g.start_4_hour == 0) && (g.start_4_min == 0) && (g.end_4_hour == 0) && (g.end_4_min == 0));
         bool time4_to_start = ((hour == (uint8_t)g.start_4_hour) && (min == (uint8_t)g.start_4_min) && (sec < 4));
         bool time4_to_end = ((hour == (uint8_t)g.end_4_hour) && (min == (uint8_t)g.end_4_min) && (sec < 4));
+        if(!isSleep && pi_ctl)
+            gosleeping |= time_Check(hour, min, (uint8_t)g.end_4_hour,(uint8_t)g.end_4_min,5);
 
         if ((time1_to_start && time1_avaiable) ||
             (time2_to_start && time2_avaiable) ||
@@ -379,7 +388,7 @@ void Rover::one_hz_loop(void)
         if ((time1_to_end && time1_avaiable) ||
             (time2_to_end && time2_avaiable) ||
             (time3_to_end && time3_avaiable) ||
-            (time4_to_end && time4_avaiable))
+            (time4_to_end && time4_avaiable) || gosleeping)//pictrl checek in advance 5 mins
         {
             isperiod = false;
             triggerhour = 0;
@@ -404,13 +413,7 @@ void Rover::one_hz_loop(void)
        
         if((!isSleep && pi_ctl) /*&& !needsleep*/)
         {
-            int triggertotalmins = triggerhour * 60 + triggermin;
-            triggertotalmins = triggertotalmins-5; //reduce 5 mins to prepare pi ctrl 
-            if(triggertotalmins < 0)
-                triggertotalmins = triggertotalmins + 24 * 60;
-            if(hour * 60 + min >= triggertotalmins)
-                gosleeping = true;
-            
+          gosleeping = time_Check(hour,min,triggerhour,triggermin,5);  
         }
 
         
@@ -1858,11 +1861,13 @@ void Rover::golf_gohome(uint8_t flg)
     else//goto index wp and continue auto
     {
         golf_work_state = GOLF_BACK;
-        wp_index_last = getWPCurIdx();
-        if(wp_index_last>=g.wp_index_back)
-            wp_index_last = 0;
-        else
+        uint16_t wp_index = getWPCurIdx();
+        if(wp_index > g.wp_index_go && wp_index < g.wp_index_back)
+        {
+            wp_index_last = wp_index;//next time jump here       
             setWPCurrent(g.wp_index_back);
+        }
+
     }
 
 }
@@ -1948,4 +1953,18 @@ void Rover::closeRngfnd_neardoor()
     }
     else
         enable_rangefinder(-1, true);
+}
+
+bool Rover::time_Check(uint8_t curH, uint8_t curM, uint8_t triggerH, uint8_t triggerM,  uint8_t dtM )
+{
+    bool gosleeping = false;
+    
+    int triggertotalmins = triggerH * 60 + triggerM;
+    triggertotalmins = triggertotalmins-dtM; //reduce 5 mins to prepare pi ctrl 
+    if(triggertotalmins < 0)
+        triggertotalmins = triggertotalmins + 24 * 60;
+    if(curH * 60 + curM >= triggertotalmins)
+        gosleeping = true;
+    
+    return gosleeping;
 }

@@ -534,6 +534,7 @@ public:
     uint16_t lastmode = 0;
     void closeRngfnd_neardoor();
     bool rngfndflg = true;
+    bool time_Check(uint8_t curH, uint8_t curM, uint8_t triggerH, uint8_t triggerM,  uint8_t dtM = 5);
 };
 
 extern Rover rover;
