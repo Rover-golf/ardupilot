@@ -1050,7 +1050,7 @@ void Rover::sim_pi_ctl(void)
                 }
                 break;
             case 10:                           // move forward again for charge
-                rover.mode_gobatt.set_para(g.golf_throttle); // *1.2
+                /* rover.mode_gobatt.set_para(g.golf_throttle); // *1.2   // Josh remove this on July 3rd, 2025
                 if (one_hz_times > 3) // 30
                 {
                     rover.mode_gobatt.set_para(); // stop
@@ -1058,6 +1058,7 @@ void Rover::sim_pi_ctl(void)
                     one_hz_times = 0;
                     pi_ctl_step++;
                 }
+                */
                 break;                  
             case 11:
                 // close door and wait 3s
