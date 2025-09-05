@@ -515,7 +515,7 @@ public:
     bool lidarvaildflg = false;
     uint16_t test_work_s = 0;
     //guide to stage
-    bool fly_to_here(Location target_loc);
+    bool fly_to_here(Location target_loc, bool bReverse = false);
     //calculate the desired location by angle and distance from home or current
     //uint_8 frame:0-home,1-current; float  angle; float  distance
     Location calc_desired_location(float distance = 1, float angle = 0, uint8_t frame = 0);
@@ -535,6 +535,7 @@ public:
     void closeRngfnd_neardoor();
     bool rngfndflg = true;
     bool time_Check(uint8_t curH, uint8_t curM, uint8_t triggerH, uint8_t triggerM,  uint8_t dtM = 5);
+    bool bekfflg = false;
 };
 
 extern Rover rover;

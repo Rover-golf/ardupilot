@@ -331,7 +331,9 @@ void Rover::one_hz_loop(void)
     // #endif
 
     // End Josh
-
+    // do nothing when manual or golf_end_mission (hold by error)
+    if (imode == 0 || golf_work_state == GOLF_NOWORK) // manual
+        return;
     // 定时启动
     if (g.golf_timing_enable == 1)
     {
@@ -438,9 +440,6 @@ void Rover::one_hz_loop(void)
     //
     if(imode == 10 && (golf_work_state == GOLF_BACK || golf_work_state == GOLF_PREP_WORK))
         closeRngfnd_neardoor();
-    // do nothing when manual or golf_end_mission (hold by error)
-    if (imode == 0 || golf_work_state == GOLF_NOWORK) // manual
-        return;
     //when ekf is failsafe,don't continue especially change mode and just wait  
     if(failsafe.ekf && golf_work_state != GOLF_PI_CTL)
     {
@@ -654,6 +653,8 @@ void Rover::sim_pi_ctl(void)
     if (pi_ctl)
     {
         int lidardis = get_distance(-1);
+        //gcs().send_text(MAV_SEVERITY_INFO, "lidar Dis=%d.",lidardis); 
+
         if(lidardis > 0 && lidardis < 10000)
             lidarvaildflg = true;
 
@@ -897,7 +898,16 @@ void Rover::sim_pi_ctl(void)
                     if(failsafe.ekf)
                     {
                         gcs().send_text(MAV_SEVERITY_CRITICAL, "EKF failsafe.Guide is Waiting.");
+                        one_hz_times = 0;
+                        bekfflg = true;
                         break;
+                    }
+                    if(bekfflg)
+                    {
+                        if( one_hz_times < g.golf_time_backward)//wait ekf restore
+                            break;
+                        else
+                            bekfflg = false;
                     }
                     //calculate the desired location
                     float distance = g.stage_up / 100.0f; //cm -> m
@@ -1050,15 +1060,15 @@ void Rover::sim_pi_ctl(void)
                 }
                 break;
             case 10:                           // move forward again for charge
-                /* rover.mode_gobatt.set_para(g.golf_throttle); // *1.2   // Josh remove this on July 3rd, 2025
-                if (one_hz_times > 3) // 30
+                //rover.mode_gobatt.set_para(g.golf_throttle); // *1.2   // Josh remove this on July 3rd, 2025
+                //if (one_hz_times > 3) // 30
                 {
                     rover.mode_gobatt.set_para(); // stop
                     pi_ctl_start = AP_HAL::millis();
                     one_hz_times = 0;
                     pi_ctl_step++;
                 }
-                */
+                
                 break;                  
             case 11:
                 // close door and wait 3s
@@ -1079,14 +1089,49 @@ void Rover::sim_pi_ctl(void)
                 }
                 else if (!isSleep)
                 {
-                    int imode = control_mode->mode_number();
-                    if(imode != 17)
+                //    int imode = control_mode->mode_number();
+                //    if(imode != 17)
+                //    {
+                //        rover.set_mode(rover.mode_gobatt, ModeReason::EVERYDAY_END);
+                //        gcs().send_text(MAV_SEVERITY_NOTICE, "Working to change mode to gobatt.");
+                //    }
+                //    else
                     {
-                        rover.set_mode(rover.mode_gobatt, ModeReason::EVERYDAY_END);
-                        gcs().send_text(MAV_SEVERITY_NOTICE, "Working to change mode to gobatt.");
-                    }
-                    else
-                    {
+                        float  gpsdis = 0;
+                        gpsdis = rover.current_loc.get_distance(ahrs.get_home())*100;
+                        gcs().send_text(MAV_SEVERITY_INFO, "Golf gpsDis from home=%.0f.",gpsdis); 
+                        if( gpsdis > g.stage_up + 400 )//in outside don't backward and ran auto directly
+                        {
+                            rover.mode_gobatt.set_para(); // complate
+                            pi_ctl_step = 0;
+                            pi_ctl = false;
+                            pi_ctl_start = 0;
+                            one_hz_times = 0;
+                            nd_backward = pi_ctl;
+                            pie_ctl_times = 0;
+                            break;
+                        }
+                        if(failsafe.ekf)
+                        {
+                            bekfflg = true;
+                            one_hz_times = 0;
+                            gcs().send_text(MAV_SEVERITY_CRITICAL, "11.EKF failsafe.Guide reverse is Waiting.");
+                            break;
+                        }
+                        if(bekfflg)
+                        {
+                            if(one_hz_times < g.golf_time_backward)//wait ekf restore
+                                break;
+                            else
+                                bekfflg = false;
+                        }
+                        //guide to reverse to home
+                        bool rt = fly_to_here(ahrs.get_home(),true);
+                        if(!rt){
+                            gcs().send_text(MAV_SEVERITY_CRITICAL, "Guide mode fly to home error and try again.");
+                            break;
+                        }
+
                         pi_ctl_start = AP_HAL::millis();
                         one_hz_times = 0;
                         pi_ctl_step++;
@@ -1103,16 +1148,32 @@ void Rover::sim_pi_ctl(void)
                 }
                 break;
             case 12:
-                // backward
+                if(failsafe.ekf)
                 {
-                    //float pitch_get = degrees(ahrs.get_pitch());
-                    //if(pitch_get <  g.press_low)
-                    //{
-                    //    gcs().send_text(MAV_SEVERITY_NOTICE, "Stage is not down, waitting down to backward.");
-                    //    break;
-                   // }
-                    //rover.mode_gobatt.set_para(-g.golf_throttleR); //-50
-                    //int dis = get_distance(-1); //lidar
+                    one_hz_times = 0;
+                    gcs().send_text(MAV_SEVERITY_CRITICAL, "12.EKF failsafe.Guide to home is Waiting.");
+                    pi_ctl_start = AP_HAL::millis();
+                    pi_ctl_step = 11;
+                    break;
+                }
+
+                // backward
+                if (g2.wp_nav.reached_destination())//guide mode reach home
+                {
+                    rover_reached_stick = false;
+                    pi_ctl_start = AP_HAL::millis();
+                    one_hz_times = 0;
+                    pie_ctl_times = 0;
+                    pi_ctl_step++;
+                    control_mode->set_reversed(false);
+                    rover.set_mode(rover.mode_gobatt, ModeReason::EVERYDAY_END);
+                    rover.mode_gobatt.set_para();//stop
+                    gcs().send_text(MAV_SEVERITY_CRITICAL, "12.back to home.");
+                }
+                break;
+                //gobatt to reverse to home
+                {
+
                     float dis = 0.0f,angle = 0.f;
                     if(g.uwb_enable == 1)
                         g2.beacon.get_data(dis, angle);
@@ -1479,7 +1540,7 @@ bool Rover::golf_start_mission(void)
     gcs().send_text(MAV_SEVERITY_DEBUG, "golf_start_mission");
     if (nd_backward)
     {
-        golf_backward(-1);
+        golf_backward(0);//-1
         gcs().send_text(MAV_SEVERITY_DEBUG, "golf_start_mission to gobatt");
         return false;
     }
@@ -1679,7 +1740,7 @@ void Rover::golf_backward(int sleepflg)
     start_auto = false;
     uwb_complete = false;
     pi_ctl = true; //
-    pi_ctl_step = 12;//back 11 close door
+    pi_ctl_step = 11;//guide to reverse to home//12;//back 11 close door
     pi_ctl_start = 0; // AP_HAL::millis();
     one_hz_times = 0;//g.golf_time_closedoor-4;
     sim_pi_guide_state = 0; // 202207uwb
@@ -1777,7 +1838,7 @@ bool Rover::closetohome(float dis)
 
 }
 
-bool Rover::fly_to_here(Location target_loc)
+bool Rover::fly_to_here(Location target_loc,bool bReverse)
 {
     gcs().send_text(MAV_SEVERITY_INFO, "Set Guided mode.");
     rover.set_mode(rover.mode_guided, ModeReason::EVERYDAY_END);
@@ -1790,6 +1851,9 @@ bool Rover::fly_to_here(Location target_loc)
     if (is_positive(g.guide_speed)) {
         gspeed = g.guide_speed;
     }
+    // Direction (0=Forward, 1=Reverse)
+    control_mode->set_reversed(bReverse);
+
     bool rt = control_mode->set_desired_speed(gspeed);
     gcs().send_text(MAV_SEVERITY_INFO, "Set Guided speed: %f,rt:%d.",gspeed,(int)rt);
     return control_mode->set_desired_location(target_loc);
@@ -1960,11 +2024,11 @@ bool Rover::time_Check(uint8_t curH, uint8_t curM, uint8_t triggerH, uint8_t tri
 {
     bool gosleeping = false;
     
-    int triggertotalmins = triggerH * 60 + triggerM;
-    triggertotalmins = triggertotalmins-dtM; //reduce 5 mins to prepare pi ctrl 
+    int triggertotalmax = triggerH * 60 + triggerM;
+    int triggertotalmins = triggertotalmax-dtM; //reduce 5 mins to prepare pi ctrl 
     if(triggertotalmins < 0)
         triggertotalmins = triggertotalmins + 24 * 60;
-    if(curH * 60 + curM >= triggertotalmins)
+    if(curH * 60 + curM >= triggertotalmins && curH * 60 + curM <= triggertotalmax )
         gosleeping = true;
     
     return gosleeping;
