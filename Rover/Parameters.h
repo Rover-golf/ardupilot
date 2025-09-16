@@ -69,6 +69,60 @@ public:
         k_param_serial1_baud,   // deprecated, can be deleted
         k_param_serial2_baud,   // deprecated, can be deleted
 
+        //GOLF
+        k_param_start_1_hour = 45,
+        k_param_start_1_min,
+        k_param_end_1_hour,
+        k_param_end_1_min,
+        k_param_start_2_hour,
+        k_param_start_2_min,
+        k_param_end_2_hour,
+        k_param_end_2_min,
+        k_param_start_3_hour,
+        k_param_start_3_min,
+        k_param_end_3_hour,
+        k_param_end_3_min,
+
+        k_param_press_up = 60,
+        k_param_press_low,
+        k_param_batt_nd_rtl,
+        k_param_batt_charge_to,
+        k_param_unload_sec,
+        k_param_test_full_sec,
+        k_param_home_offset,
+        k_param_pwm_normal,
+        k_param_steer_rate_use,
+        k_param_steer_yaw_min,
+        k_param_steer_error,
+
+        k_param_golf_yawrate_k,
+        k_param_golf_forward,
+        k_param_golf_max_degerr,
+        k_param_golf_max_turn,
+        k_param_golf_yaw,
+        k_param_golf_throttle,
+        k_param_golf_throttleR,
+        k_param_golf_time_forward,
+        k_param_golf_time_opendoor,
+        k_param_golf_time_backward,
+
+        k_param_golf_time_closedoor,
+        k_param_golf_near_distence,
+        k_param_golf_timing_enable,
+        k_param_uwb_enable,
+        k_param_uwb_angleL,
+        k_param_uwb_angleR,
+        k_param_gps_yaw_center,
+        k_param_stage_down,
+        k_param_stage_up,
+        k_param_guide_speed,
+        k_param_start_4_hour,
+        k_param_start_4_min,
+        k_param_end_4_hour,
+        k_param_end_4_min,
+        k_param_wp_index_back,
+        k_param_wp_index_go,
+
         // 97: RSSI
         k_param_rssi = 97,
         k_param_rpm_sensor_old, // unused - moved to vehicle
@@ -274,6 +328,65 @@ public:
     AP_Int8     mode5;
     AP_Int8     mode6;
 
+    //GOLF
+    AP_Int16 press_up;
+    AP_Int16 press_low;
+
+    AP_Float batt_nd_rtl;
+    AP_Float batt_charge_to;
+    AP_Int16 unload_sec;
+    AP_Int16 test_full_sec;
+    AP_Int16 home_offset;
+    AP_Int16 pwm_normal;
+    AP_Float steer_rate_use;
+    AP_Float steer_yaw_min;
+    AP_Float steer_error;
+
+    AP_Float golf_yawrate_k;
+    AP_Float golf_max_degerr;
+    AP_Float golf_forward;
+    AP_Float golf_max_turn;  
+
+    AP_Float golf_yaw;
+    AP_Int32 golf_near_distence;
+    AP_Float golf_throttle;
+    AP_Float golf_throttleR;
+    AP_Int32 golf_time_forward;
+    AP_Int32 golf_time_opendoor;
+    AP_Int32 golf_time_backward;
+    AP_Int32 golf_time_closedoor;
+    //timing work mode
+    AP_Int8 golf_timing_enable;
+    AP_Int8 uwb_enable;
+    AP_Int16 uwb_angleL;
+    AP_Int16 uwb_angleR;
+    AP_Int16 gps_yaw_center;
+    AP_Int32 stage_down;
+    AP_Int32 stage_up;
+    AP_Float guide_speed;
+    AP_Int16 wp_index_back;  
+    AP_Int16 wp_index_go;
+    //GOLF
+    AP_Int8 start_1_hour;
+    AP_Int8 start_1_min;
+    AP_Int8 end_1_hour;
+    AP_Int8 end_1_min;
+
+    AP_Int8 start_2_hour;
+    AP_Int8 start_2_min;
+    AP_Int8 end_2_hour;
+    AP_Int8 end_2_min;
+
+    AP_Int8 start_3_hour;
+    AP_Int8 start_3_min;
+    AP_Int8 end_3_hour;
+    AP_Int8 end_3_min;
+
+    AP_Int8 start_4_hour;
+    AP_Int8 start_4_min;
+    AP_Int8 end_4_hour;
+    AP_Int8 end_4_min;
+    
     Parameters() {}
 };
 
@@ -428,6 +541,7 @@ public:
     AP_Float fs_gcs_timeout;
 
     class ModeCircle mode_circle;
+      
 };
 
 extern const AP_Param::Info var_info[];
