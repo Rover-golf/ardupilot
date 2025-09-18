@@ -562,6 +562,10 @@ Mode *Rover::mode_from_mode_num(const enum Mode::Number num)
         ret = (Mode *)g2.mode_dock_ptr;
         break;
 #endif
+    //GOLF
+    case Mode::Number::GO_BATT:
+        ret = &mode_gobatt;
+        break;
     default:
         break;
     }

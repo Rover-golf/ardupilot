@@ -28,6 +28,7 @@
 #include "AP_BattMonitor_Synthetic_Current.h"
 #include "AP_BattMonitor_AD7091R5.h"
 #include "AP_BattMonitor_Scripting.h"
+#include "AP_BattMonitor_CANBus_229.h"//GOLF
 
 #include <AP_HAL/AP_HAL.h>
 
@@ -707,6 +708,13 @@ AP_BattMonitor::init()
                 drivers[instance] = NEW_NOTHROW AP_BattMonitor_INA3221(*this, state[instance], _params[instance]);
                 break;
 #endif  // AP_BATTERY_INA3221_ENABLED
+//GOLF
+#if HAL_229_CAN_ENABLE
+        //gcs().send_text(MAV_SEVERITY_INFO, "new AP_BattMonitor_229");
+            case Type::MK229:
+                drivers[instance] = new AP_BattMonitor_229(*this, state[instance], _params[instance]);
+                break;
+#endif // HAL_229_CAN_ENABLE
             case Type::NONE:
             default:
                 break;

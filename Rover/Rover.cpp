@@ -135,6 +135,10 @@ const AP_Scheduler::Task Rover::scheduler_tasks[] = {
 #if AP_ROVER_ADVANCED_FAILSAFE_ENABLED
     SCHED_TASK(afs_fs_check,           10,    200, 129),
 #endif
+//GOLF
+    SCHED_TASK(one_hz_loop,         1,      500, 150),
+    SCHED_TASK(hundred_hz_loop,     50,     50, 153),//100
+    SCHED_TASK(sim_pi_ctl,          50,     50, 156),
 };
 
 

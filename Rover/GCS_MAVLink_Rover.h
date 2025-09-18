@@ -36,6 +36,9 @@ protected:
     // Send the mode with the given index (not mode number!) return the total number of modes
     // Index starts at 1
     uint8_t send_available_mode(uint8_t index) const override;
+    //GOLF
+    void golf_send_cmd(uint16_t cmd_id, const float param1 = 0, const float param2 = 0);
+    void send_golf_info();
 
 private:
 

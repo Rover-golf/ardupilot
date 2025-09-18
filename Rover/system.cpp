@@ -149,7 +149,9 @@ void Rover::init_ardupilot()
     if (is_boat()) {
         rover.g2.mis_done_behave.set_default(uint8_t(ModeAuto::DoneBehaviour::LOITER));
     }
-
+    //GOLF
+    init_golfpin();
+    
     // flag that initialisation has completed
     initialised = true;
 }

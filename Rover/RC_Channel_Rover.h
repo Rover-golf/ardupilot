@@ -25,6 +25,9 @@ private:
     void add_waypoint_for_current_loc();
 
     void do_aux_function_sailboat_motor_3pos(const AuxSwitchPos ch_flag);
+    
+    //GOLF door open/close
+    void do_aux_function_door_control(const AuxSwitchPos ch_flag);
 };
 
 class RC_Channels_Rover : public RC_Channels

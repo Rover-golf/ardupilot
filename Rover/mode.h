@@ -28,6 +28,7 @@ public:
         SMART_RTL    = 12,
         GUIDED       = 15,
         INITIALISING = 16,
+        GO_BATT      = 17,//GOLF
         // Mode number 30 reserved for "offboard" for external/lua control.
     };
 
@@ -65,7 +66,8 @@ public:
 
     // return if external control is allowed in this mode (Guided or Guided-within-Auto)
     virtual bool in_guided_mode() const { return false; }
-
+    //GOLF
+    virtual bool in_gobatt_mode() const { return false; }
     // returns true if vehicle can be armed or disarmed from the transmitter in this mode
     virtual bool allows_arming_from_transmitter() { return !is_autopilot_mode(); }
 
@@ -682,7 +684,7 @@ public:
     bool requires_velocity() const override { return false; }
 
 protected:
-
+    bool _enter() override;//GOLF
     void _exit() override;
 };
 
@@ -924,3 +926,34 @@ protected:
     bool _loitering = false; // true if we are loitering after mission completion
 };
 #endif
+
+//GOLF
+class ModeGoBatt : public Mode
+{
+public:
+    Number mode_number() const override { return Number::GO_BATT; }
+    const char *name4() const override { return "GOBATT"; }
+
+    // methods that affect movement of the vehicle in this mode
+    void update() override;
+
+    // attributes for mavlink system status reporting
+    bool has_manual_input() const override { return true; }
+    bool attitude_stabilized() const override { return false; }
+
+    // manual mode does not require position or velocity estimate
+    bool requires_position() const override { return false; }
+    bool requires_velocity() const override { return false; }
+
+    bool in_gobatt_mode() const override { return true; }
+    void set_para(float throttle=0, float steering=0);
+    bool set_yaw(float yaw);
+    bool stop_rover();
+protected:
+    //需要初始化一些东西
+    bool _enter() override;
+    void _exit() override;
+    float _steering, _throttle, _lateral, _mainsail;
+    float _yaw;
+    uint32_t _last_time_ms = 0;
+};

@@ -41,6 +41,7 @@ public:
         Pozyx  = 1,
         Marvelmind = 2,
         Nooploop  = 3,
+        Nooploop_AOA  = 4,//GOLF
 #if AP_BEACON_SITL_ENABLED
         SITL   = 10
 #endif
@@ -106,6 +107,10 @@ public:
 
     // a method for vehicles to call to make onboard log messages:
     void log();
+
+    //GOLF
+    void get_data(float &dis, float &angel);
+    void get_data_raw(float &dis, float &angel);
 
 private:
 

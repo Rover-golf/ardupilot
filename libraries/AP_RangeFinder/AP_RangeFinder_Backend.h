@@ -81,6 +81,12 @@ public:
     // return the actual type of the rangefinder, as opposed to the
     // parameter value which may be changed at runtime.
     RangeFinder::Type allocated_type() const { return _backend_type; }
+    
+    //GOLF 
+    uint16_t target_deg() const { return state.target_deg; } 
+    //for gauide mode upstair stage disable laider
+    bool enableflg = true;
+    void enable(bool flg = true) {enableflg = flg; }
 
 protected:
 

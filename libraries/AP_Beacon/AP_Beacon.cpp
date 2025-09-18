@@ -22,6 +22,7 @@
 #include "AP_Beacon_Marvelmind.h"
 #include "AP_Beacon_Nooploop.h"
 #include "AP_Beacon_SITL.h"
+#include "AP_Beacon_Nooploop_AOA.h"//GOLF
 
 #include <AP_Common/Location.h>
 #include <AP_Logger/AP_Logger.h>
@@ -111,6 +112,9 @@ void AP_Beacon::init(void)
     case Type::Nooploop:
         _driver = NEW_NOTHROW AP_Beacon_Nooploop(*this);
         break;
+    case Type::Nooploop_AOA:
+        _driver = NEW_NOTHROW AP_Beacon_Nooploop_AOA(*this);
+        break;        
 #if AP_BEACON_SITL_ENABLED
     case Type::SITL:
         _driver = NEW_NOTHROW AP_Beacon_SITL(*this);
@@ -118,6 +122,24 @@ void AP_Beacon::init(void)
 #endif
     case Type::None:
         break;
+    }
+}
+
+//GOLF call in rover
+void AP_Beacon::get_data(float &dis, float &angel)
+{
+    if ((Type)_type == Type::Nooploop_AOA)
+    {
+        // AP_Beacon_Backend::getdata
+        _driver->get_data(dis, angel);
+    }
+}
+void AP_Beacon::get_data_raw(float &dis, float &angel)
+{
+    if ((Type)_type == Type::Nooploop_AOA)
+    {
+        // AP_Beacon_Backend::getdata
+        _driver->get_data_raw(dis, angel);
     }
 }
 

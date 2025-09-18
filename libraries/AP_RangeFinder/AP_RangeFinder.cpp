@@ -42,6 +42,7 @@
 #include "AP_RangeFinder_Benewake_TF03.h"
 #include "AP_RangeFinder_Benewake_TFMini.h"
 #include "AP_RangeFinder_Benewake_TFMiniPlus.h"
+#include "AP_RangeFinder_Benewake_AJSR04.h" //GOLF
 #include "AP_RangeFinder_PWM.h"
 #include "AP_RangeFinder_GYUS42v2.h"
 #include "AP_RangeFinder_HC_SR04.h"
@@ -180,6 +181,7 @@ const AP_Param::GroupInfo *RangeFinder::backend_var_info[RANGEFINDER_MAX_INSTANC
 
 RangeFinder::RangeFinder()
 {
+    init_done = false;//GOLF
     AP_Param::setup_object_defaults(this, var_info);
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
@@ -205,6 +207,12 @@ void RangeFinder::convert_params(void)
  */
 __INITFUNC__ void RangeFinder::init(enum Rotation orientation_default)
 {
+    //GOLF
+    if (init_done) {
+        // init called a 2nd time?
+        return;
+    }
+    init_done = true;
     convert_params();
 
     if (num_instances != 0) {
@@ -484,6 +492,12 @@ __INITFUNC__ void RangeFinder::detect_instance(uint8_t instance, uint8_t& serial
 #if AP_RANGEFINDER_BENEWAKE_TF03_ENABLED
     case Type::BenewakeTF03:
         serial_create_fn = AP_RangeFinder_Benewake_TF03::create;
+        break;
+#endif
+//GOLF
+#if AP_RANGEFINDER_GOLF_ENABLED
+    case Type::BenewakeAJSR04:
+        serial_create_fn = AP_RangeFinder_AJSR04::create;
         break;
 #endif
 #if AP_RANGEFINDER_TERARANGER_SERIAL_ENABLED

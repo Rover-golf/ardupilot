@@ -106,6 +106,7 @@ public:
 #if MODE_DOCK_ENABLED
     friend class ModeDock;
 #endif
+    friend class ModeGoBatt;    //GOLF
 
     friend class RC_Channel_Rover;
     friend class RC_Channels_Rover;
@@ -252,6 +253,7 @@ private:
 #if MODE_DOCK_ENABLED
     ModeDock mode_dock;
 #endif
+    ModeGoBatt mode_gobatt; //GOLF
 
     // cruise throttle and speed learning
     typedef struct {
@@ -450,6 +452,105 @@ public:
     } auto_arm_once;
     void handle_auto_arm_once();
 #endif  // AP_ROVER_AUTO_ARM_ONCE_ENABLED
+//GOLF
+    void one_hz_loop(void);
+    void hundred_hz_loop(void);
+    void sim_pi_ctl(void);
+    void sim_pi_guide(void);
+
+    void init_golfpin(void);
+    void motor_pull(void);
+    void motor_push(void);
+    void motor_stop(void);
+
+
+    bool golf_start_mission();
+    void golf_end_mission();
+
+    
+    void start_debug();
+
+    float constrain_deg(float deg);
+    void send_golf_to_buff();
+    void golf_send_cmd(uint16_t cmd_id, const float &param1, const float &param2);  // Josh added param1,2
+
+    bool near_target(int distmax = 50, int distmin = 0);// cm
+    float calc_triangle_angleC(float a, float b, float c);
+    float calc_triangle_sidelen(float a, float b, float angleC = 90.f);
+
+    golf_work_state_t golf_work_state = GOLF_NOWORK; // Josh changed from GOLF_HOLD
+    bool work_enable = false;
+    bool isSleep = true; // Josh
+    bool work_golf_back = false;    // Josh
+    int old_imode=-1;
+    uint8_t pre_imode = 0; //for ekf hold to restore
+    bool old_isSleep = false;
+    bool needsleep = false; //for back
+    bool isperiod = false;
+    uint8_t triggerhour = 0, triggermin = 0;
+
+    bool start_auto = true;
+    uint32_t rover_golf_start = 0;
+    bool batt_nd_charge = false;
+
+
+    bool yaw_enable = false;
+    float yaw_desire = 0.0f;
+    bool yaw_complete = false;
+    bool uwb_complete = false;
+    float uwb_admire = 0.0f;
+    uint16_t uwb_delay = 0;
+
+    uint8_t sim_pi_guide_state = 0;
+    bool pi_ctl = false;
+    bool rover_reached_stick = false;
+    uint16_t pi_ctl_id = 0;
+    uint8_t pi_ctl_step = 0;
+    uint32_t pi_ctl_start = 0;
+    uint8_t oldpi_ctl_step = 100;
+
+    uint8_t golf_is_full = 0xff;
+    uint8_t nd_collision = 0xff;
+
+    float target_deg = 0.0f;
+
+    bool nd_backward = false;
+    void golf_backward(int sleepflg = -1);  
+    bool golf_is_athome();  
+    void golf_set_sleepflg(float sleepflg = 1.0f);
+    float unload_flg = 1.0;
+    int one_hz_times = 0;
+    int pie_ctl_times = 0; //add times when gps or uwb contral
+    float old_yaw = 0;
+    float old_dis = 0;
+    int get_distance(int idx = 0, bool msgflg = false);
+    float old_gpsdis = 0;
+    int directionflg = 1;
+    bool closetohome(float dis = 1.0f);
+    bool lidarvaildflg = false;
+    uint16_t test_work_s = 0;
+    //guide to stage
+    bool fly_to_here(Location target_loc, bool bReverse = false);
+    //calculate the desired location by angle and distance from home or current
+    //uint_8 frame:0-home,1-current; float  angle; float  distance
+    Location calc_desired_location(float distance = 1, float angle = 0, uint8_t frame = 0);
+    //disable rangefinder when guide to stage
+    void enable_rangefinder(int idx = -1, bool enableflg = true);
+    bool reached_stageup = false;//up
+    bool reached_guided = false;//guided to stage
+    //wp
+    uint16_t getWPCurIdx();
+    bool setWPCurrent(uint32_t index = 0);
+    void golf_gohome(uint8_t flg = 0);
+    bool golf_jumpLastWP();
+    uint16_t wp_index_last = 0;
+    uint16_t wp_index_go = 0;
+    bool GPS_Check();
+    uint16_t lastmode = 0;
+    void closeRngfnd_neardoor();
+    bool rngfndflg = true;
+    bool time_Check(uint8_t curH, uint8_t curM, uint8_t triggerH, uint8_t triggerM,  uint8_t dtM = 5);
+    bool bekfflg = false;
 };
 
 extern Rover rover;

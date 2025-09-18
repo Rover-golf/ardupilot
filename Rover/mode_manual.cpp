@@ -1,5 +1,14 @@
 #include "Rover.h"
+//GOLF
+bool ModeManual::_enter()
+{
+    rover.golf_end_mission();
 
+    rover.work_enable = false;
+    rover.yaw_enable = false;
+
+    return true;
+}
 void ModeManual::_exit()
 {
     // clear lateral when exiting manual mode

@@ -185,6 +185,10 @@ public:
 #if AP_RANGEFINDER_HEXSOONRADAR_ENABLED
         HEXSOON_RADAR = 44,
 #endif
+//GOLF
+#if AP_RANGEFINDER_GOLF_ENABLED
+        BenewakeAJSR04 = 80,
+#endif
 #if AP_RANGEFINDER_SIM_ENABLED
         SIM = 100,
 #endif
@@ -216,7 +220,7 @@ public:
         enum RangeFinder::Status status; // sensor status
         uint8_t  range_valid_count;     // number of consecutive valid readings (maxes out at 10)
         uint32_t last_reading_ms;       // system time of last successful update from sensor
-
+        uint16_t target_deg;            // angle:in degree //GOLF
         const struct AP_Param::GroupInfo *var_info;
     };
 
@@ -336,6 +340,8 @@ private:
 
     uint32_t _log_rfnd_bit = -1;
     void Log_RFND() const;
+    //GOLF
+    bool init_done;
 };
 
 namespace AP {

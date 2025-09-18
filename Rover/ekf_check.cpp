@@ -117,8 +117,8 @@ bool Rover::ekf_over_threshold()
     } else if (vel_variance >= g.fs_ekf_thresh) {
         over_thresh_count++;
     }
-    
-    if (over_thresh_count >= 2) {
+    //GOLF
+    if (over_thresh_count >= 1) {//2 just one over the threshold return true. compass
         return true;
     }
 

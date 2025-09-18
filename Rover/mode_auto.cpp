@@ -4,6 +4,9 @@
 
 bool ModeAuto::_enter()
 {
+    //GOLF
+    if(!rover.golf_start_mission())
+        return false;
     // fail to enter auto if no mission commands
     if (!mission.present()) {
         GCS_SEND_TEXT(MAV_SEVERITY_NOTICE, "No Mission. Can't set AUTO.");

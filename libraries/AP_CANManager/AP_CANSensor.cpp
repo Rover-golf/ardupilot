@@ -156,6 +156,31 @@ bool CANSensor::write_frame(AP_HAL::CANFrame &out_frame, const uint32_t timeout_
     uint64_t deadline = AP_HAL::micros64() + 2000000;
     return (_can_iface->send(out_frame, deadline, AP_HAL::CANIface::AbortOnError) == 1);
 }
+//GOLF
+bool CANSensor::read_frame(AP_HAL::CANFrame &in_frame, const uint32_t timeout_us)
+{
+    if (!_initialized)
+    {
+        debug_can(AP_CANManager::LOG_ERROR, "Driver not initialized for read_frame");
+        return false;
+    }
+    uint64_t deadline_us = AP_HAL::micros64() + timeout_us;
+    // wait to receive frame
+    bool read_select = true;
+    bool write_select = false;
+    bool ret = _can_iface->select(read_select, write_select, nullptr, deadline_us);
+    if (ret && read_select)
+    {
+        uint64_t time;
+        AP_HAL::CANIface::CanIOFlags flags{};
+
+        // AP_HAL::CANFrame frame;
+        int16_t res = _can_iface->receive(in_frame, time, flags);
+        if (res == 1)
+            return true;
+    }
+    return false;
+}
 
 void CANSensor::loop()
 {
@@ -188,6 +213,9 @@ void CANSensor::loop()
                 handle_frame(frame);
             }
         }
+        //GOLF
+        // check connect otherwise send restart command
+        Check_SendData();
     }
 }
 

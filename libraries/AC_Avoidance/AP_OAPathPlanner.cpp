@@ -360,7 +360,8 @@ void AP_OAPathPlanner::avoidance_thread()
             } 
             _oabendyruler->set_config(_margin_max);
             AP_OABendyRuler::OABendyType bendy_type;
-            if (_oabendyruler->update(avoidance_request2.current_loc, avoidance_request2.destination, avoidance_request2.ground_speed_vec, origin_new, destination_new, bendy_type, proximity_only)) {
+            //GOLF OATYPE3 exclusion_circles use bendyruler proximity_only->true
+            if (_oabendyruler->update(avoidance_request2.current_loc, avoidance_request2.destination, avoidance_request2.ground_speed_vec, origin_new, destination_new, bendy_type, true)) {//proximity_only only process inclusion_and_exclusion_circles
                 // detected a obstacle by vehicle's proximity sensor. Switch avoidance to BendyRuler till obstacle is out of the way
                 proximity_only = false;
                 res = OA_SUCCESS;

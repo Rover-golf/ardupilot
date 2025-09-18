@@ -44,7 +44,11 @@ public:
 
     // handler for outgoing frames
     bool write_frame(AP_HAL::CANFrame &out_frame, const uint32_t timeout_us);
-
+    //GOLF
+    //check connect and send data
+    virtual void Check_SendData() { }
+    bool read_frame(AP_HAL::CANFrame &in_frame, const uint32_t timeout_us); 
+       
 #ifdef HAL_BUILD_AP_PERIPH
     static void set_periph(const uint8_t i, const AP_CAN::Protocol protocol, AP_HAL::CANIface* iface) {
         if (i < ARRAY_SIZE(_periph)) {

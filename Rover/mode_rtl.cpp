@@ -2,6 +2,9 @@
 
 bool ModeRTL::_enter()
 {
+    //GOLF
+    if(rover.golf_is_athome())
+        return false;
     // refuse RTL if home has not been set
     if (!AP::ahrs().home_is_set()) {
         return false;
