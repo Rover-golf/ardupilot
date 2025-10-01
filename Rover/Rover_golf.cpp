@@ -150,20 +150,7 @@ void Rover::one_hz_loop(void)
 
     float batt_volt = battery.voltage();
     //gcs().send_text(MAV_SEVERITY_INFO, "batt_volt %.2f", batt_volt);
-    //use batt limit to test: 1:uwb 2:gps 3:lidar 4:open door 5:close door
-    //4 TEST DOOR
-    if(g.batt_nd_rtl > 3.5f && g.batt_nd_rtl < 4.5f)//4 open
-    {
-        motor_push();
-        gcs().send_text(MAV_SEVERITY_INFO, "motor_push: open door.");
-    }
-    else if(g.batt_nd_rtl > 4.5f && g.batt_nd_rtl < 5.5f)//5 close
-    {
-        motor_pull();
-        gcs().send_text(MAV_SEVERITY_INFO, "motor_pull: close door.");
-    }
-
-
+    //use batt limit to test: 1:uwb 2:gps 3:lidar open 4:lidar close 5:open door 6:close door
     //1 test UWB
     if(g.batt_nd_rtl > 0.f && g.batt_nd_rtl < 1.5f)
     {
@@ -175,7 +162,7 @@ void Rover::one_hz_loop(void)
 #endif
     }
     //2 test GPS
-    if(g.batt_nd_rtl > 1.5f && g.batt_nd_rtl < 2.5f)
+    else if(g.batt_nd_rtl > 1.5f && g.batt_nd_rtl < 2.5f)
     {
         float pitch_get = degrees(ahrs.get_pitch());
     //test the distance to home   
@@ -189,11 +176,31 @@ void Rover::one_hz_loop(void)
     //status().gps_yaw;
     }
     //3 TEST lidar
-    if(g.batt_nd_rtl > 2.5f && g.batt_nd_rtl < 3.5f)
+    else if(g.batt_nd_rtl > 2.5f && g.batt_nd_rtl < 3.5f)
     {
-        //get_distance(-1,true);
+        //enable laider
+        enable_rangefinder(-1, true);
         int disLidar = get_distance(-1);
         gcs().send_text(MAV_SEVERITY_INFO, "Lidar: %d.",disLidar);
+    }
+    //4 TEST lidar close
+    else if(g.batt_nd_rtl > 3.5f && g.batt_nd_rtl < 4.5f)
+    {
+        //disable laider
+        enable_rangefinder(-1, false);
+        int disLidar = get_distance(-1);
+        gcs().send_text(MAV_SEVERITY_INFO, "Lidar: %d.disable",disLidar);
+    }
+     //5 TEST DOOR
+    else if(g.batt_nd_rtl >4.5f && g.batt_nd_rtl < 5.5f)//5 open
+    {
+        motor_push();
+        gcs().send_text(MAV_SEVERITY_INFO, "motor_push: open door.");
+    }
+    else if(g.batt_nd_rtl > 5.5f && g.batt_nd_rtl < 6.5f)//6 close
+    {
+        motor_pull();
+        gcs().send_text(MAV_SEVERITY_INFO, "motor_pull: close door.");
     }
 
     // golf: regular start&retur
@@ -999,20 +1006,6 @@ void Rover::sim_pi_ctl(void)
                 //    }
                 //    else
                     {
-                        float  gpsdis = 0;
-                        gpsdis = rover.current_loc.get_distance(ahrs.get_home())*100;
-                        gcs().send_text(MAV_SEVERITY_INFO, "Golf gpsDis from home=%.0f.",gpsdis); 
-                        if( gpsdis > g.stage_up + 400 )//in outside don't backward and ran auto directly
-                        {
-                            rover.mode_gobatt.set_para(); // complate
-                            pi_ctl_step = 0;
-                            pi_ctl = false;
-                            pi_ctl_start = 0;
-                            one_hz_times = 0;
-                            nd_backward = pi_ctl;
-                            pie_ctl_times = 0;
-                            break;
-                        }
                         if(failsafe.ekf)
                         {
                             bekfflg = true;
@@ -1026,6 +1019,20 @@ void Rover::sim_pi_ctl(void)
                                 break;
                             else
                                 bekfflg = false;
+                        }
+                        float  gpsdis = 0;
+                        gpsdis = rover.current_loc.get_distance(ahrs.get_home())*100;
+                        gcs().send_text(MAV_SEVERITY_INFO, "Golf gpsDis from home=%.0f.",gpsdis); 
+                        if( gpsdis > g.stage_up + 400 )//in outside don't backward and ran auto directly
+                        {
+                            rover.mode_gobatt.set_para(); // complate
+                            pi_ctl_step = 0;
+                            pi_ctl = false;
+                            pi_ctl_start = 0;
+                            one_hz_times = 0;
+                            nd_backward = pi_ctl;
+                            pie_ctl_times = 0;
+                            break;
                         }
                         //guide to reverse to home
                         bool rt = fly_to_here(ahrs.get_home(),true);
@@ -1162,7 +1169,7 @@ void Rover::sim_pi_ctl(void)
                     //int disLidar = get_distance(-1);
                     float  dis = rover.current_loc.get_distance(ahrs.get_home())*100;
                     gcs().send_text(MAV_SEVERITY_CRITICAL, "GPS from home: %.0f.",dis);
-                    if (dis > g.stage_up|| one_hz_times > g.golf_time_closedoor) 
+                    if (dis > g.stage_up|| one_hz_times > g.golf_time_opendoor) 
                     {
                         //finish
                         rover.mode_gobatt.set_para(); // stop
@@ -1419,6 +1426,8 @@ void Rover::init_golfpin(void)
     hal.gpio->pinMode(AUX_ENA_PIN, HAL_GPIO_OUTPUT);
     hal.gpio->pinMode(AUX_IN1_PIN, HAL_GPIO_OUTPUT);
     hal.gpio->pinMode(AUX_IN2_PIN, HAL_GPIO_OUTPUT);
+    gcs().send_text(MAV_SEVERITY_INFO, "init_golfpin");
+
 }
 
 void Rover::motor_stop(void)
@@ -1445,6 +1454,8 @@ void Rover::motor_push(void)
 bool Rover::golf_start_mission(void)
 {
     gcs().send_text(MAV_SEVERITY_DEBUG, "golf_start_mission");
+    //direction restore to forward
+    control_mode->set_reversed(false);
     if (nd_backward)
     {
         golf_backward(0);//-1
@@ -1479,6 +1490,8 @@ void Rover::golf_end_mission(void)
     nd_backward = pi_ctl;
 
     gcs().send_text(MAV_SEVERITY_DEBUG, "golf_end_mission");
+    //direction restore to forward
+    control_mode->set_reversed(false);
     // rover.set_mode(rover.mode_rtl, ModeReason::EVERYDAY_END);    uwb202207
     rover_golf_start = AP_HAL::millis();
     work_enable = false;

@@ -63,7 +63,7 @@ void AP_RangeFinder_Backend::update_status(RangeFinder::RangeFinder_State &state
     if(!enableflg)//for gauide mode upstair stage disable laider
         set_status(state_arg, RangeFinder::Status::NoData);
     // check distance
-    if (state_arg.distance_m > max_distance()) {
+    else if (state_arg.distance_m > max_distance()) {
         set_status(state_arg, RangeFinder::Status::OutOfRangeHigh);
     } else if (state_arg.distance_m < min_distance()) {
         set_status(state_arg, RangeFinder::Status::OutOfRangeLow);
