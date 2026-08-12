@@ -146,7 +146,6 @@ void Rover::one_hz_loop(void)
         else
             gcs().send_text(MAV_SEVERITY_INFO, "Mode= %d,isSleep=%d", imode, isSleep);
     }
-       
 
     float batt_volt = battery.voltage();
     //gcs().send_text(MAV_SEVERITY_INFO, "batt_volt %.2f", batt_volt);
@@ -201,6 +200,11 @@ void Rover::one_hz_loop(void)
     {
         motor_pull();
         gcs().send_text(MAV_SEVERITY_INFO, "motor_pull: close door.");
+    }//TEST AUX5
+    else if(g.batt_nd_rtl > 6.5f && g.batt_nd_rtl < 7.5f)//7 AUX5 gpio 0/1
+    {
+        uint8_t auxcur = check_digital_pin(AUX_GOLF_PIN);
+        gcs().send_text(MAV_SEVERITY_INFO, "AUX5: %i", auxcur);
     }
 
     // golf: regular start&retur
@@ -221,7 +225,7 @@ void Rover::one_hz_loop(void)
     }
     //sitl 
     static bool door_nd_close = false;
-    golf_is_full = false;//!(rover.check_digital_pin(AUX_GOLF_PIN));
+    //golf_is_full = 0; //!(rover.check_digital_pin(AUX_GOLF_PIN));
     if (golf_is_full)
         gcs().send_text(MAV_SEVERITY_INFO, "golf full %i", golf_is_full);
     nd_collision = false;//!(rover.check_digital_pin(AUX_AVOID_PIN));
@@ -419,6 +423,18 @@ void Rover::one_hz_loop(void)
         break;
     case GOLF_WORK://in auto
         test_work_s++;
+
+        if(check_digital_pin(AUX_GOLF_PIN) == 1)
+        {
+            golf_is_full++;
+            if(golf_is_full > 10)
+                golf_is_full = 10;
+        }
+        else
+        {
+            golf_is_full = 0;
+        }
+
         if (test_work_s >= 5 && door_nd_close)
         {
             ServoRelayEvents.do_set_servo(5, g.pwm_normal);
@@ -1423,6 +1439,10 @@ void Rover::sim_pi_guide(void)
 
 void Rover::init_golfpin(void)
 {
+    // ball full check
+    golf_is_full = 0;
+    hal.gpio->pinMode(AUX_GOLF_PIN, HAL_GPIO_INPUT);
+    //
     hal.gpio->pinMode(AUX_ENA_PIN, HAL_GPIO_OUTPUT);
     hal.gpio->pinMode(AUX_IN1_PIN, HAL_GPIO_OUTPUT);
     hal.gpio->pinMode(AUX_IN2_PIN, HAL_GPIO_OUTPUT);
@@ -1816,6 +1836,7 @@ bool Rover::setWPCurrent(uint32_t index)
 void Rover::golf_gohome(uint8_t flg)
 {
     test_work_s = 0;//stop timing
+    golf_is_full = 0;
 
     if(flg == 0)//RTL directly
     {

@@ -303,7 +303,7 @@ uint8_t Rover::check_digital_pin(uint8_t pin)
     hal.gpio->pinMode(pin, HAL_GPIO_INPUT);
 
     // enable pullup
-    hal.gpio->write(pin, 1);
+    //hal.gpio->write(pin, 1);
 
     return hal.gpio->read(pin);
 }
